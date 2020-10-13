@@ -1,0 +1,79 @@
+plugins {
+    id 'application'
+    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':standalone-parser')
+    runtimeOnly project(':web')
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    implementation group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '1.9.5.4'
+    implementation group: 'com.googlecode.soundlibs', name: 'vorbisspi', version: '1.0.3.3'
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task copyCss(type: Copy) {
+    from("${project.projectDir}/src/main/markdown"){
+        include '*.css'
+    }
+    into "$buildDir/docs"
+}
+
+generateHtml {
+    dependsOn(copyCss)
+
+    inputDirectory = file("${project.projectDir}/src/main/markdown")
+    outputDirectory = file("${project.buildDir}/docs")
+    headerHtmlFile = new File("${project.projectDir}/src/main/markdown/header.template")
+    footerHtmlFile = new File("${project.projectDir}/src/main/markdown/footer.template")
+    inputEncoding = "UTF-8"
+    outputEncoding = "UTF-8"
+
+    recursiveInput = false
+    transformRelativeMarkdownLinks = true
+    pegdownExtensions = "ANCHORLINKS, AUTOLINKS, TABLES, TOC, FENCED_CODE_BLOCKS, DEFINITIONS, STRIKETHROUGH"
+}
+
+distributions {
+    main {
+        distributionBaseName = 'soundscape'
+        setVersion('')
+
+        contents {
+            from(generateHtml) {
+                into 'docs'
+            }
+            from(file("${project.projectDir}/src/main/templates"))
+        }
+    }
+}
+
+springBoot {
+    buildInfo()
+}
+
+jar {
+    enabled = true
+}
+
+application {
+    mainClassName = 'de.jowisoftware.rpgsoundscape.player.Main'
+    applicationDefaultJvmArgs = ['--enable-preview']
+}
+tasks.bootRun.workingDir "${project.projectDir}/.."

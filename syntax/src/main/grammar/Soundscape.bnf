@@ -1,0 +1,170 @@
+{
+    parserClass="de.jowisoftware.rpgsoundscape.intellij.parser.SoundscapeParser"
+
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="S"
+    psiImplClassSuffix="Impl"
+    psiPackage="de.jowisoftware.rpgsoundscape.intellij.psi"
+    psiImplPackage="de.jowisoftware.rpgsoundscape.intellij.psi.impl"
+
+    elementTypeHolderClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeTypes"
+    elementTypeClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeElementType"
+    tokenTypeClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeTokenType"
+}
+
+root ::= !<<eof>> (root_item*)
+root_item ::=
+    sep_ |
+    (includeDefinition sep_) |
+    (loadDefinition sep_) |
+    includableTrackDefinition |
+    soundscapeDefinition |
+    musicDefinition |
+    effectDefinition
+    {recoverWhile=root_item_recover_}
+private root_item_recover_ ::= !(SOUNDSCAPE | INCLUDE | INCLUDABLE | LOAD | MUSIC | EFFECT)
+
+// INCLUDE
+
+includeDefinition ::= INCLUDE string {pin=1}
+
+// LOAD SAMPLE
+
+loadDefinition ::= LOAD SAMPLE id FROM string playModifications? {pin=1}
+
+// INCLUDABLE
+
+includableTrackDefinition ::= INCLUDABLE TRACK id block {pin=1}
+
+// MUSIC & EFFECT
+
+musicDefinition ::= MUSIC musicEffectDefinition {pin=1}
+effectDefinition ::= EFFECT musicEffectDefinition {pin=1}
+
+musicEffectDefinition ::= string FROM id playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+private musicEffectDefinitionDetails_ ::=
+    ( metadataStatement sep_ )+
+    {recoverWhile=musicEffectDefinitionDetails_recover_}
+private musicEffectDefinitionDetails_recover_ ::= !(CURLY_R | DESCRIBED | CATEGORIZED)
+
+// SOUNDSCAPE
+
+soundscapeDefinition ::= SOUNDSCAPE string CURLY_L soundscapeBlock CURLY_R {pin=1}
+
+soundscapeBlock ::= soundscapeBlockStatement_*
+private soundscapeBlockStatement_ ::= (
+    sep_ |
+    (loadDefinition sep_) |
+    includableTrackDefinition |
+    trackDefinition |
+    (metadataStatement sep_)
+    )+ {recoverWhile=soundscapeBlockStatement_recover_}
+private soundscapeBlockStatement_recover_ ::= !(CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | DESCRIBED | CATEGORIZED)
+
+// TRACK
+
+trackDefinition ::= trackModifier_ TRACK id (WITH TITLE string)? trackContent {pin=2}
+trackContent ::= (block | INCLUDES id sep_)
+private trackModifier_ ::= loopingTrackModifier | manualTrackModifier {recoverWhile=track_recover_}
+private track_recover_ ::= !TRACK
+loopingTrackModifier ::= LOOPING pausedModifier? {pin=1}
+manualTrackModifier ::= MANUAL autostartingModifier? {pin=1}
+pausedModifier ::= PAUSED
+autostartingModifier ::= AUTOSTARTING
+
+// statement
+statement ::=
+    block |
+    sep_ |
+    (playStatement sep_) |
+    (sleepStatement sep_) |
+    (pauseStatement sep_) |
+    (resumeStatement sep_) |
+    (doNothingStatement sep_) |
+    repeatStatement |
+    randomlyStatement |
+    parallellyStatement
+    {recoverWhile=statement_recover_}
+private statement_recover_ ::= !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED)
+
+block ::= CURLY_L statement+ CURLY_R {pin=1}
+
+// PLAY
+
+playStatement ::= PLAY id playModifications? {pin=1}
+playModifications ::= WITH playModificationItem (listDelimiter_ playModificationItem)*
+private listDelimiter_ ::= LIST_DELIMITER | AND
+
+playModificationItem ::=
+    playModificationAmplification |
+    playModificationOmission |
+    playModificationLimit |
+    playModificationAttribution
+    {recoverWhile=playModificationItem_recover_}
+
+private playModificationItem_recover_ ::= !(LIST_DELIMITER | AND | sep_)
+
+playModificationAmplification ::= AMPLIFICATION OF percentage {pin=1}
+playModificationOmission ::= OMISSION OF FIRST timespan {pin=1}
+playModificationLimit ::= LIMIT TO timespan {pin=1}
+playModificationAttribution ::= ATTRIBUTION string {pin=1}
+
+// PAUSE
+
+pauseStatement ::= PAUSE (pauseAllOtherTracks | pauseAllTracks | pauseThisTrack | pauseTrack) {pin=1}
+pauseAllOtherTracks ::= ALL OTHER TRACKS {pin=2}
+pauseAllTracks ::= ALL TRACKS {pin=1}
+pauseThisTrack ::= THIS TRACK {pin=1}
+pauseTrack ::= TRACK id {pin=1}
+
+// RESUME
+
+resumeStatement ::= RESUME (resumeTrackStatement | resumeLoopingTracksStatement) {pin=1}
+resumeTrackStatement ::= TRACK id {pin=1}
+resumeLoopingTracksStatement ::= LOOPING TRACKS {pin=1}
+
+// SLEEP
+
+sleepStatement ::= SLEEP (simpleSleepStatement_ | complexSleepStatement_) {pin=1}
+private simpleSleepStatement_ ::= timespan
+private complexSleepStatement_ ::= BETWEEN timespan AND timespan {pin=1}
+
+// TIMES
+
+repeatStatement ::= REPEAT (simpleRepeatStatement_ | complexRepeatStatement_) TIMES statement {pin=1}
+private simpleRepeatStatement_ ::= int
+private complexRepeatStatement_ ::= BETWEEN int AND int {pin=1}
+
+
+// RANDOMLY
+
+randomlyStatement ::= RANDOMLY CURLY_L randomlyWeight randomlyWeight+ CURLY_R {pin=1}
+randomlyWeight ::= WEIGHTED WITH int statement {pin=1 recoverWhile=randomly_recover_}
+
+// DO NOTHING
+
+doNothingStatement ::= DO NOTHING {pin=1}
+private randomly_recover_ ::= !(CURLY_R | WEIGHTED)
+
+// PARALLEL
+
+parallellyStatement ::= PARALLELLY CURLY_L statement statement+ CURLY_R {pin=1}
+
+// DESCRIBED & CATEGORY
+
+metadataStatement ::= describedStatement | categoryStatement
+describedStatement ::= DESCRIBED (BY | AS) string {pin=1}
+categoryStatement ::= CATEGORIZED ((categorizedIn categorizedAs) | (categorizedAs categorizedIn)) {pin=1}
+categorizedAs ::= AS string {pin=1}
+categorizedIn ::= IN string {pin=1}
+
+// Other
+
+private sep_ ::= SEPARATOR
+
+id ::= IDENTIFIER
+string ::= TEXT
+int ::= NUM_INTEGER
+percentage ::= PERCENT
+timespan ::= DURATION

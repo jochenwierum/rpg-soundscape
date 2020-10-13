@@ -1,0 +1,86 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://jetbrains.bintray.com/intellij-plugin-service'
+        }
+    }
+}
+
+plugins {
+    id 'org.jetbrains.intellij' version '0.4.26'
+    id "org.jetbrains.grammarkit" version "2020.2.1"
+}
+
+apply plugin: 'org.jetbrains.grammarkit'
+
+
+import org.jetbrains.grammarkit.tasks.*
+
+
+sourceCompatibility = 11
+targetCompatibility = 11
+tasks.withType(JavaCompile) {
+    options.compilerArgs -= "--enable-preview"
+}
+
+sourceSets {
+    main {
+        java.srcDirs += 'build/gen'
+    }
+}
+
+buildSearchableOptions.enabled = false
+
+intellij {
+    version '2020.2.1'
+}
+
+grammarKit {
+    // defaults:
+    //jflexRelease = '1.7.0-1'
+    //grammarKitRelease = '2020.1'
+}
+
+task generateLexer(type: GenerateLexer) {
+    // source flex file
+    source = "src/main/grammar/Soundscape.flex"
+
+    // target directory for lexer
+    targetDir = "build/gen/de/jowisoftware/rpgsoundscape/intellij/"
+
+    // target classname, target file will be targetDir/targetClass/java
+    targetClass = "SoundscapeLexer"
+
+    // if set, plugin will remove a lexer output file before generating new one. Default: false
+    purgeOldFiles = true
+}
+
+task generateParser(type: GenerateParser) {
+    // source bnf file
+    source = "src/main/grammar/Soundscape.bnf"
+
+    // optional, task-specific root for the generated files. Default: none
+    targetRoot = 'build/gen'
+
+    // path to a parser file, relative to the targetRoot
+    pathToParser = '/de/jowisoftware/rpgsoundscape/intellij/parser/SoundscapeParser.java'
+
+    // path to a directory with generated psi files, relative to the targetRoot
+    pathToPsiRoot = '/de/jowisoftware/rpgsoundscape/intellij/psi'
+
+    // if set, plugin will remove a parser output file and psi output directory before generating new ones. Default: false
+    purgeOldFiles = true
+}
+
+compileJava {
+    dependsOn generateLexer
+    dependsOn generateParser
+}
+
+task buildGrammar_kit_jar (type: Jar, dependsOn: [tasks['assemble']]) {
+    archiveBaseName = 'grammar-kit'
+    destinationDirectory = file("build/artifacts")
+    from (sourceSets.main.output)
+}
+
+task artifacts (dependsOn: [buildGrammar_kit_jar]) { }

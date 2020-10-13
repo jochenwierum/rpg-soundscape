@@ -1,0 +1,26 @@
+allprojects {
+	repositories {
+		mavenCentral()
+	}
+}
+
+subprojects {
+	group = 'de.jowisoftware.rpcsoundscape'
+	version = '1.0-SNAPSHOT'
+
+	apply plugin: 'java'
+	sourceCompatibility = 15
+	targetCompatibility = 15
+
+	tasks.withType(JavaCompile) {
+		options.compilerArgs += "--enable-preview"
+	}
+
+	tasks.withType(Test) {
+		jvmArgs += "--enable-preview"
+	}
+
+	tasks.withType(JavaExec) {
+		jvmArgs += '--enable-preview'
+	}
+}

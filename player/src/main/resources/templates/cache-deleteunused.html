@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Soundscape</title>
+</head>
+<body>
+<h1>Cleanup cache</h1>
+<p>
+The following cached files were deleted:
+</p>
+<ul>
+    <li th:each="item : ${deleted}" th:text="${item}">
+    </li>
+</ul>
+<p>
+    Thank you! You can close this tab now!
+</p>
+</body>
+</html>

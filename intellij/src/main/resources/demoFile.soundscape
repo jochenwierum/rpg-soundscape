@@ -1,0 +1,65 @@
+include "_birds.soundscape";
+
+Load sample rain from "file:///sounds/rain.mp3";
+Load sample horses from "file:///sounds/horses.wav";
+Load sample thunder from "file:///sounds/thunder.wav";
+
+Load sample bird5 from "file:///sounds/bird4.mp3" with amplification of 10%;
+Load sample bird6 from soundcloud with id 1234;
+
+/*
+Load sample bird1 from "file:///sounds/bird1.mp3";
+Load sample bird2 from "file:///sounds/bird2.mp3";
+Load sample bird3 from "file:///sounds/bird3.mp3";
+Load sample bird4 from url "http://sounds.com/test.mp3";
+...
+*/
+
+includable track _include1 { play bird4; }
+
+LOAD SAMPLE music1 from "file:///sounds/music1.mp3";
+
+Music "funny mood" from music1;
+Effect "bird 1" from bird2;
+
+Soundscape "forest" {
+  described as "a nice and sunny forest";
+  categorized in "mood" as "sunny";
+  categorized in "mood" as "neutral";
+  categorized in "environment" as "oceanic";
+
+  Looping track birds {
+    Randomly {
+        Weighted with 2 play bird1;
+        Weighted with 1 {
+          Play bird3;
+          Play bird4;
+        }
+        Weighted with 1 {
+          Parallelly {
+            Play bird2;
+            Play bird4 with amplification of -20%;
+          }
+       }
+    }
+
+    Sleep between 500ms and 2s;
+
+    Repeat between 2 and 8 times {
+      Play bird1;
+    }
+
+  }
+
+  // paused by default
+  Looping paused track rain {
+    Play rain;
+    Sleep 1s;
+  }
+
+  Manual autostarting track horses with title "animals" {
+    Play horses;
+  }
+
+  manual track b1 includes _include1;
+}

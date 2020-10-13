@@ -1,0 +1,10 @@
+.idea
+*.iml
+*.log*
+
+.cache
+
+.gradle
+build
+node_modules
+out

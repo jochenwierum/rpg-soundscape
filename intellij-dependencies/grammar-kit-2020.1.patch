@@ -1,0 +1,255 @@
+diff --git c/.idea/gradle.xml i/.idea/gradle.xml
+new file mode 100644
+index 0000000..0651dbd
+--- /dev/null
++++ i/.idea/gradle.xml
+@@ -0,0 +1,20 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="GradleMigrationSettings" migrationVersion="1" />
++  <component name="GradleSettings">
++    <option name="linkedExternalProjectsSettings">
++      <GradleProjectSettings>
++        <option name="delegatedBuild" value="false" />
++        <option name="testRunner" value="PLATFORM" />
++        <option name="distributionType" value="DEFAULT_WRAPPED" />
++        <option name="externalProjectPath" value="$PROJECT_DIR$" />
++        <option name="gradleHome" value="$USER_HOME$/.sdkman/candidates/gradle/current" />
++        <option name="modules">
++          <set>
++            <option value="$PROJECT_DIR$" />
++          </set>
++        </option>
++      </GradleProjectSettings>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+diff --git c/.idea/jarRepositories.xml i/.idea/jarRepositories.xml
+new file mode 100644
+index 0000000..c6cdc1e
+--- /dev/null
++++ i/.idea/jarRepositories.xml
+@@ -0,0 +1,20 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="RemoteRepositoriesConfiguration">
++    <remote-repository>
++      <option name="id" value="central" />
++      <option name="name" value="Maven Central repository" />
++      <option name="url" value="https://repo1.maven.org/maven2" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="jboss.community" />
++      <option name="name" value="JBoss Community repository" />
++      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="maven" />
++      <option name="name" value="maven" />
++      <option name="url" value="https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases" />
++    </remote-repository>
++  </component>
++</project>
+\ No newline at end of file
+diff --git c/.idea/libraries/org_jetbrains_annotations_Latest.xml i/.idea/libraries/org_jetbrains_annotations_Latest.xml
+index 9423f91..f35736b 100644
+--- c/.idea/libraries/org_jetbrains_annotations_Latest.xml
++++ i/.idea/libraries/org_jetbrains_annotations_Latest.xml
+@@ -2,7 +2,7 @@
+   <library name="org.jetbrains:annotations:Latest" type="repository">
+     <properties maven-id="org.jetbrains:annotations:LATEST" />
+     <CLASSES>
+-      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/19.0.0/annotations-19.0.0.jar!/" />
++      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/20.1.0/annotations-20.1.0.jar!/" />
+     </CLASSES>
+     <JAVADOC />
+     <SOURCES />
+diff --git c/.idea/misc.xml i/.idea/misc.xml
+index ff6d284..21ed132 100644
+--- c/.idea/misc.xml
++++ i/.idea/misc.xml
+@@ -1,9 +1,13 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="ExternalStorageConfigurationManager" enabled="true" />
++  <component name="FrameworkDetectionExcludesConfiguration">
++    <file type="web" url="file://$PROJECT_DIR$" />
++  </component>
+   <component name="ProjectResources">
+     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
+   </component>
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="Local IDEA [/ideadev]" project-jdk-type="IDEA JDK">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="11" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+diff --git c/.idea/runConfigurations/LightPsi_All__classes.xml i/.idea/runConfigurations/LightPsi_All__classes.xml
+index 6b64079..b0dd7b7 100644
+--- c/.idea/runConfigurations/LightPsi_All__classes.xml
++++ i/.idea/runConfigurations/LightPsi_All__classes.xml
+@@ -1,21 +1,18 @@
+ <component name="ProjectRunConfigurationManager">
+   <configuration default="false" name="LightPsi-All: classes" type="Application" factoryName="Application" singleton="true">
++    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.sdkman/candidates/java/11.0.8.hs-adpt" />
++    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+     <output_file path="$PROJECT_DIR$/build-lightpsi/classes.log.txt" is_save="true" />
+-    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
++    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+     <option name="MAIN_CLASS_NAME" value="org.intellij.grammar.Main" />
+-    <option name="VM_PARAMETERS" value="-ea -verbose:class" />
++    <module name="grammar-kit.main" />
+     <option name="PROGRAM_PARAMETERS" value="build-lightpsi grammars/* testData/generator/* build-lightpsi/grammars/* /Projects/all-grammars-test/grammars/*" />
+-    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+-    <option name="ALTERNATIVE_JRE_PATH" />
+-    <option name="ENABLE_SWING_INSPECTOR" value="false" />
+-    <option name="ENV_VARIABLES" />
+-    <option name="PASS_PARENT_ENVS" value="true" />
+-    <module name="grammar-kit" />
+-    <envs />
++    <option name="VM_PARAMETERS" value="-ea -verbose:class" />
+     <RunnerSettings RunnerId="Profile " />
+     <RunnerSettings RunnerId="Run" />
+     <ConfigurationWrapper RunnerId="Run" />
+-    <method />
++    <method v="2">
++      <option name="Make" enabled="true" />
++    </method>
+   </configuration>
+ </component>
+\ No newline at end of file
+diff --git c/.idea/runConfigurations/LightPsi_All__package.xml i/.idea/runConfigurations/LightPsi_All__package.xml
+index 43bad82..b6481d5 100644
+--- c/.idea/runConfigurations/LightPsi_All__package.xml
++++ i/.idea/runConfigurations/LightPsi_All__package.xml
+@@ -1,21 +1,17 @@
+ <component name="ProjectRunConfigurationManager">
+   <configuration default="false" name="LightPsi-All: package" type="Application" factoryName="Application" singleton="true">
+-    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
++    <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.sdkman/candidates/java/11.0.8.hs-adpt" />
++    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
++    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+     <option name="MAIN_CLASS_NAME" value="org.intellij.grammar.LightPsi" />
+-    <option name="VM_PARAMETERS" value="-ea" />
++    <module name="grammar-kit.main" />
+     <option name="PROGRAM_PARAMETERS" value="./binaries ./build-lightpsi/classes.log.txt" />
+-    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+-    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+-    <option name="ALTERNATIVE_JRE_PATH" />
+-    <option name="ENABLE_SWING_INSPECTOR" value="false" />
+-    <option name="ENV_VARIABLES" />
+-    <option name="PASS_PARENT_ENVS" value="true" />
+-    <module name="grammar-kit" />
+-    <envs />
++    <option name="VM_PARAMETERS" value="-ea" />
+     <RunnerSettings RunnerId="Profile " />
+     <RunnerSettings RunnerId="Run" />
+     <ConfigurationWrapper RunnerId="Run" />
+-    <method>
++    <method v="2">
++      <option name="Make" enabled="true" />
+       <option name="RunConfigurationTask" enabled="true" run_configuration_name="LightPsi-All: classes" run_configuration_type="Application" />
+     </method>
+   </configuration>
+diff --git c/artifacts.gradle i/artifacts.gradle
+index 8721855..655f9b5 100644
+--- c/artifacts.gradle
++++ i/artifacts.gradle
+@@ -20,7 +20,7 @@ task buildExpression_console_sample (type: Jar) {
+   baseName = 'expression-console-sample'
+   destinationDir = file(artifactsPath)
+   manifest { from "$rootDir/tests/org/intellij/grammar/expression/META-INF/MANIFEST.MF" }
+-  from (files("$rootDir/out/test/grammar-kit/org/intellij/grammar/expression")) {
++  from (files("$rootDir/out/test/classes/org/intellij/grammar/expression")) {
+     into '/org/intellij/grammar/expression'
+   }
+ }
+diff --git c/src/org/intellij/grammar/LightPsi.java i/src/org/intellij/grammar/LightPsi.java
+index b56c431..d5334e3 100644
+--- c/src/org/intellij/grammar/LightPsi.java
++++ i/src/org/intellij/grammar/LightPsi.java
+@@ -115,7 +115,7 @@ public class LightPsi {
+ 
+   private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
+     BufferedReader reader = new BufferedReader(new FileReader(classesFile));
+-    Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)]");
++    Pattern pattern = Pattern.compile(".*\\[[^\\]]*load[^\\]]*\\] (.*) source: (?:file:)?(.*)");
+ 
+     JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
+     int count = 0;
+diff --git c/src/org/intellij/grammar/Main.java i/src/org/intellij/grammar/Main.java
+index 6059a26..7c801e0 100644
+--- c/src/org/intellij/grammar/Main.java
++++ i/src/org/intellij/grammar/Main.java
+@@ -16,8 +16,10 @@
+ 
+ package org.intellij.grammar;
+ 
++import com.intellij.extapi.psi.ASTWrapperPsiElement;
+ import com.intellij.lang.LanguageASTFactory;
+ import com.intellij.lang.LanguageBraceMatching;
++import com.intellij.lang.parser.GeneratedParserUtilBase;
+ import com.intellij.openapi.util.text.StringUtil;
+ import com.intellij.psi.PsiFile;
+ import org.intellij.grammar.generator.ParserGenerator;
+@@ -78,6 +80,19 @@ public class Main {
+               Class.forName("org.jetbrains.annotations.Nullable");
+               Class.forName("org.intellij.lang.annotations.Pattern");
+               Class.forName("org.intellij.lang.annotations.RegExp");
++              Class.forName(ASTWrapperPsiElement.class.getName());
++              Class.forName(GeneratedParserUtilBase.class.getName());
++              Class.forName(GeneratedParserUtilBase.Parser.class.getName());
++              Class.forName(GeneratedParserUtilBase.Builder.class.getName());
++              Class.forName(GeneratedParserUtilBase.CompletionState.class.getName());
++              Class.forName(GeneratedParserUtilBase.ErrorState.class.getName());
++              Class.forName(GeneratedParserUtilBase.DummyBlock.class.getName());
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$MyList");
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$Variant");
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$DummyBlockElementType");
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$Frame");
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$Hook");
++              Class.forName("com.intellij.lang.parser.GeneratedParserUtilBase$Hooks");
+               com.intellij.psi.impl.DebugUtil.psiToString(bnfFile, false);
+             }
+ 
+diff --git c/tests/org/intellij/grammar/BnfGeneratorTest.java i/tests/org/intellij/grammar/BnfGeneratorTest.java
+index b75e56c..108cd9d 100644
+--- c/tests/org/intellij/grammar/BnfGeneratorTest.java
++++ i/tests/org/intellij/grammar/BnfGeneratorTest.java
+@@ -42,7 +42,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
+   public void testConsumeMethods() throws Exception { doGenTest(false); }
+ 
+   @Bombed(year = 2030, user = "author", month = 1, day = 1, description = "not implemented")
+-  public void testUpperRules() throws Exception { doGenTest(true); }
++  //public void testUpperRules() throws Exception { doGenTest(true); }
+   public void testFixes() throws Exception { doGenTest(true); }
+ 
+   public void testEmpty() throws Exception {
+diff --git c/tests/org/intellij/grammar/expression/Main.java i/tests/org/intellij/grammar/expression/Main.java
+index 68f4495..5150273 100644
+--- c/tests/org/intellij/grammar/expression/Main.java
++++ i/tests/org/intellij/grammar/expression/Main.java
+@@ -31,7 +31,7 @@ public class Main {
+     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+     String s;
+     while((s = in.readLine()) != null) {
+-      dump(s, false);
++      dump(s, true);
+       System.out.print("> ");
+     }
+   }
+@@ -40,10 +40,12 @@ public class Main {
+     ExpressionParserDefinition parserDefinition = new ExpressionParserDefinition();
+     String treeDump;
+     if (usePsi) {
++      System.out.println("USING PSI");
+       PsiFile psiFile = LightPsi.parseFile("a.expr", text, parserDefinition);
+       treeDump = DebugUtil.psiToString(psiFile, false);
+     }
+     else {
++      System.out.println("not USING PSI");
+       ASTNode astNode = LightPsi.parseText(text, parserDefinition);
+       treeDump = DebugUtil.nodeTreeToString(astNode, true);
+     }

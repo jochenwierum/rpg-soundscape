@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    a.applink, a.applink:link, a.applink:active, a.applink:visited,
+    a.appbutton, a.appbutton:link, a.appbutton:active, a.appbutton:visited {
+        @apply text-blue-800 font-bold no-underline border-blue-800 border-solid;
+    }
+
+    a.applink:hover,
+    a.appbutton:hover {
+        @apply text-blue-600;
+    }
+
+    a.appbutton {
+        @apply border-2 rounded inline-block p-2
+    }
+
+    .maintitle {
+        @apply text-xl mb-6 text-center text-2xl font-bold mx-4 bg-gray-400 rounded border-8 border-transparent border-solid;
+    }
+
+    select {
+        @apply appearance-none mt-1 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm transition duration-150 bg-no-repeat pr-8 ease-in-out;
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke='%239fa6b2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        color-adjust: exact;
+        background-position: right .5rem center;
+        background-size: 1.5em 1.5em;
+    }
+
+    input[type=text] {
+        @apply appearance-none bg-white mt-1 py-2 px-3 border border-gray-300 rounded-md shadow-sm transition duration-150 ease-in-out;
+    }
+
+    input[ŧype=text]:focus,
+    select:focus {
+        @apply outline-none shadow-outline border-blue-300;
+        box-shadow: 0 0 0 3px rgba(164,202,254,.45);
+    }
+
+    /* button-groups */
+    .button-group {
+        @apply cursor-pointer
+        text-gray-800 font-bold text-sm
+        border border-blue-300
+        py-0 px-0 inline-block;
+    }
+    .button-group:hover {
+        @apply bg-blue-400;
+    }
+
+    .button-group a {
+        @apply block py-1 px-3;
+    }
+
+    .button-group:first-child {
+        @apply rounded-l;
+    }
+    .button-group:last-child {
+        @apply rounded-r;
+    }
+
+    .button-group-active {
+        @apply bg-blue-300;
+    }
+
+    @screen md {
+        .button-group {
+            @apply py-1 px-2 text-base;
+        }
+        .button-group a {
+            @apply block py-1 px-2;
+        }
+    }
+
+    /* Common Button Styles */
+    .button-group.button-disabled {
+        @apply cursor-not-allowed text-gray-300 border-gray-300;
+    }
+    .button-group.button-disabled a {
+        @apply cursor-not-allowed;
+    }
+    .button-group.button-disabled:hover {
+        @apply bg-white;
+    }
+}

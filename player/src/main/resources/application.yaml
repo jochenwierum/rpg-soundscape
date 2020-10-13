@@ -1,0 +1,23 @@
+spring:
+  main.banner-mode: 'off'
+  lifecycle.timeout-per-shutdown-phase: 20s
+
+  resources:
+    static-locations: classpath:/static/
+    cache.cachecontrol:
+      max-age: 120
+      must-revalidate: true
+    chain:
+      enabled: true
+      compressed: true # look for .br and .gz static files
+
+server:
+  port: 8008
+
+application:
+  freesound:
+    client-id: icZMOMvvge3lXG5w30k2
+    secret: OHwOZdqN41JCG4w4fsVMF0v7z1U8QsckzOMeMRCt
+
+logging.level:
+  de.jowisoftware.rpgsoundscape: INFO

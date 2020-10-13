@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://jetbrains.bintray.com/intellij-plugin-service'
+        }
+    }
+}
+
+plugins {
+  id 'org.jetbrains.intellij' version '0.4.26'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+tasks.withType(JavaCompile) {
+    options.compilerArgs -= "--enable-preview"
+}
+
+sourceSets {
+    main {
+        java.srcDirs += 'build/gen'
+    }
+}
+
+dependencies {
+    implementation project(':syntax')
+    //testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version '2020.2.1'
+    sandboxDirectory "${project.rootDir}/intellij/idea-sandbox/intellij"
+    //plugins = ['PsiViewer:202-SNAPSHOT.3']
+}
+
+buildSearchableOptions.enabled = false
+
+runIde {
+    jbrVersion '11_0_2b159'
+}
+
+patchPluginXml {
+    changeNotes """Add change notes here.<br>"""
+}
