@@ -2,7 +2,7 @@ package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.ErrorPosition;
 import de.jowisoftware.rpgsoundscape.exceptions.SyntaxException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SLoadDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SLoadDefinition;
 import de.jowisoftware.rpgsoundscape.model.Modification.AttributionModification;
 
 import java.net.URI;
@@ -17,9 +17,9 @@ public record Sample(
         ErrorPosition position) {
 
     static Sample from(SLoadDefinition sampleDefinition) {
-        String sampleName = sampleDefinition.getId().getText();
+        String sampleName = sampleDefinition.getSampleId().getText();
 
-        String uriString = Util.parse(sampleDefinition.getString());
+        String uriString = sampleDefinition.getString().parsed();
         URI uri;
         try {
             uri = new URI(uriString).normalize();

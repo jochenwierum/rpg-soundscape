@@ -1,7 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPauseStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SPauseStatement;
 
 public record Pause(
         PauseMode pauseMode,
@@ -23,9 +23,9 @@ public record Pause(
             pauseMode = PauseMode.OTHER;
         } else if (statement.getPauseThisTrack() != null) {
             pauseMode = PauseMode.THIS;
-        } else if (statement.getPauseTrack() != null) {
+        } else if (statement.getTrackRef() != null) {
             pauseMode = PauseMode.SPECIFIC;
-            track = statement.getPauseTrack().getId().getText();
+            track = statement.getTrackRef().getText();
 
             if (!context.knowsTrack(track)) {
                 throw new SemanticException(statement, "Track does not exist: " + track);

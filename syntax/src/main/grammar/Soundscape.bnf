@@ -1,16 +1,18 @@
 {
-    parserClass="de.jowisoftware.rpgsoundscape.intellij.parser.SoundscapeParser"
+    parserClass="de.jowisoftware.rpgsoundscape.language.parser.SoundscapeParser"
 
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix="S"
     psiImplClassSuffix="Impl"
-    psiPackage="de.jowisoftware.rpgsoundscape.intellij.psi"
-    psiImplPackage="de.jowisoftware.rpgsoundscape.intellij.psi.impl"
+    psiPackage="de.jowisoftware.rpgsoundscape.language.psi"
+    psiImplPackage="de.jowisoftware.rpgsoundscape.language.psi.impl"
 
-    elementTypeHolderClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeTypes"
-    elementTypeClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeElementType"
-    tokenTypeClass="de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeTokenType"
+    elementTypeHolderClass="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes"
+    elementTypeClass="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeElementType"
+    tokenTypeClass="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTokenType"
+
+    psiImplUtilClass="de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil"
 }
 
 root ::= !<<eof>> (root_item*)
@@ -31,18 +33,18 @@ includeDefinition ::= INCLUDE string {pin=1}
 
 // LOAD SAMPLE
 
-loadDefinition ::= LOAD SAMPLE id FROM string playModifications? {pin=1}
+loadDefinition ::= LOAD SAMPLE? sampleId FROM string playModifications? {pin=1}
 
 // INCLUDABLE
 
-includableTrackDefinition ::= INCLUDABLE TRACK id block {pin=1}
+includableTrackDefinition ::= INCLUDABLE TRACK includableTrackId block {pin=1}
 
 // MUSIC & EFFECT
 
 musicDefinition ::= MUSIC musicEffectDefinition {pin=1}
 effectDefinition ::= EFFECT musicEffectDefinition {pin=1}
 
-musicEffectDefinition ::= string FROM id playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+musicEffectDefinition ::= string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
 private musicEffectDefinitionDetails_ ::=
     ( metadataStatement sep_ )+
     {recoverWhile=musicEffectDefinitionDetails_recover_}
@@ -50,9 +52,8 @@ private musicEffectDefinitionDetails_recover_ ::= !(CURLY_R | DESCRIBED | CATEGO
 
 // SOUNDSCAPE
 
-soundscapeDefinition ::= SOUNDSCAPE string CURLY_L soundscapeBlock CURLY_R {pin=1}
+soundscapeDefinition ::= SOUNDSCAPE string CURLY_L soundscapeBlockStatement_* CURLY_R {pin=1}
 
-soundscapeBlock ::= soundscapeBlockStatement_*
 private soundscapeBlockStatement_ ::= (
     sep_ |
     (loadDefinition sep_) |
@@ -64,8 +65,9 @@ private soundscapeBlockStatement_recover_ ::= !(CURLY_R | LOAD | LOOPING | MANUA
 
 // TRACK
 
-trackDefinition ::= trackModifier_ TRACK id (WITH TITLE string)? trackContent {pin=2}
-trackContent ::= (block | INCLUDES id sep_)
+trackDefinition ::= trackModifier_ TRACK trackId (WITH TITLE string)? trackContent {pin=2}
+
+trackContent ::= (block | INCLUDES includableTrackRef sep_)
 private trackModifier_ ::= loopingTrackModifier | manualTrackModifier {recoverWhile=track_recover_}
 private track_recover_ ::= !TRACK
 loopingTrackModifier ::= LOOPING pausedModifier? {pin=1}
@@ -85,15 +87,18 @@ statement ::=
     repeatStatement |
     randomlyStatement |
     parallellyStatement
-    {recoverWhile=statement_recover_}
+    {
+    pin(".*")=1
+    recoverWhile=statement_recover_
+    }
 private statement_recover_ ::= !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED)
 
 block ::= CURLY_L statement+ CURLY_R {pin=1}
 
 // PLAY
 
-playStatement ::= PLAY id playModifications? {pin=1}
-playModifications ::= WITH playModificationItem (listDelimiter_ playModificationItem)*
+playStatement ::= PLAY SAMPLE? sampleRef playModifications? {pin=1}
+playModifications ::= WITH playModificationItem (listDelimiter_ playModificationItem)* {pin=1}
 private listDelimiter_ ::= LIST_DELIMITER | AND
 
 playModificationItem ::=
@@ -112,16 +117,15 @@ playModificationAttribution ::= ATTRIBUTION string {pin=1}
 
 // PAUSE
 
-pauseStatement ::= PAUSE (pauseAllOtherTracks | pauseAllTracks | pauseThisTrack | pauseTrack) {pin=1}
+pauseStatement ::= PAUSE (pauseAllOtherTracks | pauseAllTracks | pauseThisTrack | trackNameReference_) {pin=1}
 pauseAllOtherTracks ::= ALL OTHER TRACKS {pin=2}
 pauseAllTracks ::= ALL TRACKS {pin=1}
 pauseThisTrack ::= THIS TRACK {pin=1}
-pauseTrack ::= TRACK id {pin=1}
+private trackNameReference_ ::= TRACK trackRef {pin=1}
 
 // RESUME
 
-resumeStatement ::= RESUME (resumeTrackStatement | resumeLoopingTracksStatement) {pin=1}
-resumeTrackStatement ::= TRACK id {pin=1}
+resumeStatement ::= RESUME (trackNameReference_ | resumeLoopingTracksStatement) {pin=1}
 resumeLoopingTracksStatement ::= LOOPING TRACKS {pin=1}
 
 // SLEEP
@@ -163,8 +167,42 @@ categorizedIn ::= IN string {pin=1}
 
 private sep_ ::= SEPARATOR
 
-id ::= IDENTIFIER
-string ::= TEXT
-int ::= NUM_INTEGER
-percentage ::= PERCENT
-timespan ::= DURATION
+fake id ::= IDENTIFIER
+
+sampleRef ::= IDENTIFIER {
+    extends=id
+    methods=[getReference]
+}
+sampleId ::= IDENTIFIER {
+    extends=sampleRef
+    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
+    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
+    methods=[getReference getName getNameIdentifier setName]
+}
+
+trackRef ::= IDENTIFIER {
+    extends=id
+    methods=[getReference]
+}
+trackId ::= IDENTIFIER {
+    extends=trackRef
+    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
+    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
+    methods=[getReference getName getNameIdentifier setName]
+}
+
+includableTrackRef ::= IDENTIFIER {
+    extends=id
+    methods=[getReference]
+}
+includableTrackId ::= IDENTIFIER {
+    extends=includableTrackRef
+    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
+    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
+    methods=[getReference getName getNameIdentifier setName]
+}
+
+string ::= TEXT {methods=[parsed]}
+int ::= NUM_INTEGER {methods=[parsed]}
+percentage ::= PERCENT {methods=[parsed]}
+timespan ::= DURATION {methods=[parsed]}

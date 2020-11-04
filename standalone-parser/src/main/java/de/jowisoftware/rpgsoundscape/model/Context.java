@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile;
+import de.jowisoftware.rpgsoundscape.language.psi.SoundscapeFile;
 
 import java.util.Map;
 import java.util.Set;

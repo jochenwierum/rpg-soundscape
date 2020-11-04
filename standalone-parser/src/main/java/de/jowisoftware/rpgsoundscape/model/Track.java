@@ -1,8 +1,8 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SId;
-import de.jowisoftware.rpgsoundscape.intellij.psi.STrackDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackRef;
+import de.jowisoftware.rpgsoundscape.language.psi.STrackDefinition;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -26,10 +26,10 @@ public record Track(
     }
 
     public static Track from(STrackDefinition definition, Context context) {
-        String id = definition.getId().getText();
+        String id = definition.getTrackId().getText();
         return new Track(
                 id,
-                definition.getString() == null ? id : Util.parse(definition.getString()),
+                definition.getString() == null ? id : definition.getString().parsed(),
                 isAutoStart(definition),
                 definition.getLoopingTrackModifier() != null,
                 findBlock(definition, context)
@@ -44,7 +44,7 @@ public record Track(
     private static Statement findBlock(STrackDefinition definition, Context context) {
         Statement statement;
 
-        SId includedId = definition.getTrackContent().getId();
+        SIncludableTrackRef includedId = definition.getTrackContent().getIncludableTrackRef();
         if (includedId == null) {
             statement = Block.from(definition.getTrackContent().getBlock(), context);
             if(!statement.isValid()) {

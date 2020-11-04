@@ -1,11 +1,11 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import com.intellij.psi.PsiElement;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SEffectDefinition;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SMusicDefinition;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SMusicEffectDefinition;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SRootItem;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile;
+import de.jowisoftware.rpgsoundscape.language.psi.SEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SMusicDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SMusicEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SRootItem;
+import de.jowisoftware.rpgsoundscape.language.psi.SoundscapeFile;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +24,7 @@ public final class SoundscapeReader {
 
     public static Set<String> readIncludes(SoundscapeFile psiFile) {
         Set<String> result = new HashSet<>();
-        collect(List.of(psiFile), SRootItem::getIncludeDefinition).forEach(item ->
-                result.add(Util.parse(item.content().getString()))
+        collect(List.of(psiFile), SRootItem::getIncludeDefinition).forEach(item -> result.add(item.content().getString().parsed())
         );
         return result;
     }
@@ -46,14 +45,13 @@ public final class SoundscapeReader {
     }
 
     private static Map<String, Soundscape> readSoundscapes(
-            List<de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile> files, Context context) {
+            List<SoundscapeFile> files, Context context) {
         Map<String, Soundscape> soundscapes = new HashMap<>();
 
-        collect(files, SRootItem::getSoundscapeDefinition).forEach(tuple ->
-                Util.collectChecked(
-                        tuple.content(), soundscapes,
-                        Util.parse(tuple.content().getString()),
-                        Soundscape.from(tuple.content(), context.withFile(tuple.file()))));
+        collect(files, SRootItem::getSoundscapeDefinition).forEach(tuple -> Util.collectChecked(
+                tuple.content(), soundscapes,
+                tuple.content().getString().parsed(),
+                Soundscape.from(tuple.content(), context.withFile(tuple.file()))));
 
         return soundscapes;
     }
@@ -70,10 +68,9 @@ public final class SoundscapeReader {
             Function<SRootItem, T> selector, Function<T, SMusicEffectDefinition> getDefinition) {
         Map<String, Effect> effects = new HashMap<>();
 
-        collect(files, selector).forEach(tuple ->
-                Util.collectChecked(tuple.content(), effects,
-                        Util.parse(getDefinition.apply(tuple.content()).getString()),
-                        Effect.from(getDefinition.apply(tuple.content()), context.withFile(tuple.file()))));
+        collect(files, selector).forEach(tuple -> Util.collectChecked(tuple.content(), effects,
+                getDefinition.apply(tuple.content()).getString().parsed(),
+                Effect.from(getDefinition.apply(tuple.content()), context.withFile(tuple.file()))));
 
         return effects;
     }
@@ -84,30 +81,30 @@ public final class SoundscapeReader {
         collect(files, SRootItem::getIncludableTrackDefinition).forEach(tuple ->
                 Util.collectChecked(
                         tuple.content(), includableTracks,
-                        tuple.content().getId().getText(),
+                        tuple.content().getIncludableTrackId().getText(),
                         Block.from(tuple.content().getBlock(), context.withFile(tuple.file()))));
 
         return context.withAdditionalIncludableTracks(includableTracks);
     }
 
     private static Context readSamples(
-            List<de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile> files, Context context) {
+            List<SoundscapeFile> files, Context context) {
         Map<String, Sample> samples = new HashMap<>();
 
         collect(files, SRootItem::getLoadDefinition).forEach(tuple ->
                 Util.collectChecked(tuple.content(), samples,
-                        tuple.content().getId().getText(),
+                        tuple.content().getSampleId().getText(),
                         Sample.from(tuple.content())));
 
         return context.withAdditionalSamples(samples);
     }
 
     private static record Tuple<T>(
-            de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile file,
+            SoundscapeFile file,
             T content) {
     }
 
-    private static <T> Stream<Tuple<T>> collect(List<de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeFile> files,
+    private static <T> Stream<Tuple<T>> collect(List<SoundscapeFile> files,
             Function<SRootItem, T> filter) {
         return files.stream()
                 .flatMap(file -> Arrays.stream(file.getChildren())

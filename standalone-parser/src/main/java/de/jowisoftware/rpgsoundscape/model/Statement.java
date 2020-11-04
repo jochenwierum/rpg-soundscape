@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SStatement;
 
 import java.util.Set;
 

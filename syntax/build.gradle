@@ -13,9 +13,7 @@ plugins {
 
 apply plugin: 'org.jetbrains.grammarkit'
 
-
 import org.jetbrains.grammarkit.tasks.*
-
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -25,12 +23,12 @@ tasks.withType(JavaCompile) {
 
 sourceSets {
     main {
+        java.srcDirs += 'src/main/gen'
         java.srcDirs += 'build/gen'
     }
 }
 
 buildSearchableOptions.enabled = false
-
 intellij {
     version '2020.2.1'
 }
@@ -46,7 +44,7 @@ task generateLexer(type: GenerateLexer) {
     source = "src/main/grammar/Soundscape.flex"
 
     // target directory for lexer
-    targetDir = "build/gen/de/jowisoftware/rpgsoundscape/intellij/"
+    targetDir = "build/gen/de/jowisoftware/rpgsoundscape/language/lexer/"
 
     // target classname, target file will be targetDir/targetClass/java
     targetClass = "SoundscapeLexer"
@@ -55,6 +53,7 @@ task generateLexer(type: GenerateLexer) {
     purgeOldFiles = true
 }
 
+/*
 task generateParser(type: GenerateParser) {
     // source bnf file
     source = "src/main/grammar/Soundscape.bnf"
@@ -71,10 +70,11 @@ task generateParser(type: GenerateParser) {
     // if set, plugin will remove a parser output file and psi output directory before generating new ones. Default: false
     purgeOldFiles = true
 }
+*/
 
 compileJava {
     dependsOn generateLexer
-    dependsOn generateParser
+    //dependsOn generateParser
 }
 
 task buildGrammar_kit_jar (type: Jar, dependsOn: [tasks['assemble']]) {

@@ -1,7 +1,7 @@
-package de.jowisoftware.rpgsoundscape.intellij;
+package de.jowisoftware.rpgsoundscape.language.lexer;
 
-import static de.jowisoftware.rpgsoundscape.intellij.SoundscapeParserDefinitionStub.*;
-import static de.jowisoftware.rpgsoundscape.intellij.psi.SoundscapeTypes.*;
+import static de.jowisoftware.rpgsoundscape.language.parser.SoundscapeParserDefinitionStub.*;
+import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 
 %%
 

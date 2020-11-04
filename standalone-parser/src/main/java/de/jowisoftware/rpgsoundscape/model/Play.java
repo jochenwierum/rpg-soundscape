@@ -2,7 +2,7 @@ package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.ErrorPosition;
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayStatement;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +15,7 @@ public record Play(
         List<Modification> modifications,
         ErrorPosition position) implements Statement {
     static Statement from(SPlayStatement statement, Context context) {
-        String name = statement.getId().getText();
+        String name = statement.getSampleRef().getText();
 
         Sample sample = context.sample(name);
         if (sample == null) {

@@ -1,7 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SResumeStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SResumeStatement;
 
 public record Resume(
         ResumeMode resumeMode,
@@ -15,9 +15,9 @@ public record Resume(
         String track = null;
         ResumeMode resumeMode = ResumeMode.LOOPING;
 
-        if (statement.getResumeTrackStatement() != null) {
+        if (statement.getTrackRef() != null) {
             resumeMode = ResumeMode.SPECIFIC;
-            track = statement.getResumeTrackStatement().getId().getText();
+            track = statement.getTrackRef().getText();
 
             if (!context.knowsTrack(track)) {
                 throw new SemanticException(statement, "Track does not exist: " + track);

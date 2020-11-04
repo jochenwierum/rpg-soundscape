@@ -24,10 +24,45 @@
                   extensions="soundscape"/>
 
         <lang.syntaxHighlighterFactory
-            language="Soundscape"
-            implementationClass="de.jowisoftware.rpgsoundscape.intellij.SoundscapeSyntaxHighlighterFactory"/>
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.highlight.SoundscapeSyntaxHighlighterFactory"/>
 
-        <colorSettingsPage implementation="de.jowisoftware.rpgsoundscape.intellij.SoundscapeSettingsPage"/>
+        <colorSettingsPage implementation="de.jowisoftware.rpgsoundscape.intellij.settings.SoundscapeSettingsPage"/>
+
+        <!--
+        <completion.contributor
+                language="Soundscape"
+                implementationClass="SoundscapeCompletionContributor"/>
+                -->
+
+
+        <lang.refactoringSupport
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeRefactoringSupportProvider"/>
+
+        <elementDescriptionProvider
+                implementation="de.jowisoftware.rpgsoundscape.intellij.language.CustomElementDescriptionProvider"/>
+
+        <lang.findUsagesProvider
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeFindUsagesProvider"/>
+
+        <annotator
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeAnnotator"/>
+
+        <codeInsight.lineMarkerProvider
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeLineMarkerProvider"/>
+
+        <lang.foldingBuilder
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeFoldingBuilder"/>
+
+        <lang.commenter
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeCommenter"/>
+
     </extensions>
 
     <actions>

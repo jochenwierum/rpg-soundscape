@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SParallellyStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SParallellyStatement;
 
 import java.util.List;
 import java.util.Set;

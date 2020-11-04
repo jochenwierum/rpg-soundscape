@@ -31,7 +31,7 @@ dependencies {
 intellij {
     version '2020.2.1'
     sandboxDirectory "${project.rootDir}/intellij/idea-sandbox/intellij"
-    //plugins = ['PsiViewer:202-SNAPSHOT.3']
+    plugins = ['PsiViewer:202-SNAPSHOT.3']
 }
 
 buildSearchableOptions.enabled = false

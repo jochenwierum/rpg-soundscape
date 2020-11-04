@@ -1,10 +1,10 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPercentage;
+import de.jowisoftware.rpgsoundscape.language.psi.SPercentage;
 
 public record Percentage(int value) {
     static Percentage from(SPercentage percentage) {
-        return new Percentage(Util.parse(percentage));
+        return new Percentage(percentage.parsed());
     }
 
     public double toDouble() {

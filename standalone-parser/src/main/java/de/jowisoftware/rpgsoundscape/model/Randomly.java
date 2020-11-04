@@ -1,7 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SRandomlyStatement;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SRandomlyWeight;
+import de.jowisoftware.rpgsoundscape.language.psi.SRandomlyStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SRandomlyWeight;
 
 import java.util.List;
 import java.util.Set;
@@ -27,7 +27,7 @@ public record Randomly(List<RandomChoice> choices) implements Statement {
 
     private static RandomChoice from(SRandomlyWeight randomlyWeight, Context context) {
         Statement statement = Statement.from(randomlyWeight.getStatement(), context);
-        long weight = Util.parse(randomlyWeight.getInt());
+        long weight = randomlyWeight.getInt().parsed();
         return new RandomChoice(weight, statement);
     }
 

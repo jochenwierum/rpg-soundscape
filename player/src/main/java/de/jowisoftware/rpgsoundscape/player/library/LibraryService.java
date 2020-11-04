@@ -4,7 +4,7 @@ import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
 import de.jowisoftware.rpgsoundscape.exceptions.SyntaxException;
 import de.jowisoftware.rpgsoundscape.model.Sample;
 import de.jowisoftware.rpgsoundscape.model.SoundscapeFileContent;
-import de.jowisoftware.rpgsoundscape.parser.ParserFacade;
+import de.jowisoftware.rpgsoundscape.language.parser.ParserFacade;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
 import de.jowisoftware.rpgsoundscape.player.status.event.Problem;

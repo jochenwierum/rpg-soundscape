@@ -1,7 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SMetadataStatement;
+import de.jowisoftware.rpgsoundscape.language.psi.SMetadataStatement;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,12 +26,12 @@ public record Metadata(
                 if (description != null) {
                     throw new SemanticException(statement, "A description was already provided");
                 }
-                description = Util.parse(statement.getDescribedStatement().getString());
+                description = statement.getDescribedStatement().getString().parsed();
             } else if (statement.getCategoryStatement() != null) {
                 categories.computeIfAbsent(
-                        Util.parse(statement.getCategoryStatement().getCategorizedIn().getString()),
+                        statement.getCategoryStatement().getCategorizedIn().getString().parsed(),
                         __ -> new HashSet<>())
-                        .add(Util.parse(statement.getCategoryStatement().getCategorizedAs().getString()));
+                        .add(statement.getCategoryStatement().getCategorizedAs().getString().parsed());
             }
         }
 

@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SBlock;
+import de.jowisoftware.rpgsoundscape.language.psi.SBlock;
 
 import java.util.List;
 import java.util.Set;

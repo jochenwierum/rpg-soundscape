@@ -2,12 +2,12 @@ package de.jowisoftware.rpgsoundscape.model;
 
 import com.intellij.psi.PsiElement;
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModificationAmplification;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModificationAttribution;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModificationItem;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModificationLimit;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModificationOmission;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SPlayModifications;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationAmplification;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationAttribution;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationItem;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationLimit;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationOmission;
+import de.jowisoftware.rpgsoundscape.language.psi.SPlayModifications;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -17,8 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static de.jowisoftware.rpgsoundscape.model.Util.parse;
 
 public sealed interface Modification {
     record AmplificationModification(Percentage percentage) implements Modification {
@@ -33,13 +31,13 @@ public sealed interface Modification {
 
     record AttributionModification(String attribution) implements Modification {
         static AttributionModification from(SPlayModificationAttribution attribution) {
-            return new AttributionModification(parse(attribution.getString()));
+            return new AttributionModification(attribution.getString().parsed());
         }
     }
 
     record StartOmissionModification(Duration duration) implements Modification {
         static StartOmissionModification from(SPlayModificationOmission omission) {
-            return new StartOmissionModification(parse(omission.getTimespan()));
+            return new StartOmissionModification(omission.getTimespan().parsed());
         }
 
         public StartOmissionModification merge(StartOmissionModification other) {
@@ -49,7 +47,7 @@ public sealed interface Modification {
 
     record LimitModification(Duration duration) implements Modification {
         static LimitModification from(SPlayModificationLimit limit) {
-            return new LimitModification(parse(limit.getTimespan()));
+            return new LimitModification(limit.getTimespan().parsed());
         }
 
         public LimitModification merge(LimitModification other) {

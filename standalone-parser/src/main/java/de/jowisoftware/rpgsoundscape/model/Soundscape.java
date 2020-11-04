@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.model;
 
-import de.jowisoftware.rpgsoundscape.intellij.psi.SSoundscapeDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SSoundscapeDefinition;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,9 +20,9 @@ public record Soundscape(
         context = processIncludableTracks(soundscape, context);
         context = processTracksNames(soundscape, context);
         Map<String, Track> tracks = processTracks(soundscape, context);
-        Metadata metadata = Metadata.from(context, soundscape.getSoundscapeBlock().getMetadataStatementList());
+        Metadata metadata = Metadata.from(context, soundscape.getMetadataStatementList());
 
-        return new Soundscape(Util.parse(soundscape.getString()),
+        return new Soundscape(soundscape.getString().parsed(),
                 context.fileName(),
                 Collections.unmodifiableMap(tracks),
                 metadata);
@@ -31,32 +31,32 @@ public record Soundscape(
     private static Map<String, Track> processTracks(SSoundscapeDefinition soundscape, Context context) {
         Map<String, Track> tracks = new HashMap<>();
 
-        soundscape.getSoundscapeBlock().getTrackDefinitionList()
+        soundscape.getTrackDefinitionList()
                 .forEach(Util.collectChecked(tracks,
-                        td -> td.getId().getText(),
+                        td -> td.getTrackId().getText(),
                         td -> Track.from(td, context)));
         return tracks;
     }
 
     private static Context processIncludableTracks(SSoundscapeDefinition soundscape, Context context) {
         Map<String, Statement> includableTracks = new HashMap<>();
-        soundscape.getSoundscapeBlock().getIncludableTrackDefinitionList()
+        soundscape.getIncludableTrackDefinitionList()
                 .forEach(Util.collectChecked(includableTracks,
-                        td -> td.getId().getText(),
+                        td -> td.getIncludableTrackId().getText(),
                         td -> Block.from(td.getBlock(), context)));
         return context.withAdditionalIncludableTracks(includableTracks);
     }
 
     private static Context processSamples(SSoundscapeDefinition soundscape, Context context) {
         Map<String, Sample> samples = new HashMap<>();
-        soundscape.getSoundscapeBlock().getLoadDefinitionList()
-                .forEach(Util.collectChecked(samples, sd -> sd.getId().getText(), Sample::from));
+        soundscape.getLoadDefinitionList()
+                .forEach(Util.collectChecked(samples, sd -> sd.getSampleId().getText(), Sample::from));
         return context.withAdditionalSamples(samples);
     }
 
     private static Context processTracksNames(SSoundscapeDefinition soundscape, Context context) {
-        Set<String> names = soundscape.getSoundscapeBlock().getTrackDefinitionList().stream()
-                .map(td -> td.getId().getText())
+        Set<String> names = soundscape.getTrackDefinitionList().stream()
+                .map(td -> td.getTrackId().getText())
                 .collect(Collectors.toSet());
 
         return context.withTrackNames(names);

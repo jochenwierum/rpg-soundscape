@@ -2,7 +2,7 @@ package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.exceptions.ErrorPosition;
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.intellij.psi.SMusicEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SMusicEffectDefinition;
 
 public record Effect(
         String name,
@@ -11,8 +11,8 @@ public record Effect(
         implements MetadataAware {
 
     static Effect from(SMusicEffectDefinition definition, Context context) {
-        String name = Util.parse(definition.getString());
-        String id = definition.getId().getText();
+        String name = definition.getString().parsed();
+        String id = definition.getSampleRef().getText();
 
         Sample sample = context.sample(id);
         if (sample == null) {
