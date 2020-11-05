@@ -16,12 +16,6 @@ tasks.withType(JavaCompile) {
     options.compilerArgs -= "--enable-preview"
 }
 
-sourceSets {
-    main {
-        java.srcDirs += 'build/gen'
-    }
-}
-
 dependencies {
     implementation project(':syntax')
     //testImplementation group: 'junit', name: 'junit', version: '4.12'
@@ -31,7 +25,10 @@ dependencies {
 intellij {
     version '2020.2.1'
     sandboxDirectory "${project.rootDir}/intellij/idea-sandbox/intellij"
-    plugins = ['PsiViewer:202-SNAPSHOT.3']
+    plugins = [
+            'PsiViewer:202-SNAPSHOT.3',
+            'com.jetbrains.hackathon.indices.viewer:1.8'
+    ]
 }
 
 buildSearchableOptions.enabled = false

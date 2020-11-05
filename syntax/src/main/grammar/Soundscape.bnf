@@ -15,8 +15,10 @@
     psiImplUtilClass="de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil"
 }
 
-root ::= !<<eof>> (root_item*)
-root_item ::=
+root ::= !<<eof>> root_content
+root_content ::= (root_item_*)
+
+private root_item_ ::=
     sep_ |
     (includeDefinition sep_) |
     (loadDefinition sep_) |
@@ -41,10 +43,12 @@ includableTrackDefinition ::= INCLUDABLE TRACK includableTrackId block {pin=1}
 
 // MUSIC & EFFECT
 
-musicDefinition ::= MUSIC musicEffectDefinition {pin=1}
-effectDefinition ::= EFFECT musicEffectDefinition {pin=1}
+fake musicEffectDefinition ::= musicEffectDefinition_
 
-musicEffectDefinition ::= string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+musicDefinition ::= MUSIC musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
+effectDefinition ::= EFFECT musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
+
+private musicEffectDefinition_ ::= string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
 private musicEffectDefinitionDetails_ ::=
     ( metadataStatement sep_ )+
     {recoverWhile=musicEffectDefinitionDetails_recover_}

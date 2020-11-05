@@ -5,9 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SEffectDefinition extends PsiElement {
+public interface SEffectDefinition extends SMusicEffectDefinition {
 
   @Nullable
-  SMusicEffectDefinition getMusicEffectDefinition();
+  SSampleRef getSampleRef();
+
+  @Nullable
+  SString getString();
 
 }

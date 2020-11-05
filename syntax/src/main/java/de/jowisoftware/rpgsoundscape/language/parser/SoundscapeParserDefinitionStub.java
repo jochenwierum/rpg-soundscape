@@ -62,6 +62,7 @@ public class SoundscapeParserDefinitionStub implements ParserDefinition {
 
     @Override
     public IFileElementType getFileNodeType() {
+        /*return SoundscapeElementTypes.FILE;*/
         return ROOT;
     }
 

@@ -36,7 +36,7 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitEffectDefinition(@NotNull SEffectDefinition o) {
-    visitPsiElement(o);
+    visitMusicEffectDefinition(o);
   }
 
   public void visitId(@NotNull SId o) {
@@ -81,7 +81,7 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitMusicDefinition(@NotNull SMusicDefinition o) {
-    visitPsiElement(o);
+    visitMusicEffectDefinition(o);
   }
 
   public void visitMusicEffectDefinition(@NotNull SMusicEffectDefinition o) {
@@ -164,7 +164,7 @@ public class SVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitRootItem(@NotNull SRootItem o) {
+  public void visitRootContent(@NotNull SRootContent o) {
     visitPsiElement(o);
   }
 

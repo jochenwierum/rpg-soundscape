@@ -8,10 +8,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SMusicDefinitionImpl extends ASTWrapperPsiElement implements SMusicDefinition {
+public class SMusicDefinitionImpl extends SMusicEffectDefinitionImpl implements SMusicDefinition {
 
   public SMusicDefinitionImpl(@NotNull ASTNode node) {
     super(node);
@@ -28,8 +27,14 @@ public class SMusicDefinitionImpl extends ASTWrapperPsiElement implements SMusic
 
   @Override
   @Nullable
-  public SMusicEffectDefinition getMusicEffectDefinition() {
-    return findChildByClass(SMusicEffectDefinition.class);
+  public SSampleRef getSampleRef() {
+    return findChildByClass(SSampleRef.class);
+  }
+
+  @Override
+  @Nullable
+  public SString getString() {
+    return findChildByClass(SString.class);
   }
 
 }

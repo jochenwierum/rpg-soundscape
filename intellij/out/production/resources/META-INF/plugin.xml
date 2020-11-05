@@ -58,6 +58,14 @@
         <lang.foldingBuilder
                 language="Soundscape"
                 implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeFoldingBuilder"/>
+
+        <lang.commenter
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeCommenter"/>
+
+        <!--
+        <stubElementTypeHolder class="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeElementTypes"/>
+        -->
     </extensions>
 
     <actions>

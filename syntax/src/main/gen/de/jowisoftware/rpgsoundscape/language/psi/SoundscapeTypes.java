@@ -26,7 +26,6 @@ public interface SoundscapeTypes {
   IElementType MANUAL_TRACK_MODIFIER = new SoundscapeElementType("MANUAL_TRACK_MODIFIER");
   IElementType METADATA_STATEMENT = new SoundscapeElementType("METADATA_STATEMENT");
   IElementType MUSIC_DEFINITION = new SoundscapeElementType("MUSIC_DEFINITION");
-  IElementType MUSIC_EFFECT_DEFINITION = new SoundscapeElementType("MUSIC_EFFECT_DEFINITION");
   IElementType PARALLELLY_STATEMENT = new SoundscapeElementType("PARALLELLY_STATEMENT");
   IElementType PAUSED_MODIFIER = new SoundscapeElementType("PAUSED_MODIFIER");
   IElementType PAUSE_ALL_OTHER_TRACKS = new SoundscapeElementType("PAUSE_ALL_OTHER_TRACKS");
@@ -46,7 +45,7 @@ public interface SoundscapeTypes {
   IElementType REPEAT_STATEMENT = new SoundscapeElementType("REPEAT_STATEMENT");
   IElementType RESUME_LOOPING_TRACKS_STATEMENT = new SoundscapeElementType("RESUME_LOOPING_TRACKS_STATEMENT");
   IElementType RESUME_STATEMENT = new SoundscapeElementType("RESUME_STATEMENT");
-  IElementType ROOT_ITEM = new SoundscapeElementType("ROOT_ITEM");
+  IElementType ROOT_CONTENT = new SoundscapeElementType("ROOT_CONTENT");
   IElementType SAMPLE_ID = new SoundscapeElementType("SAMPLE_ID");
   IElementType SAMPLE_REF = new SoundscapeElementType("SAMPLE_REF");
   IElementType SLEEP_STATEMENT = new SoundscapeElementType("SLEEP_STATEMENT");
@@ -171,9 +170,6 @@ public interface SoundscapeTypes {
       else if (type == MUSIC_DEFINITION) {
         return new SMusicDefinitionImpl(node);
       }
-      else if (type == MUSIC_EFFECT_DEFINITION) {
-        return new SMusicEffectDefinitionImpl(node);
-      }
       else if (type == PARALLELLY_STATEMENT) {
         return new SParallellyStatementImpl(node);
       }
@@ -231,8 +227,8 @@ public interface SoundscapeTypes {
       else if (type == RESUME_STATEMENT) {
         return new SResumeStatementImpl(node);
       }
-      else if (type == ROOT_ITEM) {
-        return new SRootItemImpl(node);
+      else if (type == ROOT_CONTENT) {
+        return new SRootContentImpl(node);
       }
       else if (type == SAMPLE_ID) {
         return new SSampleIdImpl(node);

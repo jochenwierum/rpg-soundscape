@@ -36,6 +36,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(EFFECT_DEFINITION, MUSIC_DEFINITION),
     create_token_set_(INCLUDABLE_TRACK_ID, INCLUDABLE_TRACK_REF, SAMPLE_ID, SAMPLE_REF,
       TRACK_ID, TRACK_REF),
   };
@@ -227,7 +228,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // EFFECT musicEffectDefinition
+  // EFFECT musicEffectDefinition_
   public static boolean effectDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "effectDefinition")) return false;
     if (!nextTokenIs(b, EFFECT)) return false;
@@ -235,7 +236,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, EFFECT_DEFINITION, null);
     r = consumeToken(b, EFFECT);
     p = r; // pin = 1
-    r = r && musicEffectDefinition(b, l + 1);
+    r = r && musicEffectDefinition_(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -404,7 +405,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // MUSIC musicEffectDefinition
+  // MUSIC musicEffectDefinition_
   public static boolean musicDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "musicDefinition")) return false;
     if (!nextTokenIs(b, MUSIC)) return false;
@@ -412,55 +413,9 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, MUSIC_DEFINITION, null);
     r = consumeToken(b, MUSIC);
     p = r; // pin = 1
-    r = r && musicEffectDefinition(b, l + 1);
+    r = r && musicEffectDefinition_(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
-  }
-
-  /* ********************************************************** */
-  // string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
-  public static boolean musicEffectDefinition(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "musicEffectDefinition")) return false;
-    if (!nextTokenIs(b, TEXT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = string(b, l + 1);
-    r = r && consumeToken(b, FROM);
-    r = r && sampleRef(b, l + 1);
-    r = r && musicEffectDefinition_3(b, l + 1);
-    r = r && musicEffectDefinition_4(b, l + 1);
-    exit_section_(b, m, MUSIC_EFFECT_DEFINITION, r);
-    return r;
-  }
-
-  // playModifications?
-  private static boolean musicEffectDefinition_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "musicEffectDefinition_3")) return false;
-    playModifications(b, l + 1);
-    return true;
-  }
-
-  // (CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_
-  private static boolean musicEffectDefinition_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "musicEffectDefinition_4")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = musicEffectDefinition_4_0(b, l + 1);
-    if (!r) r = sep_(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // CURLY_L musicEffectDefinitionDetails_ CURLY_R
-  private static boolean musicEffectDefinition_4_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "musicEffectDefinition_4_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, CURLY_L);
-    r = r && musicEffectDefinitionDetails_(b, l + 1);
-    r = r && consumeToken(b, CURLY_R);
-    exit_section_(b, m, null, r);
-    return r;
   }
 
   /* ********************************************************** */
@@ -508,6 +463,52 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, CURLY_R);
     if (!r) r = consumeToken(b, DESCRIBED);
     if (!r) r = consumeToken(b, CATEGORIZED);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+  static boolean musicEffectDefinition_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "musicEffectDefinition_")) return false;
+    if (!nextTokenIs(b, TEXT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = string(b, l + 1);
+    r = r && consumeToken(b, FROM);
+    r = r && sampleRef(b, l + 1);
+    r = r && musicEffectDefinition__3(b, l + 1);
+    r = r && musicEffectDefinition__4(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // playModifications?
+  private static boolean musicEffectDefinition__3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "musicEffectDefinition__3")) return false;
+    playModifications(b, l + 1);
+    return true;
+  }
+
+  // (CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_
+  private static boolean musicEffectDefinition__4(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "musicEffectDefinition__4")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = musicEffectDefinition__4_0(b, l + 1);
+    if (!r) r = sep_(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // CURLY_L musicEffectDefinitionDetails_ CURLY_R
+  private static boolean musicEffectDefinition__4_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "musicEffectDefinition__4_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, CURLY_L);
+    r = r && musicEffectDefinitionDetails_(b, l + 1);
+    r = r && consumeToken(b, CURLY_R);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -918,13 +919,13 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // !<<eof>> (root_item*)
+  // !<<eof>> root_content
   static boolean root(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "root")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = root_0(b, l + 1);
-    r = r && root_1(b, l + 1);
+    r = r && root_content(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -939,14 +940,17 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // root_item*
-  private static boolean root_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_1")) return false;
+  /* ********************************************************** */
+  // root_item_*
+  public static boolean root_content(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "root_content")) return false;
+    Marker m = enter_section_(b, l, _NONE_, ROOT_CONTENT, "<root content>");
     while (true) {
       int c = current_position_(b);
-      if (!root_item(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "root_1", c)) break;
+      if (!root_item_(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "root_content", c)) break;
     }
+    exit_section_(b, l, m, true, false, null);
     return true;
   }
 
@@ -958,13 +962,13 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   //     soundscapeDefinition |
   //     musicDefinition |
   //     effectDefinition
-  public static boolean root_item(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_item")) return false;
+  static boolean root_item_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "root_item_")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, ROOT_ITEM, "<root item>");
+    Marker m = enter_section_(b, l, _NONE_);
     r = sep_(b, l + 1);
-    if (!r) r = root_item_1(b, l + 1);
-    if (!r) r = root_item_2(b, l + 1);
+    if (!r) r = root_item__1(b, l + 1);
+    if (!r) r = root_item__2(b, l + 1);
     if (!r) r = includableTrackDefinition(b, l + 1);
     if (!r) r = soundscapeDefinition(b, l + 1);
     if (!r) r = musicDefinition(b, l + 1);
@@ -974,8 +978,8 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   // includeDefinition sep_
-  private static boolean root_item_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_item_1")) return false;
+  private static boolean root_item__1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "root_item__1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = includeDefinition(b, l + 1);
@@ -985,8 +989,8 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   // loadDefinition sep_
-  private static boolean root_item_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root_item_2")) return false;
+  private static boolean root_item__2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "root_item__2")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = loadDefinition(b, l + 1);

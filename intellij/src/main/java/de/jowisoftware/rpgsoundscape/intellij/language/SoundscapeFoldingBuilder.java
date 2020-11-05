@@ -40,10 +40,8 @@ public class SoundscapeFoldingBuilder extends FoldingBuilderEx implements DumbAw
                             || e instanceof SRandomlyStatement
                             || e instanceof SParallellyStatement) {
                         return marker(e);
-                    } else if (e instanceof SMusicDefinition
-                            || e instanceof SEffectDefinition) {
-                        SMusicEffectDefinition d = PsiTreeUtil.getChildOfType(e, SMusicEffectDefinition.class);
-                        if (d != null && !d.getMetadataStatementList().isEmpty()) {
+                    } else if (e instanceof SMusicEffectDefinition) {
+                        if (!((SMusicEffectDefinition) e).getMetadataStatementList().isEmpty()) {
                             return marker(e);
                         }
                     }
@@ -77,9 +75,9 @@ public class SoundscapeFoldingBuilder extends FoldingBuilderEx implements DumbAw
         } else if (psi instanceof SIncludableTrackDefinition) {
             return "Includable track: " + name(psi);
         } else if (psi instanceof SMusicDefinition) {
-            return "Music: " + name(PsiTreeUtil.getChildOfType(psi, SMusicEffectDefinition.class));
+            return "Music: " + name(psi);
         } else if (psi instanceof SEffectDefinition) {
-            return "Effect: " + name(PsiTreeUtil.getChildOfType(psi, SMusicEffectDefinition.class));
+            return "Effect: " + name(psi);
         } else if (psi instanceof SBlock) {
             return "(block)";
         } else if (psi instanceof SRandomlyStatement) {
