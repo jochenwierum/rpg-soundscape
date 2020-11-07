@@ -9,11 +9,10 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
-import com.intellij.psi.PsiReference;
 
-public class SSampleIdImpl extends SoundscapeNamedElementImpl implements SSampleId {
+public class SSampleIdImpl extends SIdImpl implements SSampleId {
 
-  public SSampleIdImpl(ASTNode node) {
+  public SSampleIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -24,11 +23,6 @@ public class SSampleIdImpl extends SoundscapeNamedElementImpl implements SSample
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SVisitor) accept((SVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  public PsiReference getReference() {
-    return PsiImplUtil.getReference(this);
   }
 
   @Override

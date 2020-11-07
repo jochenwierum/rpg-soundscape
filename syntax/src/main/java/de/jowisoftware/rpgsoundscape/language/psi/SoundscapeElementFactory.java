@@ -45,4 +45,8 @@ public class SoundscapeElementFactory {
         PsiElement file = createFile(project, String.format(STATEMENT, "PAUSE TRACK " + newName));
         return findChildOfType(findChildOfType(file, SPauseStatement.class), STrackRef.class);
     }
+
+    public static SFilename createFilename(Project project, String content) {
+        return createAndFind(SFilename.class, project, "include \"" + content + "\";");
+    }
 }

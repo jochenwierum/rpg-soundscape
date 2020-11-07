@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeIcons;
 import de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil;
-import de.jowisoftware.rpgsoundscape.language.psi.STrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.STrackRef;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,8 +35,6 @@ public class SoundscapeTrackReference extends AbstractReference<STrackRef> {
 
     @Override
     public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
-        return myElement instanceof STrackId
-                ? PsiImplUtil.setName(((STrackId) myElement), newElementName)
-                : PsiImplUtil.setName(myElement, newElementName);
+        return PsiImplUtil.setName((STrackRef) myElement, newElementName);
     }
 }

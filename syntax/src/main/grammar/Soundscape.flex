@@ -37,9 +37,7 @@ HEX={DIGIT}+ | [aAbBcCdDeEfF]
 ESC="\\" ( [^] | "u" {HEX}{HEX}{HEX}{HEX})
 CHAR=[^\r\n\'\"\\]
 
-IntegerNumber={DIGIT}+ | "0x" {HEX}+
-//NUMBER_F={DIGIT}* "." {DIGIT}+
-
+IntegerNumber={DIGIT}+
 Percentage="-"? {DIGIT}+ "%"
 Duration={DIGIT}+ ("ms" | "s" | "m")
 

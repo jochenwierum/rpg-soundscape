@@ -28,8 +28,8 @@ public class SIncludeDefinitionImpl extends ASTWrapperPsiElement implements SInc
 
   @Override
   @Nullable
-  public SString getString() {
-    return findChildByClass(SString.class);
+  public SFilename getFilename() {
+    return findChildByClass(SFilename.class);
   }
 
 }

@@ -23,7 +23,7 @@ public final class SoundscapeReader {
     public static Set<String> readIncludes(SoundscapeFile psiFile) {
         Set<String> result = new HashSet<>();
         collect(List.of(psiFile), SRootContent::getIncludeDefinitionList)
-                .forEach(item -> result.add(item.content().getString().parsed()));
+                .forEach(item -> result.add(item.content().getFilename().parsed()));
         return result;
     }
 

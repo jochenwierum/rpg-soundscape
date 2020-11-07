@@ -89,20 +89,22 @@ public class SampleRepository implements DisposableBean {
     public synchronized void updateSamples(Set<Sample> samples) {
         sampleCache.resetSeen();
         resolvers.forEach(SampleResolver::abortAll);
-        Map<URI, ErrorPosition> uris = samples.stream()
+
+        Map<URI, ErrorPosition> allUris = samples.stream()
                 .map(s -> Map.entry(s.uri(), s.position()))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (first, second) -> first));
 
         Set<URI> removeSamples = new HashSet<>(sources.keySet());
-        removeSamples.removeAll(uris.keySet());
+        removeSamples.removeAll(allUris.keySet());
         sources.keySet().removeAll(removeSamples);
 
         this.completed = false;
-        uris.forEach(this::resolve);
+        allUris.forEach(this::resolve);
     }
 
     private void resolve(URI uri, ErrorPosition errorPosition) {
         if (sources.containsKey(uri)) {
+            sampleCache.markAsSeen(uri);
             return;
         }
 

@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeIcons;
 import de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil;
-import de.jowisoftware.rpgsoundscape.language.psi.SSampleId;
 import de.jowisoftware.rpgsoundscape.language.psi.SSampleRef;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,11 +33,8 @@ public class SoundscapeSampleReference extends AbstractReference<SSampleRef> {
                 .toArray(Object[]::new);
     }
 
-
     @Override
     public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
-        return myElement instanceof SSampleId
-                ? PsiImplUtil.setName(((SSampleId) myElement), newElementName)
-                : PsiImplUtil.setName(myElement, newElementName);
+        return PsiImplUtil.setName(myElement, newElementName);
     }
 }

@@ -1,7 +1,0 @@
-include "_tabletopaudio.soundscape";
-
-soundscape "simple example" {
-  looping track musik {
-    play TTA_Forest_Night;
-  }
-}

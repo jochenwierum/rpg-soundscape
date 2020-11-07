@@ -9,7 +9,7 @@ public record Range<T extends Comparable<T>>(
         Optional<T> max) {
 
     static <T extends Comparable<T>, S> Range<T> of(List<S> list, Function<S, T> transform) {
-        if (list.size() == 1) {
+        if (list.size() == 1 || (list.size() == 2 && list.get(0).equals(list.get(1)))) {
             return of(transform.apply(list.get(0)), null);
         } else if (list.size() == 2) {
             return of(transform.apply(list.get(0)),

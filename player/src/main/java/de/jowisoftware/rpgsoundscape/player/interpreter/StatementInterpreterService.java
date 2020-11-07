@@ -112,10 +112,9 @@ public class StatementInterpreterService {
     private ThreadStep sleep(Sleep statement) {
         return context -> {
             Range<Duration> range = statement.range();
-            long millis = range.max()
+            long millis = Math.max(25, range.max()
                     .map(max -> randomlyBetween(range.min().toMillis(), max.toMillis()))
-                    .orElse(range.min().toMillis());
-
+                    .orElse(range.min().toMillis()));
             trace(context, "Track: {}: sleeping {}ms", context.getTrackExecutor().getName(), millis);
             context.runInterruptible(timer.createTask(millis));
             return StackResult.finish();

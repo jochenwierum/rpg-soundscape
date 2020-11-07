@@ -20,7 +20,7 @@ public class PsiImplUtilHelper {
         return element;
     }
 
-    public static  <T extends PsiElement> PsiReference getReference(T element, BiFunction<T, TextRange, PsiReference> creator) {
+    public static <T extends PsiElement> PsiReference getReference(T element, BiFunction<T, TextRange, PsiReference> creator) {
         if (element.getText() == null) {
             return null;
         }

@@ -96,9 +96,13 @@ public class ReferenceUtil {
     private static Stream<SoundscapeFile> resolveIncludes(SoundscapeFile psiFile) {
         Set<String> seen = new HashSet<>();
         Stack<SoundscapeFile> agenda = new Stack<>();
-        agenda.add(psiFile);
 
-        //Collection<VirtualFile> availableFiles = FileTypeIndex.getFiles(SoundscapeFileTypeStub.INSTANCE, GlobalSearchScope.allScope(psiFile.getProject()));
+        if (psiFile.getVirtualFile() == null || psiFile.getVirtualFile().getCanonicalPath() == null) {
+            return Stream.empty();
+        }
+
+        seen.add(psiFile.getVirtualFile().getCanonicalPath());
+        agenda.add(psiFile);
 
         Iterator<SoundscapeFile> iterator = new Iterator<>() {
             @Override
@@ -109,13 +113,12 @@ public class ReferenceUtil {
             @Override
             public SoundscapeFile next() {
                 SoundscapeFile includedFile = agenda.pop();
-                seen.add(includedFile.getVirtualFile().getCanonicalPath());
 
                 Set<String> newFiles = searchIncludes(includedFile);
                 newFiles.stream()
                         .map(newFile -> includedFile.getVirtualFile().findFileByRelativePath("../" + newFile))
                         .filter(Objects::nonNull)
-                        .filter(vf -> !seen.contains(vf.getCanonicalPath()))
+                        .filter(vf -> seen.add(vf.getCanonicalPath()))
                         .map(virtualFile -> (SoundscapeFile) PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile))
                         .filter(Objects::nonNull)
                         .forEach(agenda::add);
@@ -130,8 +133,8 @@ public class ReferenceUtil {
     private static Set<String> searchIncludes(PsiFile psiFile) {
         return Optional.ofNullable(PsiTreeUtil.getChildOfType(psiFile, SRootContent.class)).stream()
                 .flatMap(e -> PsiTreeUtil.getChildrenOfTypeAsList(e, SIncludeDefinition.class).stream())
-                .filter(e -> e.getString() != null && e.getString().getTextLength() > 2)
-                .map(e -> e.getString().parsed())
+                .filter(e -> e.getFilename() != null && e.getFilename().getTextLength() > 2)
+                .map(e -> e.getFilename().parsed())
                 .collect(Collectors.toCollection(HashSet::new));
     }
 }

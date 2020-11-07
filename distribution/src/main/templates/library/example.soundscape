@@ -1,0 +1,21 @@
+include "_samples.soundscape";
+
+soundscape "great hall" {
+  looping track steps {
+    play foodsteps;
+    sleep between 1s and 15s;
+  }
+
+  looping track people {
+    play people_small;
+  }
+
+  looping track coins {
+    randomly {
+      weighted with 1 play coins_1;
+      weighted with 1 play coins_2;
+      weighted with 1 play coins_3;
+      weighted with 3 play coins_4;
+    }
+  }
+}

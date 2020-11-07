@@ -11,7 +11,7 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 import com.intellij.psi.PsiReference;
 
-public class SSampleRefImpl extends SIdImpl implements SSampleRef {
+public class SSampleRefImpl extends SReferenceImpl implements SSampleRef {
 
   public SSampleRefImpl(@NotNull ASTNode node) {
     super(node);

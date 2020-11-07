@@ -1,8 +1,9 @@
 rootProject.name = 'rpg-soundscape'
 
-include 'intellij'
 include 'syntax'
-include 'intellij-dependencies'
+include 'intellij-plugin'
+include 'standalone-dependencies'
 include 'standalone-parser'
 include 'web'
 include 'player'
+include 'distribution'

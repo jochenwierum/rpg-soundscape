@@ -1,0 +1,7 @@
+LOAD SAMPLE foodsteps FROM "freesound:///336598";
+LOAD SAMPLE people_small FROM "freesound:///523394";
+
+Load sample coins_1 from "freesound:///213980";
+Load sample coins_2 from "freesound:///140382";
+Load sample coins_3 from "freesound:///495641";
+Load sample coins_4 from "freesound:///64329";

@@ -37,8 +37,9 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(EFFECT_DEFINITION, MUSIC_DEFINITION),
-    create_token_set_(INCLUDABLE_TRACK_ID, INCLUDABLE_TRACK_REF, SAMPLE_ID, SAMPLE_REF,
-      TRACK_ID, TRACK_REF),
+    create_token_set_(FILENAME, STRING),
+    create_token_set_(INCLUDABLE_TRACK_REF, SAMPLE_REF, TRACK_REF),
+    create_token_set_(INCLUDABLE_TRACK_ID, SAMPLE_ID, TRACK_ID),
   };
 
   /* ********************************************************** */
@@ -242,6 +243,18 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // TEXT
+  public static boolean filename(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "filename")) return false;
+    if (!nextTokenIs(b, TEXT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TEXT);
+    exit_section_(b, m, FILENAME, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // INCLUDABLE TRACK includableTrackId block
   public static boolean includableTrackDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "includableTrackDefinition")) return false;
@@ -281,7 +294,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // INCLUDE string
+  // INCLUDE filename
   public static boolean includeDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "includeDefinition")) return false;
     if (!nextTokenIs(b, INCLUDE)) return false;
@@ -289,7 +302,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, INCLUDE_DEFINITION, null);
     r = consumeToken(b, INCLUDE);
     p = r; // pin = 1
-    r = r && string(b, l + 1);
+    r = r && filename(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }

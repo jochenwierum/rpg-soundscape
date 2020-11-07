@@ -39,6 +39,10 @@ public class SVisitor extends PsiElementVisitor {
     visitMusicEffectDefinition(o);
   }
 
+  public void visitFilename(@NotNull SFilename o) {
+    visitString(o);
+  }
+
   public void visitId(@NotNull SId o) {
     visitPsiElement(o);
   }
@@ -48,12 +52,12 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitIncludableTrackId(@NotNull SIncludableTrackId o) {
-    visitIncludableTrackRef(o);
+    visitId(o);
     // visitoundscapeNamedElement(o);
   }
 
   public void visitIncludableTrackRef(@NotNull SIncludableTrackRef o) {
-    visitId(o);
+    visitReference(o);
   }
 
   public void visitIncludeDefinition(@NotNull SIncludeDefinition o) {
@@ -152,6 +156,10 @@ public class SVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitReference(@NotNull SReference o) {
+    visitPsiElement(o);
+  }
+
   public void visitRepeatStatement(@NotNull SRepeatStatement o) {
     visitPsiElement(o);
   }
@@ -169,12 +177,12 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitSampleId(@NotNull SSampleId o) {
-    visitSampleRef(o);
+    visitId(o);
     // visitoundscapeNamedElement(o);
   }
 
   public void visitSampleRef(@NotNull SSampleRef o) {
-    visitId(o);
+    visitReference(o);
   }
 
   public void visitSleepStatement(@NotNull SSleepStatement o) {
@@ -206,12 +214,12 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitTrackId(@NotNull STrackId o) {
-    visitTrackRef(o);
+    visitId(o);
     // visitoundscapeNamedElement(o);
   }
 
   public void visitTrackRef(@NotNull STrackRef o) {
-    visitId(o);
+    visitReference(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

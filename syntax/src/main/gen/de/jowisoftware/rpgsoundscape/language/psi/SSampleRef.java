@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface SSampleRef extends SId {
+public interface SSampleRef extends SReference {
 
   PsiReference getReference();
 

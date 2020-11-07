@@ -13,6 +13,16 @@
     tokenTypeClass="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTokenType"
 
     psiImplUtilClass="de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil"
+
+    extends(".*Id")="id"
+    implements(".*Id")="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
+    methods(".*Id")=[getName getNameIdentifier setName]
+
+    extends(".*Ref")="reference"
+    methods(".*Ref")=[getReference]
+
+    extends("filename")="string"
+    methods("filename")=[getReference parsed]
 }
 
 root ::= !<<eof>> root_content
@@ -31,7 +41,7 @@ private root_item_recover_ ::= !(SOUNDSCAPE | INCLUDE | INCLUDABLE | LOAD | MUSI
 
 // INCLUDE
 
-includeDefinition ::= INCLUDE string {pin=1}
+includeDefinition ::= INCLUDE filename {pin=1}
 
 // LOAD SAMPLE
 
@@ -169,44 +179,24 @@ categorizedIn ::= IN string {pin=1}
 
 // Other
 
-private sep_ ::= SEPARATOR
-
 fake id ::= IDENTIFIER
+fake reference ::= IDENTIFIER
 
-sampleRef ::= IDENTIFIER {
-    extends=id
-    methods=[getReference]
-}
-sampleId ::= IDENTIFIER {
-    extends=sampleRef
-    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
-    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
-    methods=[getReference getName getNameIdentifier setName]
-}
+sampleRef ::= IDENTIFIER
+sampleId ::= IDENTIFIER
 
-trackRef ::= IDENTIFIER {
-    extends=id
-    methods=[getReference]
-}
-trackId ::= IDENTIFIER {
-    extends=trackRef
-    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
-    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
-    methods=[getReference getName getNameIdentifier setName]
-}
+trackRef ::= IDENTIFIER
+trackId ::= IDENTIFIER
 
-includableTrackRef ::= IDENTIFIER {
-    extends=id
-    methods=[getReference]
-}
-includableTrackId ::= IDENTIFIER {
-    extends=includableTrackRef
-    implements="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
-    mixin="de.jowisoftware.rpgsoundscape.language.psi.impl.SoundscapeNamedElementImpl"
-    methods=[getReference getName getNameIdentifier setName]
-}
+includableTrackRef ::= IDENTIFIER
+includableTrackId ::= IDENTIFIER
+
+filename ::= TEXT
+
 
 string ::= TEXT {methods=[parsed]}
 int ::= NUM_INTEGER {methods=[parsed]}
 percentage ::= PERCENT {methods=[parsed]}
 timespan ::= DURATION {methods=[parsed]}
+
+private sep_ ::= SEPARATOR

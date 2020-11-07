@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface SIncludeDefinition extends PsiElement {
 
   @Nullable
-  SString getString();
+  SFilename getFilename();
 
 }

@@ -13,7 +13,9 @@ public record Repeat(
         Statement body = Statement.from(statement.getStatement(), context);
         Range<Long> range = Range.of(statement.getIntList(), SInt::parsed);
 
-        if (range.min() == 1 && range.max().isEmpty()) {
+        if (range.min() == 0 && range.max().isEmpty()) {
+            return new NoOp();
+        } else if (range.min() == 1 && range.max().isEmpty()) {
             return body;
         } else {
             return new Repeat(body, range);
@@ -27,6 +29,6 @@ public record Repeat(
 
     @Override
     public boolean isValid() {
-        return statement.isValid();
+        return range.min() > 0 && statement.isValid();
     }
 }

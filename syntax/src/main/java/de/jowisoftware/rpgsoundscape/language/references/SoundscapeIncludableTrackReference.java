@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeIcons;
 import de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil;
-import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackRef;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +34,6 @@ public class SoundscapeIncludableTrackReference extends AbstractReference<SInclu
 
     @Override
     public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
-        return myElement instanceof SIncludableTrackId
-                ? PsiImplUtil.setName(((SIncludableTrackId) myElement), newElementName)
-                : PsiImplUtil.setName(myElement, newElementName);
+        return PsiImplUtil.setName(myElement, newElementName);
     }
 }

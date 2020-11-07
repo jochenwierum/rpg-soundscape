@@ -11,7 +11,7 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 import com.intellij.psi.PsiReference;
 
-public class SIncludableTrackRefImpl extends SIdImpl implements SIncludableTrackRef {
+public class SIncludableTrackRefImpl extends SReferenceImpl implements SIncludableTrackRef {
 
   public SIncludableTrackRefImpl(@NotNull ASTNode node) {
     super(node);

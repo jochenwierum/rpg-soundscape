@@ -4,11 +4,8 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 
-public interface SSampleId extends SSampleRef, SoundscapeNamedElement {
-
-  PsiReference getReference();
+public interface SSampleId extends SId, SoundscapeNamedElement {
 
   String getName();
 

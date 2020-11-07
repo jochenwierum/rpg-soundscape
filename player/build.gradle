@@ -2,7 +2,6 @@ plugins {
     id 'application'
     id 'org.springframework.boot' version '2.3.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
 }
 
 repositories {
@@ -28,28 +27,7 @@ test {
     useJUnitPlatform()
 }
 
-task copyCss(type: Copy) {
-    from("${project.projectDir}/src/main/markdown"){
-        include '*.css'
-    }
-    into "$buildDir/docs"
-}
-
-generateHtml {
-    dependsOn(copyCss)
-
-    inputDirectory = file("${project.projectDir}/src/main/markdown")
-    outputDirectory = file("${project.buildDir}/docs")
-    headerHtmlFile = new File("${project.projectDir}/src/main/markdown/header.template")
-    footerHtmlFile = new File("${project.projectDir}/src/main/markdown/footer.template")
-    inputEncoding = "UTF-8"
-    outputEncoding = "UTF-8"
-
-    recursiveInput = false
-    transformRelativeMarkdownLinks = true
-    pegdownExtensions = "ANCHORLINKS, AUTOLINKS, TABLES, TOC, FENCED_CODE_BLOCKS, DEFINITIONS, STRIKETHROUGH"
-}
-
+/*
 distributions {
     main {
         distributionBaseName = 'soundscape'
@@ -63,6 +41,7 @@ distributions {
         }
     }
 }
+*/
 
 springBoot {
     buildInfo()

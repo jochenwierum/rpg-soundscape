@@ -16,6 +16,7 @@ public interface SoundscapeTypes {
   IElementType DESCRIBED_STATEMENT = new SoundscapeElementType("DESCRIBED_STATEMENT");
   IElementType DO_NOTHING_STATEMENT = new SoundscapeElementType("DO_NOTHING_STATEMENT");
   IElementType EFFECT_DEFINITION = new SoundscapeElementType("EFFECT_DEFINITION");
+  IElementType FILENAME = new SoundscapeElementType("FILENAME");
   IElementType INCLUDABLE_TRACK_DEFINITION = new SoundscapeElementType("INCLUDABLE_TRACK_DEFINITION");
   IElementType INCLUDABLE_TRACK_ID = new SoundscapeElementType("INCLUDABLE_TRACK_ID");
   IElementType INCLUDABLE_TRACK_REF = new SoundscapeElementType("INCLUDABLE_TRACK_REF");
@@ -139,6 +140,9 @@ public interface SoundscapeTypes {
       }
       else if (type == EFFECT_DEFINITION) {
         return new SEffectDefinitionImpl(node);
+      }
+      else if (type == FILENAME) {
+        return new SFilenameImpl(node);
       }
       else if (type == INCLUDABLE_TRACK_DEFINITION) {
         return new SIncludableTrackDefinitionImpl(node);

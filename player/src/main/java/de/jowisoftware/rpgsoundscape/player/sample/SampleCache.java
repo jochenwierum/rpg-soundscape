@@ -251,6 +251,10 @@ public class SampleCache {
         unusedWarningId = 0;
     }
 
+    public void markAsSeen(URI uri) {
+        seen.add(hash(uri));
+    }
+
     private static record Filenames(
             Path cacheFile,
             Path attributionFile,

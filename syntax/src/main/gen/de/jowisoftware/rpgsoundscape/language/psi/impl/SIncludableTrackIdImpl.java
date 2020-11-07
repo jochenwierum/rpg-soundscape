@@ -9,11 +9,10 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
-import com.intellij.psi.PsiReference;
 
-public class SIncludableTrackIdImpl extends SoundscapeNamedElementImpl implements SIncludableTrackId {
+public class SIncludableTrackIdImpl extends SIdImpl implements SIncludableTrackId {
 
-  public SIncludableTrackIdImpl(ASTNode node) {
+  public SIncludableTrackIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -24,11 +23,6 @@ public class SIncludableTrackIdImpl extends SoundscapeNamedElementImpl implement
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SVisitor) accept((SVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  public PsiReference getReference() {
-    return PsiImplUtil.getReference(this);
   }
 
   @Override
