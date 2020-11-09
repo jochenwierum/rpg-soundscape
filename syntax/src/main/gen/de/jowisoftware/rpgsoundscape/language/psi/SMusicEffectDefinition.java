@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SMusicEffectDefinition extends PsiElement {
+public interface SMusicEffectDefinition extends SoundscapeStructureViewPsiElement {
 
   @NotNull
   List<SMetadataStatement> getMetadataStatementList();
@@ -18,5 +18,13 @@ public interface SMusicEffectDefinition extends PsiElement {
 
   @NotNull
   SString getString();
+
+  String getName();
+
+  //WARNING: getPresentation(...) is skipped
+  //matching getPresentation(SMusicEffectDefinition, ...)
+  //methods are not found in PsiImplUtil
+
+  boolean skipInStructureView();
 
 }

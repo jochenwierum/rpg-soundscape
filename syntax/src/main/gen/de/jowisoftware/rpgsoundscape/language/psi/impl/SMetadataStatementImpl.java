@@ -38,4 +38,9 @@ public class SMetadataStatementImpl extends ASTWrapperPsiElement implements SMet
     return findChildByClass(SDescribedStatement.class);
   }
 
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

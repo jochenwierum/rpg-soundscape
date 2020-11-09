@@ -7,7 +7,7 @@ import de.jowisoftware.rpgsoundscape.language.SoundscapeFileTypeStub;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeLanguage;
 import org.jetbrains.annotations.NotNull;
 
-public class SoundscapeFile extends PsiFileBase {
+public class SoundscapeFile extends PsiFileBase implements SoundscapeStructureViewPsiElement {
     private final SoundscapeFileTypeStub fileType;
 
     public SoundscapeFile(FileViewProvider viewProvider, SoundscapeFileTypeStub fileType) {

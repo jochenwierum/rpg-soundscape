@@ -24,7 +24,7 @@ dependencies {
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2020.2.1'
-    sandboxDirectory "${project.rootDir}/intellij/idea-sandbox/intellij"
+    sandboxDirectory "${project.rootDir}/intellij-plugin/idea-sandbox/intellij"
     plugins = [
             'PsiViewer:202-SNAPSHOT.3',
             //'com.jetbrains.hackathon.indices.viewer:1.8',

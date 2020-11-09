@@ -7,16 +7,13 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.patterns.PatternCondition;
 import com.intellij.patterns.PsiElementPattern.Capture;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiErrorElement;
 import com.intellij.util.ProcessingContext;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeIcons;
-import de.jowisoftware.rpgsoundscape.language.psi.SParallellyStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SRandomlyStatement;
-import de.jowisoftware.rpgsoundscape.language.psi.SRandomlyWeight;
-import de.jowisoftware.rpgsoundscape.language.psi.SRootContent;
-import de.jowisoftware.rpgsoundscape.language.psi.SSoundscapeDefinition;
-import de.jowisoftware.rpgsoundscape.language.psi.SStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,23 +25,9 @@ import static com.intellij.patterns.StandardPatterns.or;
 
 public class SoundscapeCompletionContributor extends CompletionContributor {
     public SoundscapeCompletionContributor() {
-        addCompletion(psiElement().withSuperParent(2,
-                or(
-                        psiElement(SStatement.class),
-                        psiElement(SParallellyStatement.class),
-                        psiElement(SRandomlyWeight.class)
-                )),
-                List.of(
-                        item("Play sample ", SoundscapeIcons.SAMPLE, true),
-                        item("Sleep ", null, true),
-                        item("Parallelly "),
-                        item("Pause ", null, true),
-                        item("Randomly "),
-                        item("Repeat ", SoundscapeIcons.TRACK, true),
-                        item("Resume ", SoundscapeIcons.TRACK, true)
-                ));
-
-        addCompletion(psiElement().withSuperParent(2, SRootContent.class),
+        addCompletion(psiElement()
+                        .withParent(customError("unexpected")
+                                .withParent(psiElement(SoundscapeTypes.ROOT_CONTENT))),
                 List.of(
                         item("Include \"", null, true),
                         item("Load sample ", SoundscapeIcons.NEW_SAMPLE, false),
@@ -54,7 +37,9 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                         item("Effect ", SoundscapeIcons.NEW_EFFECT, false)
                 ));
 
-        addCompletion(psiElement().withSuperParent(2, SSoundscapeDefinition.class),
+        addCompletion(psiElement(SoundscapeTypes.IDENTIFIER)
+                        .withParent(customError("<metadata statement>")
+                                .withParent(psiElement(SoundscapeTypes.SOUNDSCAPE_DEFINITION))),
                 List.of(
                         item("Looping ", SoundscapeIcons.NEW_TRACK, true),
                         item("Manual ", SoundscapeIcons.NEW_TRACK, true),
@@ -64,6 +49,23 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                         item("Categorized ", null, true)
                 ));
 
+        addCompletion(psiElement()
+                        .withParent(psiElement(PsiErrorElement.class)
+                                .withParent(or(
+                                        psiElement(SoundscapeTypes.STATEMENT),
+                                        psiElement(SoundscapeTypes.PARALLELLY_STATEMENT),
+                                        psiElement(SoundscapeTypes.RANDOMLY_WEIGHT),
+                                        psiElement(SoundscapeTypes.REPEAT_STATEMENT)
+                                ))),
+                List.of(
+                        item("Play sample ", SoundscapeIcons.SAMPLE, true),
+                        item("Sleep ", null, true),
+                        item("Parallelly "),
+                        item("Pause ", null, true),
+                        item("Randomly "),
+                        item("Repeat ", SoundscapeIcons.TRACK, true),
+                        item("Resume ", SoundscapeIcons.TRACK, true)
+                ));
 
         addCompletion(psiElement().withSuperParent(2, SRandomlyStatement.class),
                 List.of(
@@ -97,23 +99,82 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                         item("autostarting track ", SoundscapeIcons.NEW_TRACK, false)
                 ));
 
-        /*
-        addCompletion(psiElement().afterLeaf(
-                or(uri , psiElement(SoundscapeTypes.SAMPLE_REF))),
+        addCompletion(
+                psiElement().andOr(
+                        // after identifier
+                        psiElement().afterLeaf(
+                                psiElement(SoundscapeTypes.IDENTIFIER)
+                                        .withParent(psiElement(SoundscapeTypes.SAMPLE_REF))),
+
+                        // after "from STRING"
+                        psiElement()
+                                .afterLeaf(psiElement(SoundscapeTypes.TEXT)
+                                        .afterLeaf(psiElement(SoundscapeTypes.FROM))
+                                )),
                 List.of(item("with ")));
 
-        addCompletion(psiElement().afterLeaf(psiElement(SoundscapeTypes.SAMPLE_ID)),
-                List.of(item("from ")));
-        */
+        addCompletion(psiElement().afterLeaf(
+                psiElement(SoundscapeTypes.IDENTIFIER)
+                        .afterLeafSkipping(
+                                or(psiElement().whitespaceCommentEmptyOrError(), psiElement(SoundscapeTypes.SAMPLE)),
+                                psiElement(SoundscapeTypes.LOAD))),
+                List.of(item("from \"")));
 
-        // play / from uri -> with
-        // sleep / repeat -> between
-        // modification -> and
-        // load -> from
+        addCompletion(psiElement().afterLeaf(or(psiElement(SoundscapeTypes.SLEEP), psiElement(SoundscapeTypes.REPEAT))),
+                List.of(item("between ")));
 
-        // between X -> and
-        // categorized as X -> in
-        // categorized in X -> as
+        addCompletion(psiElement()
+                        .afterLeaf(or(
+                                psiElement(SoundscapeTypes.NUM_INTEGER)
+                                        .withTextLengthLongerThan(0)
+                                        .afterLeaf(psiElement(SoundscapeTypes.BETWEEN)),
+                                psiElement(SoundscapeTypes.DURATION)
+                                        .withTextLengthLongerThan(1)
+                                        .afterLeaf(psiElement(SoundscapeTypes.BETWEEN))
+                        )),
+                List.of(item(" and ")));
+
+        addCompletion(psiElement()
+                        .afterLeaf(or(
+                                psiElement(SoundscapeTypes.NUM_INTEGER)
+                                        .afterLeaf(psiElement(SoundscapeTypes.AND)
+                                                .afterLeaf(psiElement(SoundscapeTypes.NUM_INTEGER)
+                                                        .afterLeaf(psiElement(SoundscapeTypes.BETWEEN)
+                                                                .afterLeaf(psiElement(SoundscapeTypes.REPEAT))))),
+                                psiElement(SoundscapeTypes.NUM_INTEGER)
+                                        .afterLeaf(psiElement(SoundscapeTypes.REPEAT))
+                        )),
+                List.of(item(" times ")));
+
+        addCompletion(psiElement().afterLeaf(
+                or(
+                        psiElement(SoundscapeTypes.TEXT)
+                                .afterLeaf(psiElement(SoundscapeTypes.IN)
+                                        .afterLeaf(psiElement(SoundscapeTypes.CATEGORIZED))
+                                ),
+                        psiElement(SoundscapeTypes.CATEGORIZED)
+                )),
+                List.of(item("as \"")));
+
+        addCompletion(psiElement().afterLeaf(
+                or(
+                        psiElement(SoundscapeTypes.TEXT)
+                                .afterLeaf(psiElement(SoundscapeTypes.AS)
+                                        .afterLeaf(psiElement(SoundscapeTypes.CATEGORIZED))
+                                ),
+                        psiElement(SoundscapeTypes.CATEGORIZED)
+                )),
+                List.of(item("in \"")));
+    }
+
+    private Capture<PsiErrorElement> customError(final String text) {
+        return psiElement(PsiErrorElement.class)
+                .with(new PatternCondition<PsiErrorElement>("custom error: " + text) {
+                    @Override
+                    public boolean accepts(@NotNull PsiErrorElement psiErrorElement, ProcessingContext context) {
+                        return psiErrorElement.getErrorDescription().contains(text);
+                    }
+                });
     }
 
     @Override

@@ -4,8 +4,9 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.navigation.ItemPresentation;
 
-public interface STrackDefinition extends PsiElement {
+public interface STrackDefinition extends SoundscapeStructureViewPsiElement {
 
   @Nullable
   SLoopingTrackModifier getLoopingTrackModifier();
@@ -21,5 +22,9 @@ public interface STrackDefinition extends PsiElement {
 
   @Nullable
   STrackId getTrackId();
+
+  String getName();
+
+  ItemPresentation getPresentation();
 
 }

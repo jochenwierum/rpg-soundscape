@@ -5,12 +5,14 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface STrackContent extends PsiElement {
+public interface STrackContent extends SoundscapeStructureViewPsiElement {
 
   @Nullable
   SBlock getBlock();
 
   @Nullable
   SIncludableTrackRef getIncludableTrackRef();
+
+  boolean skipInStructureView();
 
 }

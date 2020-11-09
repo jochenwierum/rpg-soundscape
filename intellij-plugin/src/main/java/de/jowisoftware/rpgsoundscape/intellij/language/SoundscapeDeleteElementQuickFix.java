@@ -15,8 +15,8 @@ import de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DeleteElementQuickFix extends BaseElementAtCaretIntentionAction {
-    public DeleteElementQuickFix(PsiElement element) {
+public class SoundscapeDeleteElementQuickFix extends BaseElementAtCaretIntentionAction {
+    public SoundscapeDeleteElementQuickFix(PsiElement element) {
         setText("Delete unused " + getType(element) + " '" + element.getText() + "'");
     }
 

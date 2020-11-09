@@ -41,7 +41,7 @@ public class SoundscapeAnnotator implements Annotator {
             holder.newAnnotation(WEAK_WARNING, type + " is unused")
                     .range(element.getTextRange())
                     .highlightType(ProblemHighlightType.LIKE_UNUSED_SYMBOL)
-                    .withFix(new DeleteElementQuickFix(element))
+                    .withFix(new SoundscapeDeleteElementQuickFix(element))
                     .create();
         }
     }

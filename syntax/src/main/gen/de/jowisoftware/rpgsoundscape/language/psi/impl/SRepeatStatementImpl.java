@@ -38,4 +38,9 @@ public class SRepeatStatementImpl extends ASTWrapperPsiElement implements SRepea
     return findChildByClass(SStatement.class);
   }
 
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

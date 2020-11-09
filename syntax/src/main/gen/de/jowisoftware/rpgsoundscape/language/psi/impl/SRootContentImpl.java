@@ -56,4 +56,9 @@ public class SRootContentImpl extends ASTWrapperPsiElement implements SRootConte
     return PsiTreeUtil.getChildrenOfTypeAsList(this, SSoundscapeDefinition.class);
   }
 
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

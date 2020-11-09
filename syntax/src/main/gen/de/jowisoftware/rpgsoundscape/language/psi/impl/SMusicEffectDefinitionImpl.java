@@ -50,4 +50,14 @@ public class SMusicEffectDefinitionImpl extends ASTWrapperPsiElement implements 
     return findNotNullChildByClass(SString.class);
   }
 
+  @Override
+  public String getName() {
+    return PsiImplUtil.getName(this);
+  }
+
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SRootContent extends PsiElement {
+public interface SRootContent extends SoundscapeStructureViewPsiElement {
 
   @NotNull
   List<SIncludableTrackDefinition> getIncludableTrackDefinitionList();
@@ -21,5 +21,7 @@ public interface SRootContent extends PsiElement {
 
   @NotNull
   List<SSoundscapeDefinition> getSoundscapeDefinitionList();
+
+  boolean skipInStructureView();
 
 }

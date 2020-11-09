@@ -38,4 +38,9 @@ public class STrackContentImpl extends ASTWrapperPsiElement implements STrackCon
     return findChildByClass(SIncludableTrackRef.class);
   }
 
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

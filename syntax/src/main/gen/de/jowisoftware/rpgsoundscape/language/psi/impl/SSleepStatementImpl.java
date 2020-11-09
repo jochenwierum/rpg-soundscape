@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class SSleepStatementImpl extends ASTWrapperPsiElement implements SSleepStatement {
 
@@ -30,6 +31,16 @@ public class SSleepStatementImpl extends ASTWrapperPsiElement implements SSleepS
   @NotNull
   public List<STimespan> getTimespanList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, STimespan.class);
+  }
+
+  @Override
+  public String getName() {
+    return PsiImplUtil.getName(this);
+  }
+
+  @Override
+  public ItemPresentation getPresentation() {
+    return PsiImplUtil.getPresentation(this);
   }
 
 }

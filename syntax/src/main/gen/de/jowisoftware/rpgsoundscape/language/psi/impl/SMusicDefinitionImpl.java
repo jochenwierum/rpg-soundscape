@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class SMusicDefinitionImpl extends SMusicEffectDefinitionImpl implements SMusicDefinition {
 
@@ -35,6 +36,16 @@ public class SMusicDefinitionImpl extends SMusicEffectDefinitionImpl implements 
   @Nullable
   public SString getString() {
     return findChildByClass(SString.class);
+  }
+
+  @Override
+  public String getName() {
+    return PsiImplUtil.getName(this);
+  }
+
+  @Override
+  public ItemPresentation getPresentation() {
+    return PsiImplUtil.getPresentation(this);
   }
 
 }

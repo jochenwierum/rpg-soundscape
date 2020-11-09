@@ -4,8 +4,9 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.navigation.ItemPresentation;
 
-public interface SSoundscapeDefinition extends PsiElement {
+public interface SSoundscapeDefinition extends SoundscapeStructureViewPsiElement {
 
   @NotNull
   List<SIncludableTrackDefinition> getIncludableTrackDefinitionList();
@@ -21,5 +22,9 @@ public interface SSoundscapeDefinition extends PsiElement {
 
   @NotNull
   List<STrackDefinition> getTrackDefinitionList();
+
+  String getName();
+
+  ItemPresentation getPresentation();
 
 }

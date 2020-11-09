@@ -80,4 +80,9 @@ public class SStatementImpl extends ASTWrapperPsiElement implements SStatement {
     return findChildByClass(SSleepStatement.class);
   }
 
+  @Override
+  public boolean skipInStructureView() {
+    return PsiImplUtil.skipInStructureView(this);
+  }
+
 }

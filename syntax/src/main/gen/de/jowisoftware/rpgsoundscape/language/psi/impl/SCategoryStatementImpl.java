@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class SCategoryStatementImpl extends ASTWrapperPsiElement implements SCategoryStatement {
 
@@ -36,6 +37,16 @@ public class SCategoryStatementImpl extends ASTWrapperPsiElement implements SCat
   @Nullable
   public SCategorizedIn getCategorizedIn() {
     return findChildByClass(SCategorizedIn.class);
+  }
+
+  @Override
+  public String getName() {
+    return PsiImplUtil.getName(this);
+  }
+
+  @Override
+  public ItemPresentation getPresentation() {
+    return PsiImplUtil.getPresentation(this);
   }
 
 }

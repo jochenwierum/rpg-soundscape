@@ -10,6 +10,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class SDescribedStatementImpl extends ASTWrapperPsiElement implements SDescribedStatement {
 
@@ -30,6 +31,16 @@ public class SDescribedStatementImpl extends ASTWrapperPsiElement implements SDe
   @Nullable
   public SString getString() {
     return findChildByClass(SString.class);
+  }
+
+  @Override
+  public String getName() {
+    return PsiImplUtil.getName(this);
+  }
+
+  @Override
+  public ItemPresentation getPresentation() {
+    return PsiImplUtil.getPresentation(this);
   }
 
 }

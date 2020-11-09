@@ -4,13 +4,18 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.navigation.ItemPresentation;
 
-public interface SPlayStatement extends PsiElement {
+public interface SPlayStatement extends SoundscapeStructureViewPsiElement {
 
   @Nullable
   SPlayModifications getPlayModifications();
 
   @Nullable
   SSampleRef getSampleRef();
+
+  String getName();
+
+  ItemPresentation getPresentation();
 
 }

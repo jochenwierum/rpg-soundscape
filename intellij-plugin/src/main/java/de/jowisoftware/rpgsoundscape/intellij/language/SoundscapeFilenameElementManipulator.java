@@ -8,7 +8,7 @@ import de.jowisoftware.rpgsoundscape.language.psi.SoundscapeElementFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FilenameElementManipulator implements ElementManipulator<SFilename> {
+public class SoundscapeFilenameElementManipulator implements ElementManipulator<SFilename> {
 
     @Override
     public @Nullable SFilename handleContentChange(@NotNull SFilename element, @NotNull TextRange range, String newContent) throws IncorrectOperationException {

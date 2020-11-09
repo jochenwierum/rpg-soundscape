@@ -12,7 +12,7 @@ import de.jowisoftware.rpgsoundscape.language.psi.STrackId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CustomElementDescriptionProvider implements com.intellij.psi.ElementDescriptionProvider {
+public class SoundscapeElementDescriptionProvider implements com.intellij.psi.ElementDescriptionProvider {
     @Nullable
     @Override
     public String getElementDescription(@NotNull PsiElement element, @NotNull ElementDescriptionLocation location) {

@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SStatement extends PsiElement {
+public interface SStatement extends SoundscapeStructureViewPsiElement {
 
   @Nullable
   SBlock getBlock();
@@ -33,5 +33,7 @@ public interface SStatement extends PsiElement {
 
   @Nullable
   SSleepStatement getSleepStatement();
+
+  boolean skipInStructureView();
 
 }

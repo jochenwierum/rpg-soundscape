@@ -38,7 +38,7 @@
                 implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeRefactoringSupportProvider"/>
 
         <elementDescriptionProvider
-                implementation="de.jowisoftware.rpgsoundscape.intellij.language.CustomElementDescriptionProvider"/>
+                implementation="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeElementDescriptionProvider"/>
 
         <lang.findUsagesProvider
                 language="Soundscape"
@@ -62,7 +62,11 @@
 
         <lang.elementManipulator
                 forClass="de.jowisoftware.rpgsoundscape.language.psi.SFilename"
-                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.FilenameElementManipulator"/>
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeFilenameElementManipulator"/>
+
+        <lang.psiStructureViewFactory
+                language="Soundscape"
+                implementationClass="de.jowisoftware.rpgsoundscape.intellij.language.SoundscapeStructureViewFactory"/>
     </extensions>
 
     <actions>

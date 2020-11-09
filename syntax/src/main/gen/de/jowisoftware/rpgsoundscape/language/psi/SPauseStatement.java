@@ -4,8 +4,9 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.navigation.ItemPresentation;
 
-public interface SPauseStatement extends PsiElement {
+public interface SPauseStatement extends SoundscapeStructureViewPsiElement {
 
   @Nullable
   SPauseAllOtherTracks getPauseAllOtherTracks();
@@ -18,5 +19,9 @@ public interface SPauseStatement extends PsiElement {
 
   @Nullable
   STrackRef getTrackRef();
+
+  String getName();
+
+  ItemPresentation getPresentation();
 
 }

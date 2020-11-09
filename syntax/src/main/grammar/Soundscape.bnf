@@ -14,6 +14,7 @@
 
     psiImplUtilClass="de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil"
 
+
     extends(".*Id")="id"
     implements(".*Id")="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeNamedElement"
     methods(".*Id")=[getName getNameIdentifier setName]
@@ -23,12 +24,18 @@
 
     extends("filename")="string"
     methods("filename")=[getReference parsed]
+
+    implements(".*Definition|.*Statement|block|statement|randomlyWeight|rootContent|trackContent")="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeStructureViewPsiElement"
+    methods(".*Definition|.*Statement|block|randomlyWeight")=[getName getPresentation]
+    methods("statement|block|repeatStatement|musicEffectDefinition|metadataStatement|rootContent|trackContent")=[skipInStructureView]
+
+    methods("string|int|percentage|timespan")=[parsed]
 }
 
-root ::= !<<eof>> root_content
-root_content ::= (root_item_*)
+root ::= !<<eof>> rootContent
+rootContent ::= (rootItem_*)
 
-private root_item_ ::=
+private rootItem_ ::=
     sep_ |
     (includeDefinition sep_) |
     (loadDefinition sep_) |
@@ -60,7 +67,7 @@ effectDefinition ::= EFFECT musicEffectDefinition_ {pin=1 extends=musicEffectDef
 
 private musicEffectDefinition_ ::= string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
 private musicEffectDefinitionDetails_ ::=
-    ( metadataStatement sep_ )+
+    (metadataStatement sep_ )+
     {recoverWhile=musicEffectDefinitionDetails_recover_}
 private musicEffectDefinitionDetails_recover_ ::= !(CURLY_R | DESCRIBED | CATEGORIZED)
 
@@ -183,7 +190,7 @@ fake id ::= IDENTIFIER
 fake reference ::= IDENTIFIER
 
 sampleRef ::= IDENTIFIER
-sampleId ::= IDENTIFIER
+ sampleId ::= IDENTIFIER
 
 trackRef ::= IDENTIFIER
 trackId ::= IDENTIFIER
@@ -194,9 +201,9 @@ includableTrackId ::= IDENTIFIER
 filename ::= TEXT
 
 
-string ::= TEXT {methods=[parsed]}
-int ::= NUM_INTEGER {methods=[parsed]}
-percentage ::= PERCENT {methods=[parsed]}
-timespan ::= DURATION {methods=[parsed]}
+string ::= TEXT
+int ::= NUM_INTEGER
+percentage ::= PERCENT
+timespan ::= DURATION
 
 private sep_ ::= SEPARATOR
