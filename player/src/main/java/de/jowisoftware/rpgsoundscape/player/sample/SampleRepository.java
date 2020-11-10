@@ -1,6 +1,7 @@
 package de.jowisoftware.rpgsoundscape.player.sample;
 
 import de.jowisoftware.rpgsoundscape.exceptions.ErrorPosition;
+import de.jowisoftware.rpgsoundscape.model.Modification.NoConversionLoadModification;
 import de.jowisoftware.rpgsoundscape.model.Play;
 import de.jowisoftware.rpgsoundscape.model.Sample;
 import de.jowisoftware.rpgsoundscape.player.audio.AudioConverter;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +58,7 @@ public class SampleRepository implements DisposableBean {
 
     private final Map<URI, UriLookupResult> sources = new ConcurrentHashMap<>();
     private volatile boolean completed;
+    private volatile boolean importing;
 
     public SampleRepository(
             StatusReporter statusReporter,
@@ -90,19 +93,33 @@ public class SampleRepository implements DisposableBean {
         sampleCache.resetSeen();
         resolvers.forEach(SampleResolver::abortAll);
 
-        Map<URI, ErrorPosition> allUris = samples.stream()
-                .map(s -> Map.entry(s.uri(), s.position()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (first, second) -> first));
+        record Tuple(
+                ErrorPosition errorPosition,
+                boolean allowCaching) {
+            Tuple(Sample s) {
+                this(s.position(), s.getModification(NoConversionLoadModification.class).isEmpty());
+            }
+        }
+
+        Map<URI, Tuple> allUris = samples.stream()
+                .map(s -> Map.entry(s.uri(), new Tuple(s)))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (first, second) ->
+                        new Tuple(first.errorPosition, first.allowCaching || second.allowCaching)));
 
         Set<URI> removeSamples = new HashSet<>(sources.keySet());
         removeSamples.removeAll(allUris.keySet());
         sources.keySet().removeAll(removeSamples);
 
         this.completed = false;
-        allUris.forEach(this::resolve);
+        this.importing = true;
+
+        allUris.forEach((uri, tuple) -> this.resolve(uri, tuple.errorPosition(), tuple.allowCaching()));
+
+        this.importing = false;
+        maybeReportUnused();
     }
 
-    private void resolve(URI uri, ErrorPosition errorPosition) {
+    private void resolve(URI uri, ErrorPosition errorPosition, boolean allowCaching) {
         if (sources.containsKey(uri)) {
             sampleCache.markAsSeen(uri);
             return;
@@ -112,7 +129,7 @@ public class SampleRepository implements DisposableBean {
 
         LOG.info("Resolving audio file '{}'...", uri);
 
-        ResolverCallback resolverCallback = new Callback(uri, errorPosition);
+        ResolverCallback resolverCallback = new Callback(uri, errorPosition, allowCaching);
         try {
             resolvers.stream()
                     .filter(r -> r.supportsScheme(uri.getScheme()))
@@ -155,24 +172,32 @@ public class SampleRepository implements DisposableBean {
     private void updateStatus(URI uri, Function<UriLookupResult, UriLookupResult> update) {
         sources.compute(uri, (k, v) -> v == null ? null : update.apply(v));
 
-        if (!completed) {
-            boolean allResolved = sources.values().stream().allMatch(r -> r.sampleStatus() != SampleStatus.RESOLVING);
+        maybeReportUnused();
+    }
 
-            if (allResolved) {
-                LOG.info("All files are resolved now.");
-                completed = true;
-                sampleCache.reportUnused();
-            }
+    private void maybeReportUnused() {
+        if (completed || importing) {
+            return;
+        }
+
+        boolean allResolved = sources.values().stream().allMatch(r -> r.sampleStatus() != SampleStatus.RESOLVING);
+
+        if (allResolved) {
+            LOG.info("All files are resolved now.");
+            completed = true;
+            sampleCache.reportUnused();
         }
     }
 
     private class Callback implements SampleResolver.ResolverCallback {
         private final URI uri;
         private final ErrorPosition errorPosition;
+        private final boolean allowCaching;
 
-        public Callback(URI uri, ErrorPosition errorPosition) {
+        public Callback(URI uri, ErrorPosition errorPosition, boolean allowCaching) {
             this.uri = uri;
             this.errorPosition = errorPosition;
+            this.allowCaching = allowCaching;
         }
 
         @Override
@@ -181,35 +206,41 @@ public class SampleRepository implements DisposableBean {
         }
 
         @Override
-        public void reject(Exception e) {
+        public long reject(Exception e) {
             updateStatus(uri, UriLookupResult::asError);
-            statusReporter.logProblem(Problem.create(new ResolvingException(
+            return statusReporter.logProblem(Problem.create(new ResolvingException(
                     "Unable to resolve sample - marking file as broken", e, errorPosition)));
         }
 
         @Override
-        public void resolve(ResolvedSample present) {
-            Path file = present.path();
-            String attribution = present.attribution().orElse(null);
+        public void resolve(ResolvedSample resolvedSample) {
+            Path file = resolvedSample.path();
+            String attribution = resolvedSample.attribution().orElse(null);
 
             LOG.debug("Resolved audio file '{}' as file '{}'", uri, file);
-
             try {
-                if (!audioConverter.requiresConversion(file)) {
-                    LOG.debug("Resolved audio file '{}' does not require conversion", uri);
-                    updateStatus(uri, v -> v.asResolved(file, false, attribution));
-                } else if (applicationSettings.getCache().isPreCacheConversion()) {
-                    planTask(() -> preCacheConversion(file, attribution));
-                } else {
-                    sampleCache.getConvertedEntry(file, uri).ifPresentOrElse(
-                            oldConverted -> updateStatus(uri, v ->
-                                    v.asResolved(oldConverted, true, attribution)),
-                            () -> updateStatus(uri,
-                                    v -> v.asResolved(file, false, attribution))
-                    );
-                }
+                cacheOrConvert(file, attribution);
             } catch (Exception e) {
                 reject(e);
+            }
+        }
+
+        private void cacheOrConvert(Path file, String attribution) throws IOException, UnsupportedAudioFileException {
+            if (!allowCaching) {
+                LOG.debug("Caching is disabled for audio file '{}'", uri);
+                updateStatus(uri, v -> v.asResolved(file, false, attribution));
+            } else if (!audioConverter.requiresConversion(file)) {
+                LOG.debug("Resolved audio file '{}' does not require conversion", uri);
+                updateStatus(uri, v -> v.asResolved(file, false, attribution));
+            } else if (applicationSettings.getCache().isPreCacheConversion()) {
+                planTask(() -> preCacheConversion(file, attribution));
+            } else {
+                sampleCache.getConvertedEntry(file, uri).ifPresentOrElse(
+                        oldConverted -> updateStatus(uri, v ->
+                                v.asResolved(oldConverted, true, attribution)),
+                        () -> updateStatus(uri,
+                                v -> v.asResolved(file, false, attribution))
+                );
             }
         }
 

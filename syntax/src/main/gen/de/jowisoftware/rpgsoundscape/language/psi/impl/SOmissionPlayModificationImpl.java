@@ -8,17 +8,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SPlayModificationOmissionImpl extends ASTWrapperPsiElement implements SPlayModificationOmission {
+public class SOmissionPlayModificationImpl extends SSampleModificationImpl implements SOmissionPlayModification {
 
-  public SPlayModificationOmissionImpl(@NotNull ASTNode node) {
+  public SOmissionPlayModificationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitPlayModificationOmission(this);
+    visitor.visitOmissionPlayModification(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

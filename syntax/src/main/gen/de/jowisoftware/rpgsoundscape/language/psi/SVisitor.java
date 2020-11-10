@@ -7,6 +7,14 @@ import com.intellij.psi.PsiElement;
 
 public class SVisitor extends PsiElementVisitor {
 
+  public void visitAmplificationPlayModification(@NotNull SAmplificationPlayModification o) {
+    visitSampleModification(o);
+  }
+
+  public void visitAttributionLoadModification(@NotNull SAttributionLoadModification o) {
+    visitSampleModification(o);
+  }
+
   public void visitAutostartingModifier(@NotNull SAutostartingModifier o) {
     visitPsiElement(o);
   }
@@ -68,6 +76,10 @@ public class SVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitLimitPlayModification(@NotNull SLimitPlayModification o) {
+    visitSampleModification(o);
+  }
+
   public void visitLoadDefinition(@NotNull SLoadDefinition o) {
     visitoundscapeStructureViewPsiElement(o);
   }
@@ -90,6 +102,14 @@ public class SVisitor extends PsiElementVisitor {
 
   public void visitMusicEffectDefinition(@NotNull SMusicEffectDefinition o) {
     visitoundscapeStructureViewPsiElement(o);
+  }
+
+  public void visitNoConversionLoadModification(@NotNull SNoConversionLoadModification o) {
+    visitSampleModification(o);
+  }
+
+  public void visitOmissionPlayModification(@NotNull SOmissionPlayModification o) {
+    visitSampleModification(o);
   }
 
   public void visitParallellyStatement(@NotNull SParallellyStatement o) {
@@ -117,30 +137,6 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitPercentage(@NotNull SPercentage o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModificationAmplification(@NotNull SPlayModificationAmplification o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModificationAttribution(@NotNull SPlayModificationAttribution o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModificationItem(@NotNull SPlayModificationItem o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModificationLimit(@NotNull SPlayModificationLimit o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModificationOmission(@NotNull SPlayModificationOmission o) {
-    visitPsiElement(o);
-  }
-
-  public void visitPlayModifications(@NotNull SPlayModifications o) {
     visitPsiElement(o);
   }
 
@@ -179,6 +175,14 @@ public class SVisitor extends PsiElementVisitor {
   public void visitSampleId(@NotNull SSampleId o) {
     visitId(o);
     // visitoundscapeNamedElement(o);
+  }
+
+  public void visitSampleModification(@NotNull SSampleModification o) {
+    visitPsiElement(o);
+  }
+
+  public void visitSampleModificationList(@NotNull SSampleModificationList o) {
+    visitPsiElement(o);
   }
 
   public void visitSampleRef(@NotNull SSampleRef o) {

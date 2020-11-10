@@ -11,14 +11,14 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SMusicEffectDefinitionImpl extends ASTWrapperPsiElement implements SMusicEffectDefinition {
+public class SSampleModificationListImpl extends ASTWrapperPsiElement implements SSampleModificationList {
 
-  public SMusicEffectDefinitionImpl(@NotNull ASTNode node) {
+  public SSampleModificationListImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitMusicEffectDefinition(this);
+    visitor.visitSampleModificationList(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,36 +28,8 @@ public class SMusicEffectDefinitionImpl extends ASTWrapperPsiElement implements 
 
   @Override
   @NotNull
-  public List<SMetadataStatement> getMetadataStatementList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SMetadataStatement.class);
-  }
-
-  @Override
-  @NotNull
   public List<SSampleModification> getSampleModificationList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, SSampleModification.class);
-  }
-
-  @Override
-  @NotNull
-  public SSampleRef getSampleRef() {
-    return findNotNullChildByClass(SSampleRef.class);
-  }
-
-  @Override
-  @NotNull
-  public SString getString() {
-    return findNotNullChildByClass(SString.class);
-  }
-
-  @Override
-  public String getName() {
-    return PsiImplUtil.getName(this);
-  }
-
-  @Override
-  public boolean skipInStructureView() {
-    return PsiImplUtil.skipInStructureView(this);
   }
 
 }

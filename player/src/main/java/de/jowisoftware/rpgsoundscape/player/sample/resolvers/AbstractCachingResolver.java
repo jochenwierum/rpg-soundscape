@@ -16,7 +16,7 @@ public abstract class AbstractCachingResolver implements SampleResolver {
     }
 
     @Override
-    public void resolve(URI uri, ResolverCallback resolverCallback) {
+    public final void resolve(URI uri, ResolverCallback resolverCallback) {
         Optional<ResolvedSample> cached = sampleCache.tryResolve(uri);
         cached.ifPresentOrElse(
                 resolverCallback::resolve,

@@ -111,7 +111,9 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                                 .afterLeaf(psiElement(SoundscapeTypes.TEXT)
                                         .afterLeaf(psiElement(SoundscapeTypes.FROM))
                                 )),
-                List.of(item("with ")));
+
+                // TODO: after comma, after and (but inside PLAY/LOAD/MUSIC/EFFECT!)
+                List.of(item("with "), item("without ")));
 
         addCompletion(psiElement().afterLeaf(
                 psiElement(SoundscapeTypes.IDENTIFIER)

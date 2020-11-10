@@ -20,7 +20,7 @@ public record Effect(
         }
 
         Metadata metadata = Metadata.from(context, definition.getMetadataStatementList());
-        Play play = new Play(sample, Modification.from(definition.getPlayModifications(), false), new ErrorPosition(definition));
+        Play play = new Play(sample, Modification.from(definition.getSampleModificationList()), new ErrorPosition(definition));
         return new Effect(name, play, metadata);
     }
 }

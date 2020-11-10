@@ -5,9 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SPlayModifications extends PsiElement {
+public interface SSampleModificationList extends PsiElement {
 
   @NotNull
-  List<SPlayModificationItem> getPlayModificationItemList();
+  List<SSampleModification> getSampleModificationList();
 
 }

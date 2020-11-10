@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SPlayModificationAmplification extends PsiElement {
+public interface SAmplificationPlayModification extends SSampleModification {
 
   @Nullable
   SPercentage getPercentage();

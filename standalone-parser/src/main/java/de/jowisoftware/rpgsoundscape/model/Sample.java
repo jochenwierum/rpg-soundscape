@@ -27,15 +27,14 @@ public record Sample(
             throw new SyntaxException(sampleDefinition, "Invalid URI: '" + uriString + "'");
         }
 
-        List<Modification> modifications = Modification.from(sampleDefinition.getPlayModifications(), true);
+        List<Modification> modifications = Modification.from(sampleDefinition.getSampleModificationList());
         return new Sample(sampleName, uri, modifications, new ErrorPosition(sampleDefinition));
     }
 
-    public Optional<String> getAttribution() {
+    public <T extends Modification> Optional<T> getModification(Class<T> modificationClass) {
         return modifications.stream()
-                .filter(AttributionModification.class::isInstance)
-                .findAny()
-                .map(AttributionModification.class::cast)
-                .map(AttributionModification::attribution);
+                .filter(modificationClass::isInstance)
+                .map(modificationClass::cast)
+                .findAny();
     }
 }

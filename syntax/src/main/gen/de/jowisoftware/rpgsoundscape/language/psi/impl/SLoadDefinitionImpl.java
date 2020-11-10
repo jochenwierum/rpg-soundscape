@@ -29,14 +29,14 @@ public class SLoadDefinitionImpl extends ASTWrapperPsiElement implements SLoadDe
 
   @Override
   @Nullable
-  public SPlayModifications getPlayModifications() {
-    return findChildByClass(SPlayModifications.class);
+  public SSampleId getSampleId() {
+    return findChildByClass(SSampleId.class);
   }
 
   @Override
-  @Nullable
-  public SSampleId getSampleId() {
-    return findChildByClass(SSampleId.class);
+  @NotNull
+  public List<SSampleModification> getSampleModificationList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SSampleModification.class);
   }
 
   @Override

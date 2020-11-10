@@ -8,17 +8,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SPlayModificationAmplificationImpl extends ASTWrapperPsiElement implements SPlayModificationAmplification {
+public class SAttributionLoadModificationImpl extends SSampleModificationImpl implements SAttributionLoadModification {
 
-  public SPlayModificationAmplificationImpl(@NotNull ASTNode node) {
+  public SAttributionLoadModificationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitPlayModificationAmplification(this);
+    visitor.visitAttributionLoadModification(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,8 +27,8 @@ public class SPlayModificationAmplificationImpl extends ASTWrapperPsiElement imp
 
   @Override
   @Nullable
-  public SPercentage getPercentage() {
-    return findChildByClass(SPercentage.class);
+  public SString getString() {
+    return findChildByClass(SString.class);
   }
 
 }

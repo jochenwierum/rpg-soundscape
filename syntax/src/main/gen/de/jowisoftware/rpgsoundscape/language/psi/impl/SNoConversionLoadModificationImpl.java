@@ -8,28 +8,21 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SPlayModificationLimitImpl extends ASTWrapperPsiElement implements SPlayModificationLimit {
+public class SNoConversionLoadModificationImpl extends SSampleModificationImpl implements SNoConversionLoadModification {
 
-  public SPlayModificationLimitImpl(@NotNull ASTNode node) {
+  public SNoConversionLoadModificationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitPlayModificationLimit(this);
+    visitor.visitNoConversionLoadModification(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SVisitor) accept((SVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public STimespan getTimespan() {
-    return findChildByClass(STimespan.class);
   }
 
 }

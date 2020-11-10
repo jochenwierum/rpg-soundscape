@@ -61,4 +61,8 @@ public abstract class AbstractAssetLibrary<M extends MetadataAware> {
     }
 
     public abstract Set<Sample> add(String name, M content);
+
+    public void reset() {
+        content.clear();
+    }
 }

@@ -11,25 +11,19 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SPlayModificationsImpl extends ASTWrapperPsiElement implements SPlayModifications {
+public class SSampleModificationImpl extends ASTWrapperPsiElement implements SSampleModification {
 
-  public SPlayModificationsImpl(@NotNull ASTNode node) {
+  public SSampleModificationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitPlayModifications(this);
+    visitor.visitSampleModification(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SVisitor) accept((SVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<SPlayModificationItem> getPlayModificationItemList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SPlayModificationItem.class);
   }
 
 }

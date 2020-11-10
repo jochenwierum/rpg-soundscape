@@ -2,13 +2,13 @@ package de.jowisoftware.rpgsoundscape.player.library;
 
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
 import de.jowisoftware.rpgsoundscape.exceptions.SyntaxException;
+import de.jowisoftware.rpgsoundscape.language.parser.ParserFacade;
 import de.jowisoftware.rpgsoundscape.model.Sample;
 import de.jowisoftware.rpgsoundscape.model.SoundscapeFileContent;
-import de.jowisoftware.rpgsoundscape.language.parser.ParserFacade;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
-import de.jowisoftware.rpgsoundscape.player.status.event.Problem;
 import de.jowisoftware.rpgsoundscape.player.status.StatusReporter;
+import de.jowisoftware.rpgsoundscape.player.status.event.Problem;
 import de.jowisoftware.rpgsoundscape.player.status.event.UpdateLibraryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +71,10 @@ public class LibraryService {
     }
 
     private Set<Sample> importLibrary() throws IOException {
+        soundscapeRepository.reset();
+        musicRepository.reset();
+        effectLibrary.reset();
+
         return Files.list(applicationSettings.getLibraryPath().toAbsolutePath())
                 .filter(Files::isRegularFile)
                 .filter(this::shouldLoad)

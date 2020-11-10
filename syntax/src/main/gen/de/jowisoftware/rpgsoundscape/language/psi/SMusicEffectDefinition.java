@@ -10,8 +10,8 @@ public interface SMusicEffectDefinition extends SoundscapeStructureViewPsiElemen
   @NotNull
   List<SMetadataStatement> getMetadataStatementList();
 
-  @Nullable
-  SPlayModifications getPlayModifications();
+  @NotNull
+  List<SSampleModification> getSampleModificationList();
 
   @NotNull
   SSampleRef getSampleRef();

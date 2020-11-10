@@ -9,10 +9,10 @@ import com.intellij.navigation.ItemPresentation;
 public interface SLoadDefinition extends SoundscapeStructureViewPsiElement {
 
   @Nullable
-  SPlayModifications getPlayModifications();
-
-  @Nullable
   SSampleId getSampleId();
+
+  @NotNull
+  List<SSampleModification> getSampleModificationList();
 
   @Nullable
   SString getString();

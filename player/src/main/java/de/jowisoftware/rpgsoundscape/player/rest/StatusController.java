@@ -8,16 +8,17 @@ import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.UpdateLibraryEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
+@Controller
 @RequestMapping(path = "/api")
 public class StatusController {
     private static final Logger LOG = LoggerFactory.getLogger(StatusController.class);
@@ -50,6 +51,7 @@ public class StatusController {
         return emitter;
     }
 
+    @ResponseBody
     @GetMapping("/status/problems")
     public List<ProblemDto> getProblems() {
         return applicationStatusCollector.getProblems()
@@ -58,7 +60,7 @@ public class StatusController {
                 .collect(Collectors.toList());
     }
 
-    private static class SseForwardingListener implements ApplicationStatusListener {
+    private class SseForwardingListener implements ApplicationStatusListener {
         private final SseEmitter emitter;
 
         public SseForwardingListener(SseEmitter emitter) {
@@ -95,7 +97,7 @@ public class StatusController {
                 emitter.send(SseEmitter.event().name(name).data(data));
             } catch (Exception e) {
                 LOG.info("Status client disconnected or broken");
-                emitter.completeWithError(e);
+                applicationStatusCollector.deregisterListener(this);
             }
         }
     }

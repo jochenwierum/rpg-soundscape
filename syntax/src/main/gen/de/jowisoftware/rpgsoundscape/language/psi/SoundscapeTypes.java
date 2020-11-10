@@ -8,6 +8,8 @@ import de.jowisoftware.rpgsoundscape.language.psi.impl.*;
 
 public interface SoundscapeTypes {
 
+  IElementType AMPLIFICATION_PLAY_MODIFICATION = new SoundscapeElementType("AMPLIFICATION_PLAY_MODIFICATION");
+  IElementType ATTRIBUTION_LOAD_MODIFICATION = new SoundscapeElementType("ATTRIBUTION_LOAD_MODIFICATION");
   IElementType AUTOSTARTING_MODIFIER = new SoundscapeElementType("AUTOSTARTING_MODIFIER");
   IElementType BLOCK = new SoundscapeElementType("BLOCK");
   IElementType CATEGORIZED_AS = new SoundscapeElementType("CATEGORIZED_AS");
@@ -22,11 +24,14 @@ public interface SoundscapeTypes {
   IElementType INCLUDABLE_TRACK_REF = new SoundscapeElementType("INCLUDABLE_TRACK_REF");
   IElementType INCLUDE_DEFINITION = new SoundscapeElementType("INCLUDE_DEFINITION");
   IElementType INT = new SoundscapeElementType("INT");
+  IElementType LIMIT_PLAY_MODIFICATION = new SoundscapeElementType("LIMIT_PLAY_MODIFICATION");
   IElementType LOAD_DEFINITION = new SoundscapeElementType("LOAD_DEFINITION");
   IElementType LOOPING_TRACK_MODIFIER = new SoundscapeElementType("LOOPING_TRACK_MODIFIER");
   IElementType MANUAL_TRACK_MODIFIER = new SoundscapeElementType("MANUAL_TRACK_MODIFIER");
   IElementType METADATA_STATEMENT = new SoundscapeElementType("METADATA_STATEMENT");
   IElementType MUSIC_DEFINITION = new SoundscapeElementType("MUSIC_DEFINITION");
+  IElementType NO_CONVERSION_LOAD_MODIFICATION = new SoundscapeElementType("NO_CONVERSION_LOAD_MODIFICATION");
+  IElementType OMISSION_PLAY_MODIFICATION = new SoundscapeElementType("OMISSION_PLAY_MODIFICATION");
   IElementType PARALLELLY_STATEMENT = new SoundscapeElementType("PARALLELLY_STATEMENT");
   IElementType PAUSED_MODIFIER = new SoundscapeElementType("PAUSED_MODIFIER");
   IElementType PAUSE_ALL_OTHER_TRACKS = new SoundscapeElementType("PAUSE_ALL_OTHER_TRACKS");
@@ -34,12 +39,6 @@ public interface SoundscapeTypes {
   IElementType PAUSE_STATEMENT = new SoundscapeElementType("PAUSE_STATEMENT");
   IElementType PAUSE_THIS_TRACK = new SoundscapeElementType("PAUSE_THIS_TRACK");
   IElementType PERCENTAGE = new SoundscapeElementType("PERCENTAGE");
-  IElementType PLAY_MODIFICATIONS = new SoundscapeElementType("PLAY_MODIFICATIONS");
-  IElementType PLAY_MODIFICATION_AMPLIFICATION = new SoundscapeElementType("PLAY_MODIFICATION_AMPLIFICATION");
-  IElementType PLAY_MODIFICATION_ATTRIBUTION = new SoundscapeElementType("PLAY_MODIFICATION_ATTRIBUTION");
-  IElementType PLAY_MODIFICATION_ITEM = new SoundscapeElementType("PLAY_MODIFICATION_ITEM");
-  IElementType PLAY_MODIFICATION_LIMIT = new SoundscapeElementType("PLAY_MODIFICATION_LIMIT");
-  IElementType PLAY_MODIFICATION_OMISSION = new SoundscapeElementType("PLAY_MODIFICATION_OMISSION");
   IElementType PLAY_STATEMENT = new SoundscapeElementType("PLAY_STATEMENT");
   IElementType RANDOMLY_STATEMENT = new SoundscapeElementType("RANDOMLY_STATEMENT");
   IElementType RANDOMLY_WEIGHT = new SoundscapeElementType("RANDOMLY_WEIGHT");
@@ -67,7 +66,9 @@ public interface SoundscapeTypes {
   IElementType AUTOSTARTING = new SoundscapeTokenType("AUTOSTARTING");
   IElementType BETWEEN = new SoundscapeTokenType("BETWEEN");
   IElementType BY = new SoundscapeTokenType("BY");
+  IElementType CACHE = new SoundscapeTokenType("CACHE");
   IElementType CATEGORIZED = new SoundscapeTokenType("CATEGORIZED");
+  IElementType CONVERSION = new SoundscapeTokenType("CONVERSION");
   IElementType CURLY_L = new SoundscapeTokenType("CURLY_L");
   IElementType CURLY_R = new SoundscapeTokenType("CURLY_R");
   IElementType DESCRIBED = new SoundscapeTokenType("DESCRIBED");
@@ -113,11 +114,18 @@ public interface SoundscapeTypes {
   IElementType TRACKS = new SoundscapeTokenType("TRACKS");
   IElementType WEIGHTED = new SoundscapeTokenType("WEIGHTED");
   IElementType WITH = new SoundscapeTokenType("WITH");
+  IElementType WITHOUT = new SoundscapeTokenType("WITHOUT");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == AUTOSTARTING_MODIFIER) {
+      if (type == AMPLIFICATION_PLAY_MODIFICATION) {
+        return new SAmplificationPlayModificationImpl(node);
+      }
+      else if (type == ATTRIBUTION_LOAD_MODIFICATION) {
+        return new SAttributionLoadModificationImpl(node);
+      }
+      else if (type == AUTOSTARTING_MODIFIER) {
         return new SAutostartingModifierImpl(node);
       }
       else if (type == BLOCK) {
@@ -159,6 +167,9 @@ public interface SoundscapeTypes {
       else if (type == INT) {
         return new SIntImpl(node);
       }
+      else if (type == LIMIT_PLAY_MODIFICATION) {
+        return new SLimitPlayModificationImpl(node);
+      }
       else if (type == LOAD_DEFINITION) {
         return new SLoadDefinitionImpl(node);
       }
@@ -173,6 +184,12 @@ public interface SoundscapeTypes {
       }
       else if (type == MUSIC_DEFINITION) {
         return new SMusicDefinitionImpl(node);
+      }
+      else if (type == NO_CONVERSION_LOAD_MODIFICATION) {
+        return new SNoConversionLoadModificationImpl(node);
+      }
+      else if (type == OMISSION_PLAY_MODIFICATION) {
+        return new SOmissionPlayModificationImpl(node);
       }
       else if (type == PARALLELLY_STATEMENT) {
         return new SParallellyStatementImpl(node);
@@ -194,24 +211,6 @@ public interface SoundscapeTypes {
       }
       else if (type == PERCENTAGE) {
         return new SPercentageImpl(node);
-      }
-      else if (type == PLAY_MODIFICATIONS) {
-        return new SPlayModificationsImpl(node);
-      }
-      else if (type == PLAY_MODIFICATION_AMPLIFICATION) {
-        return new SPlayModificationAmplificationImpl(node);
-      }
-      else if (type == PLAY_MODIFICATION_ATTRIBUTION) {
-        return new SPlayModificationAttributionImpl(node);
-      }
-      else if (type == PLAY_MODIFICATION_ITEM) {
-        return new SPlayModificationItemImpl(node);
-      }
-      else if (type == PLAY_MODIFICATION_LIMIT) {
-        return new SPlayModificationLimitImpl(node);
-      }
-      else if (type == PLAY_MODIFICATION_OMISSION) {
-        return new SPlayModificationOmissionImpl(node);
       }
       else if (type == PLAY_STATEMENT) {
         return new SPlayStatementImpl(node);

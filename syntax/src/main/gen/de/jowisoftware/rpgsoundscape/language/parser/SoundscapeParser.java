@@ -40,7 +40,37 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     create_token_set_(FILENAME, STRING),
     create_token_set_(INCLUDABLE_TRACK_REF, SAMPLE_REF, TRACK_REF),
     create_token_set_(INCLUDABLE_TRACK_ID, SAMPLE_ID, TRACK_ID),
+    create_token_set_(AMPLIFICATION_PLAY_MODIFICATION, ATTRIBUTION_LOAD_MODIFICATION, LIMIT_PLAY_MODIFICATION, NO_CONVERSION_LOAD_MODIFICATION,
+      OMISSION_PLAY_MODIFICATION),
   };
+
+  /* ********************************************************** */
+  // WITH AMPLIFICATION OF percentage
+  public static boolean amplificationPlayModification(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "amplificationPlayModification")) return false;
+    if (!nextTokenIs(b, WITH)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, AMPLIFICATION_PLAY_MODIFICATION, null);
+    r = consumeTokens(b, 2, WITH, AMPLIFICATION, OF);
+    p = r; // pin = 2
+    r = r && percentage(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // WITH ATTRIBUTION string
+  public static boolean attributionLoadModification(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "attributionLoadModification")) return false;
+    if (!nextTokenIs(b, WITH)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, ATTRIBUTION_LOAD_MODIFICATION, null);
+    r = consumeTokens(b, 2, WITH, ATTRIBUTION);
+    p = r; // pin = 2
+    r = r && string(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
 
   /* ********************************************************** */
   // AUTOSTARTING
@@ -320,6 +350,20 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // WITH LIMIT TO timespan
+  public static boolean limitPlayModification(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "limitPlayModification")) return false;
+    if (!nextTokenIs(b, WITH)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, LIMIT_PLAY_MODIFICATION, null);
+    r = consumeTokens(b, 2, WITH, LIMIT, TO);
+    p = r; // pin = 2
+    r = r && timespan(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
   // LIST_DELIMITER | AND
   static boolean listDelimiter_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "listDelimiter_")) return false;
@@ -331,7 +375,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LOAD SAMPLE? sampleId FROM string playModifications?
+  // LOAD SAMPLE? sampleId FROM string loadModifications_?
   public static boolean loadDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "loadDefinition")) return false;
     if (!nextTokenIs(b, LOAD)) return false;
@@ -355,11 +399,60 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // playModifications?
+  // loadModifications_?
   private static boolean loadDefinition_5(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "loadDefinition_5")) return false;
-    playModifications(b, l + 1);
+    loadModifications_(b, l + 1);
     return true;
+  }
+
+  /* ********************************************************** */
+  // playModificationItem_ |
+  //     attributionLoadModification |
+  //     noConversionLoadModification
+  static boolean loadModificationItem_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "loadModificationItem_")) return false;
+    if (!nextTokenIs(b, "", WITH, WITHOUT)) return false;
+    boolean r;
+    r = playModificationItem_(b, l + 1);
+    if (!r) r = attributionLoadModification(b, l + 1);
+    if (!r) r = noConversionLoadModification(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // loadModificationItem_ (listDelimiter_ loadModificationItem_)*
+  static boolean loadModifications_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "loadModifications_")) return false;
+    if (!nextTokenIs(b, "", WITH, WITHOUT)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = loadModificationItem_(b, l + 1);
+    r = r && loadModifications__1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (listDelimiter_ loadModificationItem_)*
+  private static boolean loadModifications__1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "loadModifications__1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!loadModifications__1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "loadModifications__1", c)) break;
+    }
+    return true;
+  }
+
+  // listDelimiter_ loadModificationItem_
+  private static boolean loadModifications__1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "loadModifications__1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = listDelimiter_(b, l + 1);
+    r = r && loadModificationItem_(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
   }
 
   /* ********************************************************** */
@@ -480,7 +573,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+  // string FROM sampleRef playModifications_? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
   static boolean musicEffectDefinition_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "musicEffectDefinition_")) return false;
     if (!nextTokenIs(b, TEXT)) return false;
@@ -495,10 +588,10 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // playModifications?
+  // playModifications_?
   private static boolean musicEffectDefinition__3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "musicEffectDefinition__3")) return false;
-    playModifications(b, l + 1);
+    playModifications_(b, l + 1);
     return true;
   }
 
@@ -523,6 +616,33 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, CURLY_R);
     exit_section_(b, m, null, r);
     return r;
+  }
+
+  /* ********************************************************** */
+  // WITHOUT CONVERSION CACHE
+  public static boolean noConversionLoadModification(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "noConversionLoadModification")) return false;
+    if (!nextTokenIs(b, WITHOUT)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, NO_CONVERSION_LOAD_MODIFICATION, null);
+    r = consumeTokens(b, 2, WITHOUT, CONVERSION, CACHE);
+    p = r; // pin = 2
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // WITH OMISSION OF FIRST timespan
+  public static boolean omissionPlayModification(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "omissionPlayModification")) return false;
+    if (!nextTokenIs(b, WITH)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, OMISSION_PLAY_MODIFICATION, null);
+    r = consumeTokens(b, 2, WITH, OMISSION, OF, FIRST);
+    p = r; // pin = 2
+    r = r && timespan(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -645,138 +765,56 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // AMPLIFICATION OF percentage
-  public static boolean playModificationAmplification(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationAmplification")) return false;
-    if (!nextTokenIs(b, AMPLIFICATION)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATION_AMPLIFICATION, null);
-    r = consumeTokens(b, 1, AMPLIFICATION, OF);
-    p = r; // pin = 1
-    r = r && percentage(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  /* ********************************************************** */
-  // ATTRIBUTION string
-  public static boolean playModificationAttribution(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationAttribution")) return false;
-    if (!nextTokenIs(b, ATTRIBUTION)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATION_ATTRIBUTION, null);
-    r = consumeToken(b, ATTRIBUTION);
-    p = r; // pin = 1
-    r = r && string(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  /* ********************************************************** */
-  // playModificationAmplification |
-  //     playModificationOmission |
-  //     playModificationLimit |
-  //     playModificationAttribution
-  public static boolean playModificationItem(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationItem")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATION_ITEM, "<play modification item>");
-    r = playModificationAmplification(b, l + 1);
-    if (!r) r = playModificationOmission(b, l + 1);
-    if (!r) r = playModificationLimit(b, l + 1);
-    if (!r) r = playModificationAttribution(b, l + 1);
-    exit_section_(b, l, m, r, false, playModificationItem_recover__parser_);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // !(LIST_DELIMITER | AND | sep_)
-  static boolean playModificationItem_recover_(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationItem_recover_")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_);
-    r = !playModificationItem_recover__0(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // LIST_DELIMITER | AND | sep_
-  private static boolean playModificationItem_recover__0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationItem_recover__0")) return false;
-    boolean r;
-    r = consumeToken(b, LIST_DELIMITER);
-    if (!r) r = consumeToken(b, AND);
-    if (!r) r = sep_(b, l + 1);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // LIMIT TO timespan
-  public static boolean playModificationLimit(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationLimit")) return false;
-    if (!nextTokenIs(b, LIMIT)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATION_LIMIT, null);
-    r = consumeTokens(b, 1, LIMIT, TO);
-    p = r; // pin = 1
-    r = r && timespan(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  /* ********************************************************** */
-  // OMISSION OF FIRST timespan
-  public static boolean playModificationOmission(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModificationOmission")) return false;
-    if (!nextTokenIs(b, OMISSION)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATION_OMISSION, null);
-    r = consumeTokens(b, 1, OMISSION, OF, FIRST);
-    p = r; // pin = 1
-    r = r && timespan(b, l + 1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
-  }
-
-  /* ********************************************************** */
-  // WITH playModificationItem (listDelimiter_ playModificationItem)*
-  public static boolean playModifications(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModifications")) return false;
+  // amplificationPlayModification |
+  //     omissionPlayModification |
+  //     limitPlayModification
+  static boolean playModificationItem_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "playModificationItem_")) return false;
     if (!nextTokenIs(b, WITH)) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PLAY_MODIFICATIONS, null);
-    r = consumeToken(b, WITH);
-    p = r; // pin = 1
-    r = r && report_error_(b, playModificationItem(b, l + 1));
-    r = p && playModifications_2(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+    boolean r;
+    r = amplificationPlayModification(b, l + 1);
+    if (!r) r = omissionPlayModification(b, l + 1);
+    if (!r) r = limitPlayModification(b, l + 1);
+    return r;
   }
 
-  // (listDelimiter_ playModificationItem)*
-  private static boolean playModifications_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModifications_2")) return false;
+  /* ********************************************************** */
+  // playModificationItem_ (listDelimiter_ playModificationItem_)*
+  static boolean playModifications_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "playModifications_")) return false;
+    if (!nextTokenIs(b, WITH)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = playModificationItem_(b, l + 1);
+    r = r && playModifications__1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (listDelimiter_ playModificationItem_)*
+  private static boolean playModifications__1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "playModifications__1")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!playModifications_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "playModifications_2", c)) break;
+      if (!playModifications__1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "playModifications__1", c)) break;
     }
     return true;
   }
 
-  // listDelimiter_ playModificationItem
-  private static boolean playModifications_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "playModifications_2_0")) return false;
+  // listDelimiter_ playModificationItem_
+  private static boolean playModifications__1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "playModifications__1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = listDelimiter_(b, l + 1);
-    r = r && playModificationItem(b, l + 1);
+    r = r && playModificationItem_(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // PLAY SAMPLE? sampleRef playModifications?
+  // PLAY SAMPLE? sampleRef playModifications_?
   public static boolean playStatement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "playStatement")) return false;
     if (!nextTokenIs(b, PLAY)) return false;
@@ -798,10 +836,10 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // playModifications?
+  // playModifications_?
   private static boolean playStatement_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "playStatement_3")) return false;
-    playModifications(b, l + 1);
+    playModifications_(b, l + 1);
     return true;
   }
 
@@ -1482,11 +1520,6 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   static final Parser musicEffectDefinitionDetails_recover__parser_ = new Parser() {
     public boolean parse(PsiBuilder b, int l) {
       return musicEffectDefinitionDetails_recover_(b, l + 1);
-    }
-  };
-  static final Parser playModificationItem_recover__parser_ = new Parser() {
-    public boolean parse(PsiBuilder b, int l) {
-      return playModificationItem_recover_(b, l + 1);
     }
   };
   static final Parser randomly_recover__parser_ = new Parser() {

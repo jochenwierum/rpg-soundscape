@@ -25,6 +25,9 @@
     extends("filename")="string"
     methods("filename")=[getReference parsed]
 
+    extends(".*PlayModification|.*LoadModification")="sampleModification"
+    extends(".*Modifications")="sampleModificationList"
+
     implements(".*Definition|.*Statement|block|statement|randomlyWeight|rootContent|trackContent")="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeStructureViewPsiElement"
     methods(".*Definition|.*Statement|block|randomlyWeight")=[getName getPresentation]
     methods("statement|block|repeatStatement|musicEffectDefinition|metadataStatement|rootContent|trackContent")=[skipInStructureView]
@@ -52,24 +55,12 @@ includeDefinition ::= INCLUDE filename {pin=1}
 
 // LOAD SAMPLE
 
-loadDefinition ::= LOAD SAMPLE? sampleId FROM string playModifications? {pin=1}
+loadDefinition ::= LOAD SAMPLE? sampleId FROM string loadModifications_? {pin=1}
 
 // INCLUDABLE
 
 includableTrackDefinition ::= INCLUDABLE TRACK includableTrackId block {pin=1}
 
-// MUSIC & EFFECT
-
-fake musicEffectDefinition ::= musicEffectDefinition_
-
-musicDefinition ::= MUSIC musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
-effectDefinition ::= EFFECT musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
-
-private musicEffectDefinition_ ::= string FROM sampleRef playModifications? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
-private musicEffectDefinitionDetails_ ::=
-    (metadataStatement sep_ )+
-    {recoverWhile=musicEffectDefinitionDetails_recover_}
-private musicEffectDefinitionDetails_recover_ ::= !(CURLY_R | DESCRIBED | CATEGORIZED)
 
 // SOUNDSCAPE
 
@@ -118,23 +109,7 @@ block ::= CURLY_L statement+ CURLY_R {pin=1}
 
 // PLAY
 
-playStatement ::= PLAY SAMPLE? sampleRef playModifications? {pin=1}
-playModifications ::= WITH playModificationItem (listDelimiter_ playModificationItem)* {pin=1}
-private listDelimiter_ ::= LIST_DELIMITER | AND
-
-playModificationItem ::=
-    playModificationAmplification |
-    playModificationOmission |
-    playModificationLimit |
-    playModificationAttribution
-    {recoverWhile=playModificationItem_recover_}
-
-private playModificationItem_recover_ ::= !(LIST_DELIMITER | AND | sep_)
-
-playModificationAmplification ::= AMPLIFICATION OF percentage {pin=1}
-playModificationOmission ::= OMISSION OF FIRST timespan {pin=1}
-playModificationLimit ::= LIMIT TO timespan {pin=1}
-playModificationAttribution ::= ATTRIBUTION string {pin=1}
+playStatement ::= PLAY SAMPLE? sampleRef playModifications_? {pin=1}
 
 // PAUSE
 
@@ -176,6 +151,21 @@ private randomly_recover_ ::= !(CURLY_R | WEIGHTED)
 
 parallellyStatement ::= PARALLELLY CURLY_L statement statement+ CURLY_R {pin=1}
 
+
+// MUSIC & EFFECT
+
+fake musicEffectDefinition ::= musicEffectDefinition_
+
+musicDefinition ::= MUSIC musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
+effectDefinition ::= EFFECT musicEffectDefinition_ {pin=1 extends=musicEffectDefinition}
+
+private musicEffectDefinition_ ::= string FROM sampleRef playModifications_? ((CURLY_L musicEffectDefinitionDetails_ CURLY_R) | sep_)
+private musicEffectDefinitionDetails_ ::=
+    (metadataStatement sep_ )+
+    {recoverWhile=musicEffectDefinitionDetails_recover_}
+private musicEffectDefinitionDetails_recover_ ::= !(CURLY_R | DESCRIBED | CATEGORIZED)
+
+
 // DESCRIBED & CATEGORY
 
 metadataStatement ::= describedStatement | categoryStatement
@@ -183,6 +173,33 @@ describedStatement ::= DESCRIBED (BY | AS) string {pin=1}
 categoryStatement ::= CATEGORIZED ((categorizedIn categorizedAs) | (categorizedAs categorizedIn)) {pin=1}
 categorizedAs ::= AS string {pin=1}
 categorizedIn ::= IN string {pin=1}
+
+
+// MODIFICATIONS
+
+fake sampleModificationList ::= playModificationItem_*
+
+private playModifications_ ::= playModificationItem_ (listDelimiter_ playModificationItem_)*
+private loadModifications_ ::= loadModificationItem_ (listDelimiter_ loadModificationItem_)*
+private listDelimiter_ ::= LIST_DELIMITER | AND
+
+fake sampleModification ::=
+
+private playModificationItem_ ::=
+    amplificationPlayModification |
+    omissionPlayModification |
+    limitPlayModification
+
+private loadModificationItem_ ::=
+    playModificationItem_ |
+    attributionLoadModification |
+    noConversionLoadModification
+
+amplificationPlayModification ::= WITH AMPLIFICATION OF percentage {pin=2}
+omissionPlayModification ::= WITH OMISSION OF FIRST timespan {pin=2}
+limitPlayModification ::= WITH LIMIT TO timespan {pin=2}
+attributionLoadModification ::= WITH ATTRIBUTION string {pin=2}
+noConversionLoadModification ::= WITHOUT CONVERSION CACHE {pin=2}
 
 // Other
 

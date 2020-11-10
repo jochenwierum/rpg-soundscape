@@ -1,5 +1,6 @@
 package de.jowisoftware.rpgsoundscape.player.sample;
 
+import de.jowisoftware.rpgsoundscape.model.Modification.AttributionModification;
 import de.jowisoftware.rpgsoundscape.model.Sample;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository.UriLookupResult;
 
@@ -37,6 +38,8 @@ public class LookupResult {
     }
 
     public String attribution() {
-        return sample.getAttribution().orElse(uriLookupResult.attribution());
+        return sample.getModification(AttributionModification.class)
+                .map(AttributionModification::attribution)
+                .orElse(uriLookupResult.attribution());
     }
 }

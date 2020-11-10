@@ -2,25 +2,24 @@ package de.jowisoftware.rpgsoundscape.model;
 
 import com.intellij.psi.PsiElement;
 import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationAmplification;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationAttribution;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationItem;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationLimit;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModificationOmission;
-import de.jowisoftware.rpgsoundscape.language.psi.SPlayModifications;
+import de.jowisoftware.rpgsoundscape.language.psi.SAmplificationPlayModification;
+import de.jowisoftware.rpgsoundscape.language.psi.SAttributionLoadModification;
+import de.jowisoftware.rpgsoundscape.language.psi.SLimitPlayModification;
+import de.jowisoftware.rpgsoundscape.language.psi.SNoConversionLoadModification;
+import de.jowisoftware.rpgsoundscape.language.psi.SOmissionPlayModification;
+import de.jowisoftware.rpgsoundscape.language.psi.SSampleModification;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public sealed interface Modification {
+
     record AmplificationModification(Percentage percentage) implements Modification {
-        static AmplificationModification from(SPlayModificationAmplification amplification) {
+        static AmplificationModification from(SAmplificationPlayModification amplification) {
             return new AmplificationModification(Percentage.from(amplification.getPercentage()));
         }
 
@@ -30,13 +29,13 @@ public sealed interface Modification {
     }
 
     record AttributionModification(String attribution) implements Modification {
-        static AttributionModification from(SPlayModificationAttribution attribution) {
+        static AttributionModification from(SAttributionLoadModification attribution) {
             return new AttributionModification(attribution.getString().parsed());
         }
     }
 
     record StartOmissionModification(Duration duration) implements Modification {
-        static StartOmissionModification from(SPlayModificationOmission omission) {
+        static StartOmissionModification from(SOmissionPlayModification omission) {
             return new StartOmissionModification(omission.getTimespan().parsed());
         }
 
@@ -46,7 +45,7 @@ public sealed interface Modification {
     }
 
     record LimitModification(Duration duration) implements Modification {
-        static LimitModification from(SPlayModificationLimit limit) {
+        static LimitModification from(SLimitPlayModification limit) {
             return new LimitModification(limit.getTimespan().parsed());
         }
 
@@ -55,51 +54,47 @@ public sealed interface Modification {
         }
     }
 
-    static List<Modification> from(SPlayModifications sampleModifications, boolean allowAttribution) {
-        if (sampleModifications == null) {
+    record NoConversionLoadModification() implements Modification {
+    }
+
+    static List<Modification> from(List<SSampleModification> list) {
+        if (list == null) {
             return Collections.emptyList();
         }
 
-        List<SPlayModificationItem> list = sampleModifications.getPlayModificationItemList();
         List<Modification> result = new ArrayList<>();
 
-        singleOrEmpty(list,
-                SPlayModificationItem::getPlayModificationAmplification, "amplification")
+        singleOrEmpty(list, SAmplificationPlayModification.class, "amplification")
                 .ifPresent(e -> result.add(AmplificationModification.from(e)));
 
-        singleOrEmpty(list, SPlayModificationItem::getPlayModificationOmission, "omission")
+        singleOrEmpty(list, SOmissionPlayModification.class, "omission")
                 .ifPresent(e -> result.add(StartOmissionModification.from(e)));
 
-        singleOrEmpty(list, SPlayModificationItem::getPlayModificationLimit, "limit")
+        singleOrEmpty(list, SLimitPlayModification.class, "limit")
                 .ifPresent(e -> result.add(LimitModification.from(e)));
 
-        singleOrEmpty(list, SPlayModificationItem::getPlayModificationAttribution, "attribution")
-                .ifPresent(e -> {
-                    if (allowAttribution) {
-                        result.add(AttributionModification.from(e));
-                    } else {
-                        throw new SemanticException(sampleModifications, "Attribution is not allowed here");
-                    }
-                });
+        singleOrEmpty(list, SAttributionLoadModification.class, "attribution")
+                .ifPresent(e -> result.add(AttributionModification.from(e)));
+
+        singleOrEmpty(list, SNoConversionLoadModification.class, "conversion cache")
+                .ifPresent(e -> result.add(new NoConversionLoadModification()));
 
         return Collections.unmodifiableList(result);
     }
 
     private static <T extends PsiElement, E extends PsiElement> Optional<E> singleOrEmpty(
-            List<T> list, Function<T, E> selection, String type) {
-        return singleOrEmpty(list.stream()
-                .map(selection)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()), type);
-    }
+            List<T> list, Class<E> targetType, String type) {
+        List<E> matching = list.stream()
+                .filter(targetType::isInstance)
+                .map(targetType::cast)
+                .collect(Collectors.toList());
 
-    private static <E extends PsiElement> Optional<E> singleOrEmpty(List<E> filtered, String type) {
-        if (filtered.size() == 0) {
+        if (matching.size() == 0) {
             return Optional.empty();
-        } else if (filtered.size() == 1) {
-            return Optional.of(filtered.get(0));
+        } else if (matching.size() == 1) {
+            return Optional.of(matching.get(0));
         } else {
-            throw new SemanticException(filtered.get(1), "Only one " + type + " can be specified");
+            throw new SemanticException(matching.get(1), "Only one " + type + " can be specified");
         }
     }
 }

@@ -19,7 +19,7 @@ public interface SampleResolver {
 
     interface ResolverCallback {
         void resolve(ResolvedSample present);
-        void reject(Exception e);
+        long reject(Exception e);
         void planTask(Runnable r);
     }
 }

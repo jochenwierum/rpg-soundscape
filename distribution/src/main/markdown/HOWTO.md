@@ -91,11 +91,23 @@ Load sample horses from "file:////horses.mp3"
 
 Load sample campfire from "file:////campfire.mp3"
   with amplification of -5%,
-  limit to 1m and
-  omission of first 500ms;
+  with limit to 1m and
+  with omission of first 500ms;
 ~~~
 
 For skipping, the units 'ms', 's' and 'm' are valid. There is no space in front of the unit (i.e. `10 s` is invalid!) 
+
+### Controlling caching
+
+Normally, all files are converted into a format that can be played really quickly.
+However, this format produces huge files.
+For large mp3 files (such as complete soundscapes or long music tracks) this caching can be disabled.
+Opening such a sample takes significantly more time!
+
+~~~
+Load sample campfire from "file:////ambience-town.mp3"
+  without conversion cache;
+~~~
 
 ### Attributions
 
@@ -162,6 +174,17 @@ Attributions for freesound samples are automatically downloaded.
 If a freesound URL is found, the download is _not_ started because a login is required.
 Visit [the webinterface](https://127.0.0.1:8008) and follow the link in the problem tab.
 Once a file is downloaded, it is cached for further uses. 
+
+### Using Sounds from Youtube and co.
+
+If [youtube-dl](http://youtube-dl.org/) is installed on your system, you can also reference samples that will be downloaded with youtube-dl.
+Please make sure you are allowed to do this!
+
+Just use the normal video url and prepend `youtubedl+`:
+
+~~~
+Load sample some_music from "youtubedl+https://my-video-site.com/1234";
+~~~
 
 ## Soundscapes and Tracks
 

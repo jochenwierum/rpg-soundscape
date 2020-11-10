@@ -8,18 +8,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
-import com.intellij.navigation.ItemPresentation;
 
-public class SPlayStatementImpl extends ASTWrapperPsiElement implements SPlayStatement {
+public class SAmplificationPlayModificationImpl extends SSampleModificationImpl implements SAmplificationPlayModification {
 
-  public SPlayStatementImpl(@NotNull ASTNode node) {
+  public SAmplificationPlayModificationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitPlayStatement(this);
+    visitor.visitAmplificationPlayModification(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,25 +26,9 @@ public class SPlayStatementImpl extends ASTWrapperPsiElement implements SPlaySta
   }
 
   @Override
-  @NotNull
-  public List<SSampleModification> getSampleModificationList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, SSampleModification.class);
-  }
-
-  @Override
   @Nullable
-  public SSampleRef getSampleRef() {
-    return findChildByClass(SSampleRef.class);
-  }
-
-  @Override
-  public String getName() {
-    return PsiImplUtil.getName(this);
-  }
-
-  @Override
-  public ItemPresentation getPresentation() {
-    return PsiImplUtil.getPresentation(this);
+  public SPercentage getPercentage() {
+    return findChildByClass(SPercentage.class);
   }
 
 }

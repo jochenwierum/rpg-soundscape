@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SPlayModificationLimit extends PsiElement {
+public interface SOmissionPlayModification extends SSampleModification {
 
   @Nullable
   STimespan getTimespan();

@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SPlayModificationOmission extends PsiElement {
-
-  @Nullable
-  STimespan getTimespan();
+public interface SSampleModification extends PsiElement {
 
 }

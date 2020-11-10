@@ -98,7 +98,9 @@ Identifier=[:jletter:] [:jletterdigit:]*
     "autostarting" { return AUTOSTARTING; }
     "between" { return BETWEEN; }
     "by" { return BY; }
+    "cache" {return CACHE; }
     "categorized" { return CATEGORIZED; }
+    "conversion" {return CONVERSION; }
     "described" { return DESCRIBED; }
     "do" { return DO; }
     "effect" { return EFFECT; }
@@ -135,6 +137,7 @@ Identifier=[:jletter:] [:jletterdigit:]*
     "tracks" { return TRACKS; }
     "weighted" { return WEIGHTED; }
     "with" { return WITH; }
+    "without" { return WITHOUT; }
 
     "{" { return CURLY_L; }
     "}" { return CURLY_R; }
@@ -144,7 +147,6 @@ Identifier=[:jletter:] [:jletterdigit:]*
     {Percentage} { return PERCENT; }
     {Duration} { return DURATION; }
     {IntegerNumber} { return NUM_INTEGER; }
-    //{NUMBER_F} { return NUM_FLOAT; }
 
     {Identifier} { return IDENTIFIER; }
 }

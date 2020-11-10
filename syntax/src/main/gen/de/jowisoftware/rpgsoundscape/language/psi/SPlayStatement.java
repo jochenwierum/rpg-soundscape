@@ -8,8 +8,8 @@ import com.intellij.navigation.ItemPresentation;
 
 public interface SPlayStatement extends SoundscapeStructureViewPsiElement {
 
-  @Nullable
-  SPlayModifications getPlayModifications();
+  @NotNull
+  List<SSampleModification> getSampleModificationList();
 
   @Nullable
   SSampleRef getSampleRef();

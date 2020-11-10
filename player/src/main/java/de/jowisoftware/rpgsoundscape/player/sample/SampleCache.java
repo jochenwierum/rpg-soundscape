@@ -67,6 +67,7 @@ public class SampleCache {
         try (OutputStream os = Files.newOutputStream(files.cacheFile())) {
             FileCopyUtils.copy(is, os);
         } catch (IOException e) {
+            e = deleteAfterError(e, files.cacheFile());
             throw new RuntimeException("Unable to write cache file", e);
         }
 
@@ -74,11 +75,22 @@ public class SampleCache {
             try {
                 Files.writeString(files.attributionFile(), attribution);
             } catch (IOException e) {
+                e = deleteAfterError(e, files.attributionFile());
                 throw new RuntimeException("Unable to write attribution file", e);
             }
         }
 
         return new ResolvedSample(files.cacheFile(), Optional.ofNullable(attribution));
+    }
+
+    private IOException deleteAfterError(IOException e, Path file) {
+        try {
+            Files.deleteIfExists(file);
+            return e;
+        } catch (IOException e2) {
+            e2.addSuppressed(e);
+            return e2;
+        }
     }
 
     private Optional<String> readFile(Path path) {
@@ -93,7 +105,7 @@ public class SampleCache {
         }
     }
 
-    private static String hash(URI uri) {
+    public static String hash(URI uri) {
         return uri.toString().replaceAll("[^a-zA-Z0-9-_]+", "-");
     }
 

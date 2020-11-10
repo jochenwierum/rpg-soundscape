@@ -22,7 +22,7 @@ public record Play(
             throw new SemanticException(statement, "Sample '%s' is referenced but does not exist".formatted(name));
         }
 
-        List<Modification> modifications = Modification.from(statement.getPlayModifications(), false);
+        List<Modification> modifications = Modification.from(statement.getSampleModificationList());
 
         return new Play(sample, modifications, new ErrorPosition(statement));
     }
