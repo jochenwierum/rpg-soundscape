@@ -25,6 +25,9 @@ public class PersistableState implements DisposableBean, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (!Files.exists(statefile.getParent())) {
+            Files.createDirectories(statefile.getParent());
+        }
         if (!Files.isReadable(statefile)) {
             return;
         }
@@ -35,7 +38,6 @@ public class PersistableState implements DisposableBean, InitializingBean {
 
     @Override
     public void destroy() throws Exception {
-        Files.createDirectories(statefile.getParent());
         objectMapper.writeValue(statefile.toFile(), data);
     }
 

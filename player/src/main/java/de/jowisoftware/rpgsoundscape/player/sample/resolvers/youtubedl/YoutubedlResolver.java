@@ -1,5 +1,7 @@
 package de.jowisoftware.rpgsoundscape.player.sample.resolvers.youtubedl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleCache;
 import de.jowisoftware.rpgsoundscape.player.sample.resolvers.AbstractCachingResolver;
 import de.jowisoftware.rpgsoundscape.player.sample.resolvers.SampleResolver;
@@ -16,10 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 @Component
 public class YoutubedlResolver
@@ -30,14 +36,17 @@ public class YoutubedlResolver
     public static final String URI_PREFIX = "youtubedl+";
 
     private final YoutubedlSettings youtubedlSettings;
+    private final ObjectMapper objectMapper;
     private final ExecutorService executorService;
     private final SynchronousQueue<Runnable> workQueue;
 
     private volatile long problemId;
     private volatile Boolean executableFound;
 
-    public YoutubedlResolver(YoutubedlSettings youtubedlSettings) {
+    public YoutubedlResolver(YoutubedlSettings youtubedlSettings, ObjectMapper objectMapper) {
         this.youtubedlSettings = youtubedlSettings;
+        this.objectMapper = objectMapper;
+
         this.workQueue = new SynchronousQueue<>();
         this.executorService = new ThreadPoolExecutor(0, 1, 30,
                 TimeUnit.SECONDS, workQueue);
@@ -51,6 +60,11 @@ public class YoutubedlResolver
     @Override
     public boolean supportsScheme(String scheme) {
         return scheme.toLowerCase().startsWith(URI_PREFIX);
+    }
+
+    @Override
+    public String formatAttributionUri(URI uri) {
+        return uri.toString().substring(URI_PREFIX.length());
     }
 
     @Override
@@ -74,17 +88,18 @@ public class YoutubedlResolver
     }
 
     private void download(URI uri, ResolverCallback resolverCallback) {
-        Path file = null;
         Path mp3File = null;
+        Path infoFile = null;
 
         try {
             Path tmpDir = Path.of(System.getProperty("java.io.tmpdir"));
             String basename = SampleCache.hash(uri);
-            file = tmpDir.resolve(basename + ".tmp");
             mp3File = tmpDir.resolve(basename + ".mp3");
+            infoFile = tmpDir.resolve(basename + ".info.json");
 
             String realUri = uri.toString().substring(URI_PREFIX.length());
-            List<String> command = createDownloadCommand(file, realUri);
+            Path basePath = tmpDir.resolve(basename);
+            List<String> command = createDownloadCommand(basePath, realUri);
 
             LOG.info("Starting to download using external youtube-dl: {}", String.join(" ", command));
 
@@ -97,7 +112,7 @@ public class YoutubedlResolver
 
             if (result == 0) {
                 try (InputStream is = Files.newInputStream(mp3File)) {
-                    resolverCallback.resolve(sampleCache.addToCache(uri, is, null));
+                    resolverCallback.resolve(sampleCache.addToCache(uri, is, createAttribution(infoFile)));
                 }
             } else {
                 resolverCallback.reject(new RuntimeException("Unable to download video, exit status: " + result));
@@ -105,18 +120,56 @@ public class YoutubedlResolver
         } catch (Exception e) {
             resolverCallback.reject(new RuntimeException("Unable to download video " + uri.toString(), e));
         } finally {
-            deleteAfterDownload(file);
-            deleteAfterDownload(mp3File);
+            deleteAfterDownload(mp3File, infoFile);
         }
     }
 
-    private void deleteAfterDownload(Path file) {
+    private String createAttribution(Path infoFile) {
         try {
-            if (file != null) {
-                Files.deleteIfExists(file);
+            if (!Files.exists(infoFile)) {
+                return null;
+            }
+
+            Map<String, Object> data = objectMapper.readValue(infoFile.toFile(), new TypeReference<>() {
+            });
+
+            StringBuilder b = new StringBuilder();
+
+            Optional.ofNullable(data.get("license"))
+                    .ifPresent(l -> b.append("licensed as ").append(l));
+
+            Stream.of("creator", "uploader_id", "uploader")
+                    .map(data::get)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .ifPresent(value -> {
+                                if (!b.isEmpty()) {
+                                    b.append(' ');
+                                }
+                                b.append("by ").append(value);
+                            }
+                    );
+
+            if (b.length() > 0) {
+                return b.toString();
+            } else {
+                return null;
             }
         } catch (IOException e) {
-            LOG.warn("Could not delete temp file '{}'", file, e);
+            LOG.warn("Could not read info file", e);
+            return null;
+        }
+    }
+
+    private void deleteAfterDownload(Path... files) {
+        for (Path file : files) {
+            try {
+                if (file != null) {
+                    Files.deleteIfExists(file);
+                }
+            } catch (IOException e) {
+                LOG.warn("Could not delete temp file '{}'", file, e);
+            }
         }
     }
 

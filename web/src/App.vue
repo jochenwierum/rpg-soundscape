@@ -1,6 +1,14 @@
 <template>
   <div>
-    <MainNav @select="selected = $event" :active="selected" :problems-count="problemsCount"/>
+    <resolved-status
+        v-show="samplesResolvingCount !== 0 || samplesErrorCount !== 0"
+        :resolved="samplesResolvedCount"
+        :resolving="samplesResolvingCount"
+        :failed="samplesErrorCount"
+    />
+
+    <main-nav @select="selected = $event" :active="selected" :problems-count="problemsCount"/>
+
     <main style="padding-top: 56px">
       <main-view v-if="selected === 'main'"
                  :running-tracks="runningTracks"
@@ -29,7 +37,7 @@
                     @unpin="unpin($event)"
                     @describe=" describeClip=$event"/>
 
-      <problem-view v-if="selected === 'problems'"/>
+      <problem-view v-if="selected === 'problems'" :problems-count="problemsCount"/>
     </main>
 
     <clip-info :show-description="describeClip"/>
@@ -46,10 +54,12 @@ import MainView from "@/components/MainView";
 import MusicView from "@/components/MusicView";
 import EffectsView from "@/components/EffectsView";
 import ClipInfo from "@/components/ClipInfo";
+import ResolvedStatus from "@/components/ResolvedStatus";
 
 export default {
   name: 'App',
   components: {
+    ResolvedStatus,
     ClipInfo,
     EffectsView,
     MusicView,
@@ -64,6 +74,10 @@ export default {
       selected: 'main',
       libraryVersion: 0,
       problemsCount: 0,
+
+      samplesResolvingCount: 0,
+      samplesErrorCount: 0,
+      samplesResolvedCount: 0,
 
       soundscape: '',
       runningTracks: [],
@@ -96,11 +110,17 @@ export default {
         this.runningTracks.splice(0, this.runningTracks.length, ...data.runningTracks);
       });
 
-
       this.eventSource.addEventListener("musicChanged", (event) => {
         const data = JSON.parse(event.data);
         this.music = data.name;
         this.musicPlaying = data.playing;
+      });
+
+      this.eventSource.addEventListener("resolvedStatus", (event) => {
+        const data = JSON.parse(event.data);
+        this.samplesResolvedCount = data.resolved;
+        this.samplesResolvingCount = data.resolving;
+        this.samplesErrorCount = data.failed;
       });
 
       this.eventSource.addEventListener("ping", () => console.log("ping"));

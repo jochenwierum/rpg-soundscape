@@ -13,9 +13,10 @@ public class YoutubedlSettings {
     private List<String> arguments = new ArrayList<>(List.of(
             "-q",
             "--no-playlist", "--no-progress",
+            "--write-info-json",
             "-x",
             "--audio-format", "mp3",
-            "-o", "$file",
+            "-o", "$file.%(ext)s",
             "$url"));
 
     public String getPath() {

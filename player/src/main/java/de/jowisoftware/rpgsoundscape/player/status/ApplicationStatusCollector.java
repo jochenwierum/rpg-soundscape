@@ -4,6 +4,7 @@ import de.jowisoftware.rpgsoundscape.exceptions.SyntaxException;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.Problem;
+import de.jowisoftware.rpgsoundscape.player.status.event.ResolvedStatus;
 import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.UpdateLibraryEvent;
 import org.slf4j.Logger;
@@ -36,12 +37,14 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
     private final List<ApplicationStatusListener> listeners = new CopyOnWriteArrayList<>();
     private final List<Problem> problems = new CopyOnWriteArrayList<>();
 
-    private final Debouncer<SoundscapeChangeEvent> soundscapeChangeEventDebouncer =
-            new Debouncer<>(queue, ApplicationStatusListener::reportSoundscapeChanged);
-    private final Debouncer<MusicChangedEvent> musicChangeEventDebouncer =
-            new Debouncer<>(queue, ApplicationStatusListener::reportMusicChanged);
-    private final Debouncer<UpdateLibraryEvent> updateLibraryDebouncer =
-            new Debouncer<>(queue, ApplicationStatusListener::updateLibrary);
+    private final Deduplicator<SoundscapeChangeEvent> soundscapeChangeEventDeduplicator =
+            new Deduplicator<>(queue, ApplicationStatusListener::reportSoundscapeChanged);
+    private final Deduplicator<MusicChangedEvent> musicChangeEventDeduplicator =
+            new Deduplicator<>(queue, ApplicationStatusListener::reportMusicChanged);
+    private final Deduplicator<UpdateLibraryEvent> updateLibraryDeduplicator =
+            new Deduplicator<>(queue, ApplicationStatusListener::updateLibrary);
+    private final Deduplicator<ResolvedStatus> resolvedStatusDeduplicator =
+            new Deduplicator<>(queue, ApplicationStatusListener::reportResolvedStatus);
 
     public ApplicationStatusCollector(ApplicationSettings applicationSettings) {
         this.debugParser = applicationSettings.isDebugParser();
@@ -78,15 +81,19 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
         listeners.add(listener);
 
         listener.reportProblemCount(problems.size());
-        updateLibraryDebouncer.getLast().ifPresent(listener::updateLibrary);
+        updateLibraryDeduplicator.getLast().ifPresent(listener::updateLibrary);
 
         listener.reportSoundscapeChanged(
-                soundscapeChangeEventDebouncer.getLast()
+                soundscapeChangeEventDeduplicator.getLast()
                         .orElseGet(() -> new SoundscapeChangeEvent("", Set.of())));
 
         listener.reportMusicChanged(
-                musicChangeEventDebouncer.getLast()
+                musicChangeEventDeduplicator.getLast()
                         .orElseGet(() -> new MusicChangedEvent("", false)));
+
+        listener.reportResolvedStatus(
+                resolvedStatusDeduplicator.getLast()
+                        .orElseGet(() -> new ResolvedStatus(0, 0, 0)));
     }
 
     public void deregisterListener(ApplicationStatusListener listener) {
@@ -149,18 +156,24 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
 
     @Override
     public void updateLibrary(UpdateLibraryEvent event) {
-        updateLibraryDebouncer.accept(event);
+        updateLibraryDeduplicator.accept(event);
     }
 
     @Override
     public void reportSoundscapeChanged(SoundscapeChangeEvent event) {
         LOG.info("Soundscape changed: " + event.toString());
-        soundscapeChangeEventDebouncer.accept(event);
+        soundscapeChangeEventDeduplicator.accept(event);
     }
 
     @Override
     public void reportMusicChanged(MusicChangedEvent event) {
         LOG.info("Music changed: " + event.toString());
-        musicChangeEventDebouncer.accept(event);
+        musicChangeEventDeduplicator.accept(event);
+    }
+
+    @Override
+    public void reportResolved(ResolvedStatus event) {
+        LOG.info("Resolved status changed: " + event.toString());
+        resolvedStatusDeduplicator.accept(event);
     }
 }

@@ -67,6 +67,7 @@ public class ApplicationSettings {
         private Path path;
         private boolean preCacheConversion = true;
         private float cacheMaxSampleRate = 0;
+        private long maxFileSize = 0;
 
         public Path getPath() {
             if (path == null) {
@@ -93,6 +94,14 @@ public class ApplicationSettings {
 
         public void setCacheMaxSampleRate(float cacheMaxSampleRate) {
             this.cacheMaxSampleRate = cacheMaxSampleRate;
+        }
+
+        public long getMaxFileSize() {
+            return maxFileSize;
+        }
+
+        public void setMaxFileSize(long maxFileSize) {
+            this.maxFileSize = maxFileSize;
         }
     }
 }

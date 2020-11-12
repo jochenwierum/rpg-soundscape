@@ -5,12 +5,12 @@ import java.util.Queue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class Debouncer<T> implements Consumer<T> {
+public class Deduplicator<T> implements Consumer<T> {
     private final Queue<Consumer<ApplicationStatusListener>> queue;
     private final BiConsumer<ApplicationStatusListener, T> operation;
     private volatile T last = null;
 
-    public Debouncer(Queue<Consumer<ApplicationStatusListener>> queue, BiConsumer<ApplicationStatusListener, T> operation) {
+    public Deduplicator(Queue<Consumer<ApplicationStatusListener>> queue, BiConsumer<ApplicationStatusListener, T> operation) {
         this.queue = queue;
         this.operation = operation;
     }

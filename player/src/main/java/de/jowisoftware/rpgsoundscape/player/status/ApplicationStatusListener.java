@@ -1,6 +1,7 @@
 package de.jowisoftware.rpgsoundscape.player.status;
 
 import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
+import de.jowisoftware.rpgsoundscape.player.status.event.ResolvedStatus;
 import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.UpdateLibraryEvent;
 
@@ -14,4 +15,6 @@ public interface ApplicationStatusListener {
     void reportMusicChanged(MusicChangedEvent e);
 
     void updateLibrary(UpdateLibraryEvent e);
+
+    void reportResolvedStatus(ResolvedStatus orElseGet);
 }

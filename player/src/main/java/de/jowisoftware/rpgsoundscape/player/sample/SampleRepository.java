@@ -11,6 +11,8 @@ import de.jowisoftware.rpgsoundscape.player.sample.resolvers.SampleResolver;
 import de.jowisoftware.rpgsoundscape.player.sample.resolvers.SampleResolver.ResolverCallback;
 import de.jowisoftware.rpgsoundscape.player.status.StatusReporter;
 import de.jowisoftware.rpgsoundscape.player.status.event.Problem;
+import de.jowisoftware.rpgsoundscape.player.status.event.ResolvedStatus;
+import de.jowisoftware.rpgsoundscape.player.threading.DebounceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -57,11 +59,13 @@ public class SampleRepository implements DisposableBean {
     private final ExecutorService executorService;
 
     private final Map<URI, UriLookupResult> sources = new ConcurrentHashMap<>();
+    private final Runnable sendStatus;
     private volatile boolean completed;
     private volatile boolean importing;
 
     public SampleRepository(
             StatusReporter statusReporter,
+            DebounceService debounceService,
             List<SampleResolver> resolvers,
             SampleCache sampleCache,
             AudioConverter audioConverter,
@@ -71,6 +75,8 @@ public class SampleRepository implements DisposableBean {
         this.audioConverter = audioConverter;
         this.sampleCache = sampleCache;
         this.applicationSettings = applicationSettings;
+        this.sendStatus = debounceService.createDebouncer("send-status",
+                this::sendStatus, 250, 500);
 
         executorService = new ThreadPoolExecutor(0, 8, 30, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>());
@@ -107,7 +113,12 @@ public class SampleRepository implements DisposableBean {
                         new Tuple(first.errorPosition, first.allowCaching || second.allowCaching)));
 
         Set<URI> removeSamples = new HashSet<>(sources.keySet());
-        removeSamples.removeAll(allUris.keySet());
+        allUris.keySet().stream()
+                .filter(uri -> {
+                    UriLookupResult existing = sources.get(uri);
+                    return existing != null && existing.sampleStatus() == SampleStatus.RESOLVED;
+                })
+                .forEach(removeSamples::remove);
         sources.keySet().removeAll(removeSamples);
 
         this.completed = false;
@@ -134,7 +145,8 @@ public class SampleRepository implements DisposableBean {
             resolvers.stream()
                     .filter(r -> r.supportsScheme(uri.getScheme()))
                     .findFirst()
-                    .orElseThrow(() -> new ResolvingException("Source type '%s' is not supported", null, errorPosition))
+                    .orElseThrow(() -> new ResolvingException(
+                            "Source type '%s' is not supported".formatted(uri.getScheme()), null, errorPosition))
                     .resolve(uri, resolverCallback);
         } catch (Exception e) {
             resolverCallback.reject(e);
@@ -173,6 +185,7 @@ public class SampleRepository implements DisposableBean {
         sources.compute(uri, (k, v) -> v == null ? null : update.apply(v));
 
         maybeReportUnused();
+        sendStatus.run();
     }
 
     private void maybeReportUnused() {
@@ -187,6 +200,19 @@ public class SampleRepository implements DisposableBean {
             completed = true;
             sampleCache.reportUnused();
         }
+    }
+
+    private void sendStatus() {
+        Map<SampleStatus, Long> statsCount = sources.values().stream()
+                .collect(Collectors.groupingBy(
+                        UriLookupResult::sampleStatus,
+                        Collectors.counting()));
+
+        statusReporter.reportResolved(new ResolvedStatus(
+                statsCount.getOrDefault(SampleStatus.RESOLVED, 0L),
+                statsCount.getOrDefault(SampleStatus.RESOLVING, 0L),
+                statsCount.getOrDefault(SampleStatus.ERROR, 0L)
+        ));
     }
 
     private class Callback implements SampleResolver.ResolverCallback {
@@ -232,7 +258,7 @@ public class SampleRepository implements DisposableBean {
             } else if (!audioConverter.requiresConversion(file)) {
                 LOG.debug("Resolved audio file '{}' does not require conversion", uri);
                 updateStatus(uri, v -> v.asResolved(file, false, attribution));
-            } else if (applicationSettings.getCache().isPreCacheConversion()) {
+            } else if (shouldCache(file)) {
                 planTask(() -> preCacheConversion(file, attribution));
             } else {
                 sampleCache.getConvertedEntry(file, uri).ifPresentOrElse(
@@ -241,6 +267,22 @@ public class SampleRepository implements DisposableBean {
                         () -> updateStatus(uri,
                                 v -> v.asResolved(file, false, attribution))
                 );
+            }
+        }
+
+        private boolean shouldCache(Path file) {
+            if (!applicationSettings.getCache().isPreCacheConversion()) {
+                return false;
+            }
+
+            if (applicationSettings.getCache().getMaxFileSize() <= 0) {
+                return true;
+            }
+
+            try {
+                return applicationSettings.getCache().getMaxFileSize() >= Files.size(file);
+            } catch (IOException e) {
+                return false;
             }
         }
 

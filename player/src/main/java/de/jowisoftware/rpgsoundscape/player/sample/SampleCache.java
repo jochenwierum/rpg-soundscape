@@ -135,7 +135,7 @@ public class SampleCache {
             throw new RuntimeException("unable to write converted cache file", e);
         }
 
-        return files.cacheFile();
+        return files.convertedFile();
     }
 
     public Optional<Path> getConvertedEntry(Path file, URI uri) {

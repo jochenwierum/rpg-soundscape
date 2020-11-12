@@ -4,6 +4,7 @@ import de.jowisoftware.rpgsoundscape.player.status.ApplicationStatusCollector;
 import de.jowisoftware.rpgsoundscape.player.status.ApplicationStatusListener;
 import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.Problem;
+import de.jowisoftware.rpgsoundscape.player.status.event.ResolvedStatus;
 import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
 import de.jowisoftware.rpgsoundscape.player.status.event.UpdateLibraryEvent;
 import org.slf4j.Logger;
@@ -85,6 +86,11 @@ public class StatusController {
         @Override
         public void reportSoundscapeChanged(SoundscapeChangeEvent e) {
             send("soundscapeChanged", e);
+        }
+
+        @Override
+        public void reportResolvedStatus(ResolvedStatus e) {
+            send("resolvedStatus", e);
         }
 
         @Override

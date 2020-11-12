@@ -16,6 +16,8 @@ public class TrackExecutionContext {
     private final SoundscapePlayer soundscapePlayer;
     private final List<InterruptibleTask> interruptibleTasks = new CopyOnWriteArrayList<>();
 
+    private volatile TaskState state;
+
     public TrackExecutionContext(String name, TrackExecutor trackExecutor, SoundscapePlayer soundscapePlayer) {
         this.name = name;
         this.trackExecutor = trackExecutor;
@@ -31,14 +33,25 @@ public class TrackExecutionContext {
     }
 
     public void runInterruptible(InterruptibleTask task) {
-        LOG.trace("Context prepares sleep on interruptible task");
-        interruptibleTasks.add(task);
+        synchronized (this) {
+            if (state == TaskState.ABORTED) {
+                LOG.trace("Task is already aborted - do not start");
+                return;
+            }
+
+            LOG.trace("Context prepares sleep on interruptible task");
+            interruptibleTasks.add(task);
+        }
 
         var latch = new CountDownLatch(1);
         task.onFinish(latch::countDown);
 
-        LOG.trace("Context starts interruptible task");
-        task.startOrResume();
+        if (state == TaskState.RUNNING) {
+            LOG.trace("Context starts interruptible task");
+            task.startOrResume();
+        } else {
+            LOG.trace("Context is paused - don't start interruptible task");
+        }
 
         try {
             LOG.trace("Context enters sleep");
@@ -51,19 +64,26 @@ public class TrackExecutionContext {
         interruptibleTasks.remove(task);
     }
 
-    public void pauseTasks() {
+    public synchronized void pauseTasks() {
+        state = TaskState.PAUSED;
         interruptibleTasks.forEach(InterruptibleTask::pause);
     }
 
-    public void resumeTasks() {
+    public synchronized void resumeTasks() {
+        state = TaskState.RUNNING;
         interruptibleTasks.forEach(InterruptibleTask::startOrResume);
     }
 
-    public void abortTasks() {
+    public synchronized void abortTasks() {
+        state = TaskState.ABORTED;
         interruptibleTasks.forEach(InterruptibleTask::abort);
     }
 
     public String getName() {
         return name;
+    }
+
+    private enum TaskState {
+        RUNNING, PAUSED, ABORTED
     }
 }

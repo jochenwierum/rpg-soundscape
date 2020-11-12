@@ -79,19 +79,23 @@ public class FreesoundResolver extends AbstractCachingResolver {
 
         synchronized (downloader) {
             if (downloader.needsLogin()) {
-                if (problemId == 0) {
-                    String loginUri = "https://freesound.org/apiv2/oauth2/authorize/?response_type=code&client_id=%s"
-                            .formatted(URLEncoder.encode(settings.getClientId(), StandardCharsets.UTF_8));
-                    this.problemId = statusReporter.logProblem(Problem.create(
-                            new LoginException("A login for freesound is required", loginUri)));
-                }
-                LOG.debug("Login is not yet available, queuing download of '{}'", uri);
-                agenda.add(new AgendaItem(uri, id, resolverCallback));
+                logProblemAndQueue(uri, resolverCallback, id);
             } else {
                 LOG.debug("Login is available, starting download of '{}' immediately", uri);
                 download(uri, id, resolverCallback);
             }
         }
+    }
+
+    private void logProblemAndQueue(URI uri, ResolverCallback resolverCallback, String id) {
+        if (problemId == 0) {
+            String loginUri = "https://freesound.org/apiv2/oauth2/authorize/?response_type=code&client_id=%s"
+                    .formatted(URLEncoder.encode(settings.getClientId(), StandardCharsets.UTF_8));
+            this.problemId = statusReporter.logProblem(Problem.create(
+                    new LoginException("A login for freesound is required", loginUri)));
+        }
+        LOG.debug("Login is not yet available, queuing download of '{}'", uri);
+        agenda.add(new AgendaItem(uri, id, resolverCallback));
     }
 
     private void download(URI uri, String id, ResolverCallback resolverCallback) {
@@ -129,7 +133,7 @@ public class FreesoundResolver extends AbstractCachingResolver {
     private void downloadFile(String id, URI uri, ResolverCallback resolverCallback, Map<String, String> data) {
         String name = data.getOrDefault("name", "(unknown)");
         String username = data.getOrDefault("username", "(unknown)");
-        String license = mapLicensese(data.get("license"));
+        String license = mapLicenses(data.get("license"));
 
         String attribution = "%s by %s (http://freesound.org/people/%s/), licensed as %s"
                 .formatted(name, username, username, license);
@@ -144,7 +148,7 @@ public class FreesoundResolver extends AbstractCachingResolver {
         }
     }
 
-    private String mapLicensese(String licenseUrl) {
+    private String mapLicenses(String licenseUrl) {
         if (licenseUrl == null) {
             return "";
         }
@@ -174,6 +178,7 @@ public class FreesoundResolver extends AbstractCachingResolver {
     @Override
     public void abortAll() {
         agenda.clear();
+        problemId = 0;
     }
 
     @Override

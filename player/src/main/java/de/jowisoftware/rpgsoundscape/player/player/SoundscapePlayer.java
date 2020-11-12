@@ -88,13 +88,12 @@ public class SoundscapePlayer implements DisposableBean {
                 .findAny();
     }
 
-    public void switchSoundscape(Soundscape soundscape) {
+    public synchronized void switchSoundscape(Soundscape soundscape) {
         if (this.soundscape != null && soundscape.name().equals(this.soundscape.name())) {
             reloadTracks(soundscape);
-            return;
+        } else {
+            initTracks(soundscape);
         }
-
-        initTracks(soundscape);
     }
 
     private void initTracks(Soundscape soundscape) {

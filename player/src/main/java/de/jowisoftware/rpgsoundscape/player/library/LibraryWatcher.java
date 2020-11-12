@@ -1,6 +1,7 @@
 package de.jowisoftware.rpgsoundscape.player.library;
 
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
+import de.jowisoftware.rpgsoundscape.player.threading.DebounceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -31,17 +32,21 @@ public class LibraryWatcher implements DisposableBean {
     private final ApplicationSettings applicationSettings;
 
     private final WatchService watchService;
+    private final Runnable debouncer;
     private volatile boolean running = true;
 
     private final LibraryService libraryService;
 
     private final Map<Path, WatchKey> watchedDirs = new ConcurrentHashMap<>();
 
-    public LibraryWatcher(ApplicationSettings applicationSettings, LibraryService libraryService) throws IOException {
+    public LibraryWatcher(ApplicationSettings applicationSettings, LibraryService libraryService,
+            DebounceService debounceService) throws IOException {
         this.applicationSettings = applicationSettings;
         this.libraryService = libraryService;
 
         this.watchService = FileSystems.getDefault().newWatchService();
+        this.debouncer = debounceService.createDebouncer("library-update-debouncer",
+                libraryService::refreshLibrary, 500, 2000);
     }
 
     private void collectDirs(Path dir, List<Path> result) {
@@ -58,7 +63,6 @@ public class LibraryWatcher implements DisposableBean {
 
     @EventListener(ApplicationReadyEvent.class)
     public void setupWatcher() {
-
         new Thread(() -> {
             updateWatchedDirs();
             libraryService.refreshLibrary();
@@ -67,11 +71,11 @@ public class LibraryWatcher implements DisposableBean {
                 try {
                     WatchKey poll = watchService.poll(3, TimeUnit.SECONDS);
                     if (poll != null) {
-                        poll.pollEvents()
+                        poll.pollEvents() // must be called!
                                 .forEach(e -> LOG.debug("Detected change: {} {}", e.kind().name(), e.context()));
-
                         poll.reset();
-                        libraryService.refreshLibrary();
+
+                        debouncer.run();
                         updateWatchedDirs();
                     }
                 } catch (InterruptedException | ClosedWatchServiceException e) {

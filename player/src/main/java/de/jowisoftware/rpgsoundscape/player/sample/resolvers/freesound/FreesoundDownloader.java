@@ -19,6 +19,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -32,7 +33,10 @@ public class FreesoundDownloader {
     private final FreesoundSettings settings;
     private final ObjectMapper objectMapper;
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient
+            .newBuilder()
+            .connectTimeout(Duration.ofSeconds(2))
+            .build();
 
     private volatile String accessToken;
     private volatile String refreshToken;
@@ -98,7 +102,7 @@ public class FreesoundDownloader {
         return accessToken == null
                 || refreshToken == null
                 || this.expires == null
-                || LocalDateTime.now().isBefore(this.expires);
+                || LocalDateTime.now().isAfter(this.expires);
     }
 
     public synchronized boolean login(String code) {
