@@ -72,14 +72,17 @@ public class DebounceService implements DisposableBean {
                         boolean alreadyHandled = lastHandled == updateValue;
                         long statusAge = System.currentTimeMillis() - start;
 
-                        if (alreadyHandled && statusAge > MAX_AGE_MILLIS) {
+                        if (start == -1) {
+                            LOG.trace("Debouncer restarted (update: {}, age: {}ms)", updateValue, statusAge);
+                            start = System.currentTimeMillis();
+                        } else if (alreadyHandled && statusAge > MAX_AGE_MILLIS) {
                             LOG.trace("Debouncer now exits (update: {}, age: {}ms)", updateValue, statusAge);
                             thread = null;
                             return;
                         } else if (!alreadyHandled && (updateValue == lastValue || statusAge >= maxDelayMillis)) {
                             LOG.trace("Debouncer now triggers (update: {}, age: {}ms)", updateValue, statusAge);
                             lastHandled = updateValue;
-                            start = System.currentTimeMillis();
+                            start = -1;
 
                             try {
                                 target.run();

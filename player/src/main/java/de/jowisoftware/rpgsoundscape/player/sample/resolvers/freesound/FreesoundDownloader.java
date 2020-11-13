@@ -91,11 +91,21 @@ public class FreesoundDownloader {
 
         HttpRequest finishedRequest = request.header("Authorization", "Bearer " + accessToken)
                 .GET()
+                .timeout(Duration.ofSeconds(8))
                 .build();
 
         LOG.info("Starting download for {}", finishedRequest.uri());
-        return httpClient.send(finishedRequest, bodyHandler)
-                .body();
+        HttpResponse<T> response = httpClient.send(finishedRequest, bodyHandler);
+
+        int statusCode = response.statusCode();
+        if (statusCode == 401 || statusCode == 403) {
+            resetCredentials();
+            throw new LoginException("Unable to download " + finishedRequest.uri() + ": " + statusCode, null);
+        } else if (statusCode != 200) {
+            throw new IllegalStateException("Unable to download " + finishedRequest.uri() + ": " + statusCode);
+        }
+
+        return response.body();
     }
 
     public boolean needsLogin() {
@@ -115,6 +125,7 @@ public class FreesoundDownloader {
                             "code", code
                     )))
                     .header("content-type", "application/x-www-form-urlencoded")
+                    .timeout(Duration.ofSeconds(4))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
@@ -133,6 +144,7 @@ public class FreesoundDownloader {
         }
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public synchronized boolean refresh() {
         if (refreshToken == null || this.expires == null) {
             return false;
@@ -150,6 +162,7 @@ public class FreesoundDownloader {
                         "refresh_token", refreshToken
                 )))
                 .header("content-type", "application/x-www-form-urlencoded")
+                .timeout(Duration.ofSeconds(2))
                 .build();
 
         try {

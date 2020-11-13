@@ -108,26 +108,27 @@ public class FreesoundResolver extends AbstractCachingResolver {
             }
 
             LOG.info("Downloading metadata for {}", uri);
-            downloadInfo(id, resolverCallback).ifPresent(data -> {
+            downloadInfo(id, uri, resolverCallback).ifPresent(data -> {
                 LOG.info("Downloading sound file for {}", uri);
                 downloadFile(id, uri, resolverCallback, data);
             });
         });
     }
 
-    private Optional<Map<String, String>> downloadInfo(String id, ResolverCallback resolverCallback) {
-        URI uri = URI.create("https://freesound.org/apiv2/sounds/%s/?fields=name,license,download,username".formatted(id));
+    private Optional<Map<String, String>> downloadInfo(String id, URI uri, ResolverCallback resolverCallback) {
+        URI infoUri = URI.create("https://freesound.org/apiv2/sounds/%s/?fields=name,license,download,username".formatted(id));
         try {
-            Map<String, String> data = objectMapper.readValue(
-                    downloader.download(HttpRequest.newBuilder(uri), BodyHandlers.ofString()),
-                    new TypeReference<>() {
-                    });
+            String body = downloader.download(HttpRequest.newBuilder(infoUri), BodyHandlers.ofString());
+            Map<String, String> data = objectMapper.readValue(body, new TypeReference<>() {
+            });
             return Optional.of(data);
+        } catch (LoginException e) {
+            logProblemAndQueue(uri, resolverCallback, id);
         } catch (Exception e) {
             LOG.error("Unable to download sample '{}'", id, e);
-            resolverCallback.reject(new RuntimeException("Unable to download sample '%s' info from '%s'".formatted(id, uri), e));
-            return Optional.empty();
+            resolverCallback.reject(new RuntimeException("Unable to download sample '%s' info from '%s'".formatted(id, infoUri), e));
         }
+        return Optional.empty();
     }
 
     private void downloadFile(String id, URI uri, ResolverCallback resolverCallback, Map<String, String> data) {
@@ -143,6 +144,8 @@ public class FreesoundResolver extends AbstractCachingResolver {
             ResolvedSample cached = sampleCache.addToCache(uri, is, attribution);
             LOG.info("Download of sample '{}' from '{}' finished", uri, downloadUri);
             resolverCallback.resolve(cached);
+        } catch (LoginException e) {
+            logProblemAndQueue(uri, resolverCallback, id);
         } catch (Exception e) {
             resolverCallback.reject(new RuntimeException("Unable to download sample '%s' audio from '%s'".formatted(id, downloadUri), e));
         }

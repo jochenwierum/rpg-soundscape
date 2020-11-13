@@ -42,7 +42,11 @@ public class PersistableState implements DisposableBean, InitializingBean {
     }
 
     public void set(String name, String value) {
-        data.put(name, value);
+        if (value == null) {
+            data.remove(name);
+        } else {
+            data.put(name, value);
+        }
     }
 
     public String get(String name) {

@@ -128,6 +128,7 @@ public class SampleRepository implements DisposableBean {
 
         this.importing = false;
         maybeReportUnused();
+        sendStatus.run();
     }
 
     private void resolve(URI uri, ErrorPosition errorPosition, boolean allowCaching) {
