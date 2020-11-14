@@ -12,6 +12,7 @@ import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
 
 @Component
 public class HttpSampleResolver extends AbstractCachingResolver {
@@ -19,6 +20,7 @@ public class HttpSampleResolver extends AbstractCachingResolver {
 
     private final HttpClient client = HttpClient.newBuilder()
             .followRedirects(Redirect.NORMAL)
+            .connectTimeout(Duration.ofSeconds(2))
             .version(Version.HTTP_2)
             .build();
 
@@ -30,7 +32,10 @@ public class HttpSampleResolver extends AbstractCachingResolver {
     @Override
     protected void receiveSample(URI uri, ResolverCallback resolverCallback) {
         resolverCallback.planTask(() -> {
-            HttpRequest request = HttpRequest.newBuilder(uri).GET().build();
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                    .GET()
+                    .timeout(Duration.ofSeconds(8))
+                    .build();
             try {
                 LOG.info("Downloading: {}", uri);
                 try (InputStream responseBody = client.send(request, BodyHandlers.ofInputStream()).body()) {
