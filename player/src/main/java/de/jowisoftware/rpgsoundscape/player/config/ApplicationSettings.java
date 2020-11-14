@@ -53,6 +53,7 @@ public class ApplicationSettings {
 
     public static class Audio {
         private String mixer;
+        private Backend backend = Backend.JAVA_SOUND_CLIP;
 
         public String getMixer() {
             return mixer;
@@ -60,6 +61,20 @@ public class ApplicationSettings {
 
         public void setMixer(String mixer) {
             this.mixer = mixer;
+        }
+
+        public Backend getBackend() {
+            return backend;
+        }
+
+        public void setBackend(Backend backend) {
+            this.backend = backend;
+        }
+
+        @SuppressWarnings("unused")
+        public enum Backend {
+            JAVA_SOUND_CLIP,
+            JAVA_SOUND_STREAM
         }
     }
 

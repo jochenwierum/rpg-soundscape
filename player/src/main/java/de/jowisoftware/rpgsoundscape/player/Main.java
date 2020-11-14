@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.player;
 
-import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
+import de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaClipAudioPlayer;
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +14,7 @@ public class Main {
         var argList = new ArrayList<>(Arrays.asList(args));
 
         if (argList.stream().anyMatch(e -> e.equalsIgnoreCase("--print-mixers"))) {
-            AudioPlayer.printInfo();
+            JavaClipAudioPlayer.printInfo();
             return;
         }
 

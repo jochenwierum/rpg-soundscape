@@ -69,7 +69,7 @@ public class LibraryWatcher implements DisposableBean {
 
             while (running) {
                 try {
-                    WatchKey poll = watchService.poll(3, TimeUnit.SECONDS);
+                    WatchKey poll = watchService.poll(500, TimeUnit.MILLISECONDS);
                     if (poll != null) {
                         poll.pollEvents() // must be called!
                                 .forEach(e -> LOG.debug("Detected change: {} {}", e.kind().name(), e.context()));

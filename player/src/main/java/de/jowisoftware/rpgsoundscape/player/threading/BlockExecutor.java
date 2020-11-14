@@ -3,6 +3,7 @@ package de.jowisoftware.rpgsoundscape.player.threading;
 import de.jowisoftware.rpgsoundscape.model.Statement;
 import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
 import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

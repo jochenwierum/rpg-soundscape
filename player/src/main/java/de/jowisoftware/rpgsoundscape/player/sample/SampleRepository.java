@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,8 +67,8 @@ public class SampleRepository implements DisposableBean {
             DebounceService debounceService,
             List<SampleResolver> resolvers,
             SampleCache sampleCache,
-            AudioConverter audioConverter,
-            ApplicationSettings applicationSettings) {
+            ApplicationSettings applicationSettings,
+            AudioConverter audioConverter) {
         this.statusReporter = statusReporter;
         this.resolvers = resolvers;
         this.audioConverter = audioConverter;
@@ -252,7 +251,7 @@ public class SampleRepository implements DisposableBean {
             }
         }
 
-        private void cacheOrConvert(Path file, String attribution) throws IOException, UnsupportedAudioFileException {
+        private void cacheOrConvert(Path file, String attribution) throws Exception {
             if (!allowCaching) {
                 LOG.debug("Caching is disabled for audio file '{}'", uri);
                 updateStatus(uri, v -> v.asResolved(file, false, attribution));

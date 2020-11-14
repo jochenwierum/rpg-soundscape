@@ -7,7 +7,7 @@ import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterServ
 import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
 import de.jowisoftware.rpgsoundscape.player.status.StatusReporter;
 import de.jowisoftware.rpgsoundscape.player.threading.ExecutionThreadPool;
-import de.jowisoftware.rpgsoundscape.player.threading.Pause;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import de.jowisoftware.rpgsoundscape.player.threading.ThreadStep;
 import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
 import org.slf4j.Logger;

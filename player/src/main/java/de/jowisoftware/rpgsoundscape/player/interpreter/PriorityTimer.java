@@ -1,6 +1,6 @@
 package de.jowisoftware.rpgsoundscape.player.interpreter;
 
-import de.jowisoftware.rpgsoundscape.player.threading.InterruptibleTask;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.AbstractAsyncInterruptibleTaskAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -42,8 +42,8 @@ public class PriorityTimer implements DisposableBean {
         timerThread.join();
     }
 
-    public InterruptibleTask createTask(long millis) {
-        return new InterruptibleTask() {
+    public AbstractAsyncInterruptibleTaskAdapter createTask(long millis) {
+        return new AbstractAsyncInterruptibleTaskAdapter() {
             private volatile Task task;
             private volatile long remaining = millis;
 

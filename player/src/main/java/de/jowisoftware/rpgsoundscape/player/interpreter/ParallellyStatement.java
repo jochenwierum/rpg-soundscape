@@ -1,12 +1,12 @@
 package de.jowisoftware.rpgsoundscape.player.interpreter;
 
-import de.jowisoftware.rpgsoundscape.player.threading.InterruptibleTask;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
 import de.jowisoftware.rpgsoundscape.model.Parallelly;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.AbstractAsyncInterruptibleTaskAdapter;
+import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ParallellyStatement extends InterruptibleTask {
+public class ParallellyStatement extends AbstractAsyncInterruptibleTaskAdapter {
     public ParallellyStatement(TrackExecutionContext context, Parallelly parallelly) {
         var remaining = new AtomicInteger(parallelly.statements().size());
 

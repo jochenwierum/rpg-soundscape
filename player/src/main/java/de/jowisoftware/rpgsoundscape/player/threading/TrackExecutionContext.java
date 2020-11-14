@@ -1,12 +1,12 @@
 package de.jowisoftware.rpgsoundscape.player.threading;
 
 import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.InterruptibleTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
 
 public class TrackExecutionContext {
     private static final Logger LOG = LoggerFactory.getLogger(TrackExecutionContext.class);
@@ -38,29 +38,11 @@ public class TrackExecutionContext {
                 LOG.trace("Task is already aborted - do not start");
                 return;
             }
-
-            LOG.trace("Context prepares sleep on interruptible task");
             interruptibleTasks.add(task);
         }
 
-        var latch = new CountDownLatch(1);
-        task.onFinish(latch::countDown);
+        task.run(state == TaskState.RUNNING);
 
-        if (state == TaskState.RUNNING) {
-            LOG.trace("Context starts interruptible task");
-            task.startOrResume();
-        } else {
-            LOG.trace("Context is paused - don't start interruptible task");
-        }
-
-        try {
-            LOG.trace("Context enters sleep");
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        LOG.trace("Sleep finished");
         interruptibleTasks.remove(task);
     }
 

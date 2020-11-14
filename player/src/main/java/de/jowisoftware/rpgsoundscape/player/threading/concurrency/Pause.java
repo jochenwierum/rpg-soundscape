@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.threading;
+package de.jowisoftware.rpgsoundscape.player.threading.concurrency;
 
 public class Pause {
     private volatile boolean paused;

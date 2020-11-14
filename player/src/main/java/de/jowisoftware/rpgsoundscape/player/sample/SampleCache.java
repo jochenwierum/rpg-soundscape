@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Component
@@ -67,23 +66,21 @@ public class SampleCache {
         try (OutputStream os = Files.newOutputStream(files.cacheFile())) {
             FileCopyUtils.copy(is, os);
         } catch (IOException e) {
-            e = deleteAfterError(e, files.cacheFile());
-            throw new RuntimeException("Unable to write cache file", e);
+            throw new RuntimeException("Unable to write cache file", deleteAfterError(e, files.cacheFile()));
         }
 
         if (attribution != null) {
             try {
                 Files.writeString(files.attributionFile(), attribution);
             } catch (IOException e) {
-                e = deleteAfterError(e, files.attributionFile());
-                throw new RuntimeException("Unable to write attribution file", e);
+                throw new RuntimeException("Unable to write attribution file", deleteAfterError(e, files.attributionFile()));
             }
         }
 
         return new ResolvedSample(files.cacheFile(), Optional.ofNullable(attribution));
     }
 
-    private IOException deleteAfterError(IOException e, Path file) {
+    private Exception deleteAfterError(Exception e, Path file) {
         try {
             Files.deleteIfExists(file);
             return e;
@@ -109,7 +106,7 @@ public class SampleCache {
         return uri.toString().replaceAll("[^a-zA-Z0-9-_]+", "-");
     }
 
-    public Path resolveConverted(Path file, URI uri, BiConsumer<InputStream, OutputStream> converter) {
+    public Path resolveConverted(Path file, URI uri, Converter converter) {
         Filenames files = filenames(uri);
 
         String hash = fileContentHash(file);
@@ -124,14 +121,11 @@ public class SampleCache {
         LOG.info("Converted entry not in cache or hash does not match, resolving file directly");
         try (InputStream is = new BufferedInputStream(Files.newInputStream(file));
              OutputStream os = new BufferedOutputStream(Files.newOutputStream(files.convertedFile()))) {
-            converter.accept(is, os);
+            converter.convert(is, os);
             Files.writeString(files.hashFile(), hash);
-        } catch (IOException e) {
-            try {
-                Files.deleteIfExists(files.convertedFile());
-                Files.deleteIfExists(files.hashFile());
-            } catch (IOException ignored) {
-            }
+        } catch (Exception e) {
+            e = deleteAfterError(e, files.convertedFile());
+            e = deleteAfterError(e, files.hashFile);
             throw new RuntimeException("unable to write converted cache file", e);
         }
 
@@ -258,13 +252,18 @@ public class SampleCache {
         }
     }
 
+    public void markAsSeen(URI uri) {
+        seen.add(hash(uri));
+    }
+
     public void resetSeen() {
         seen.clear();
         unusedWarningId = 0;
     }
 
-    public void markAsSeen(URI uri) {
-        seen.add(hash(uri));
+    @FunctionalInterface
+    public interface Converter {
+        void convert(InputStream source, OutputStream target) throws Exception;
     }
 
     private static record Filenames(
