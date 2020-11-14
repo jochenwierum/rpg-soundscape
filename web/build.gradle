@@ -25,6 +25,8 @@ npm_run_build {
 }
 
 jar {
+    dependsOn npm_run_build
+
     from ("${buildDir}/webpack") {
         into("static")
     }
