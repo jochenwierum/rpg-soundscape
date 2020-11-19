@@ -12,6 +12,7 @@ import java.nio.file.Path;
 public class ApplicationSettings {
     private Audio audio = new Audio();
     private Cache cache = new Cache();
+    private Ui ui = new Ui();
 
     private Path libraryPath = null;
     private boolean debugParser = false;
@@ -51,9 +52,17 @@ public class ApplicationSettings {
         this.cache = cache;
     }
 
+    public Ui getUi() {
+        return ui;
+    }
+
+    public void setUi(Ui ui) {
+        this.ui = ui;
+    }
+
     public static class Audio {
         private String mixer;
-        private Backend backend = Backend.JAVA_SOUND_CLIP;
+        private Backend backend = Backend.JAVA_CLIP;
 
         public String getMixer() {
             return mixer;
@@ -73,8 +82,9 @@ public class ApplicationSettings {
 
         @SuppressWarnings("unused")
         public enum Backend {
-            JAVA_SOUND_CLIP,
-            JAVA_SOUND_STREAM
+            JAVA_CLIP,
+            JAVA_STREAM,
+            FFMPEG_STREAM
         }
     }
 
@@ -118,5 +128,41 @@ public class ApplicationSettings {
         public void setMaxFileSize(long maxFileSize) {
             this.maxFileSize = maxFileSize;
         }
+    }
+
+    public static class Ui {
+        private boolean allowFullscreen = true;
+        private ExitType exitType = ExitType.QUIT;
+        private String exitCommand = "";
+
+        public boolean isAllowFullscreen() {
+            return allowFullscreen;
+        }
+
+        public void setAllowFullscreen(boolean allowFullscreen) {
+            this.allowFullscreen = allowFullscreen;
+        }
+
+        public ExitType getExitType() {
+            return exitType;
+        }
+
+        public void setExitType(ExitType exitType) {
+            this.exitType = exitType;
+        }
+
+        public String getExitCommand() {
+            return exitCommand;
+        }
+
+        public void setExitCommand(String exitCommand) {
+            this.exitCommand = exitCommand;
+        }
+    }
+
+    public enum ExitType {
+        DISABLED,
+        QUIT,
+        EXIT_COMMAND
     }
 }

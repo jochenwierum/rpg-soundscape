@@ -35,7 +35,7 @@ public class FreesoundDownloader {
 
     private final HttpClient httpClient = HttpClient
             .newBuilder()
-            .connectTimeout(Duration.ofSeconds(2))
+            .connectTimeout(Duration.ofSeconds(8))
             .build();
 
     private volatile String accessToken;
@@ -91,7 +91,7 @@ public class FreesoundDownloader {
 
         HttpRequest finishedRequest = request.header("Authorization", "Bearer " + accessToken)
                 .GET()
-                .timeout(Duration.ofSeconds(8))
+                .timeout(Duration.ofSeconds(16))
                 .build();
 
         LOG.info("Starting download for {}", finishedRequest.uri());
@@ -125,7 +125,7 @@ public class FreesoundDownloader {
                             "code", code
                     )))
                     .header("content-type", "application/x-www-form-urlencoded")
-                    .timeout(Duration.ofSeconds(4))
+                    .timeout(Duration.ofSeconds(16))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());

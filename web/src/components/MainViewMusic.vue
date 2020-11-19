@@ -2,14 +2,14 @@
   <h2 class="maintitle">
     <span class="flex items-center" v-show="music!==''">
       <span class="pr-2">
+        <a href="#" class="appbutton" @click.prevent="musicCommand('restart')">
+          <image-reset class="w-10 h-10"/>
+        </a>
         <a href="#" class="appbutton" v-show="playing" @click.prevent="musicCommand('pause')">
           <image-pause class="w-10 h-10"/>
         </a>
         <a href="#" class="appbutton" v-show="!playing" @click.prevent="musicCommand('resume')">
           <image-play class="w-10 h-10"/>
-        </a>
-        <a href="#" class="appbutton" @click.prevent="musicCommand('restart')">
-          <image-reset class="w-10 h-10"/>
         </a>
       </span>
 

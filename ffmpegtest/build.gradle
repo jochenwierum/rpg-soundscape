@@ -1,8 +1,0 @@
-plugins {
-    id 'application'
-}
-
-dependencies {
-    implementation group: 'org.bytedeco', name: 'ffmpeg-platform', version: '4.3.1-1.5.4'
-    //implementation group: 'org.bytedeco', name: 'ffmpeg-platform-gpl', version: '4.3.1-1.5.4'
-}

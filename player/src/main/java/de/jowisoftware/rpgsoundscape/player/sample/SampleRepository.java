@@ -18,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,18 +33,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
 public class SampleRepository implements DisposableBean {
     private static final Logger LOG = LoggerFactory.getLogger(SampleRepository.class);
 
-    private static final Supplier<InputStream> ERROR_SUPPLIER =
-            () -> SampleRepository.class.getResourceAsStream("/error.wav");
-
     private static final UriLookupResult ERROR_ENTRY =
-            new UriLookupResult(SampleStatus.ERROR, false, null, ERROR_SUPPLIER);
+            new UriLookupResult(SampleStatus.ERROR, null, null);
 
     private final StatusReporter statusReporter;
     private final List<SampleResolver> resolvers;
@@ -136,7 +129,7 @@ public class SampleRepository implements DisposableBean {
             return;
         }
 
-        sources.put(uri, new UriLookupResult(SampleStatus.RESOLVING, false, null, ERROR_SUPPLIER));
+        sources.put(uri, new UriLookupResult(SampleStatus.RESOLVING, null, null));
 
         LOG.info("Resolving audio file '{}'...", uri);
 
@@ -162,22 +155,14 @@ public class SampleRepository implements DisposableBean {
 
     static record UriLookupResult(
             SampleStatus sampleStatus,
-            boolean isPreconverted,
             String attribution,
-            Supplier<InputStream> inputStreamSupplier) {
-
+            Path file) {
         public UriLookupResult asError() {
             return ERROR_ENTRY;
         }
 
-        public UriLookupResult asResolved(Path path, boolean isPreConverted, String attribution) {
-            return new UriLookupResult(SampleStatus.RESOLVED, isPreConverted, attribution, () -> {
-                try {
-                    return new BufferedInputStream(Files.newInputStream(path));
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
+        public UriLookupResult asResolved(Path path, String attribution) {
+            return new UriLookupResult(SampleStatus.RESOLVED, attribution, path);
         }
     }
 
@@ -245,27 +230,37 @@ public class SampleRepository implements DisposableBean {
 
             LOG.debug("Resolved audio file '{}' as file '{}'", uri, file);
             try {
-                cacheOrConvert(file, attribution);
+                if (!allowCaching) {
+                    LOG.debug("Caching is disabled for audio file '{}'", uri);
+                    updateStatus(uri, v -> v.asResolved(file, attribution));
+                } else {
+                    offerToCache(file, attribution);
+                }
             } catch (Exception e) {
                 reject(e);
             }
         }
 
-        private void cacheOrConvert(Path file, String attribution) throws Exception {
-            if (!allowCaching) {
-                LOG.debug("Caching is disabled for audio file '{}'", uri);
-                updateStatus(uri, v -> v.asResolved(file, false, attribution));
-            } else if (!audioConverter.requiresConversion(file)) {
+        private void offerToCache(Path file, String attribution) throws Exception {
+            if (!audioConverter.requiresConversion(file)) {
                 LOG.debug("Resolved audio file '{}' does not require conversion", uri);
-                updateStatus(uri, v -> v.asResolved(file, false, attribution));
+                updateStatus(uri, v -> v.asResolved(file, attribution));
             } else if (shouldCache(file)) {
-                planTask(() -> preCacheConversion(file, attribution));
+                planTask(() -> {
+                    try {
+                        Path result = sampleCache.resolveConverted(file, uri,
+                                (i, o) -> audioConverter.convert(i, o, applicationSettings.getCache().getCacheMaxSampleRate()));
+                        updateStatus(uri, v -> v.asResolved(result, attribution));
+                    } catch (Exception e) {
+                        reject(e);
+                    }
+                });
             } else {
                 sampleCache.getConvertedEntry(file, uri).ifPresentOrElse(
                         oldConverted -> updateStatus(uri, v ->
-                                v.asResolved(oldConverted, true, attribution)),
+                                v.asResolved(oldConverted, attribution)),
                         () -> updateStatus(uri,
-                                v -> v.asResolved(file, false, attribution))
+                                v -> v.asResolved(file, attribution))
                 );
             }
         }
@@ -283,16 +278,6 @@ public class SampleRepository implements DisposableBean {
                 return applicationSettings.getCache().getMaxFileSize() >= Files.size(file);
             } catch (IOException e) {
                 return false;
-            }
-        }
-
-        private void preCacheConversion(Path file, String attribution) {
-            try {
-                Path result = sampleCache.resolveConverted(file, uri,
-                        (i, o) -> audioConverter.convert(i, o, applicationSettings.getCache().getCacheMaxSampleRate()));
-                updateStatus(uri, v -> v.asResolved(result, true, attribution));
-            } catch (Exception e) {
-                reject(e);
             }
         }
     }

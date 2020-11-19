@@ -1,58 +1,35 @@
 package de.jowisoftware.rpgsoundscape.player.threading;
 
 import de.jowisoftware.rpgsoundscape.model.Statement;
-import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
 import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Consumer;
+import java.util.concurrent.Future;
 
-public class BlockExecutor {
+class BlockExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(BlockExecutor.class);
 
-    private final String name;
     private final Statement statement;
-    private final boolean looping;
-    protected final SoundscapePlayer soundscapePlayer;
-    protected final StatementInterpreterService statementInterpreterService;
-    protected final ExecutionThreadPool executionThreadPool;
-
-    private boolean quit = false;
-    private final Pause pause = new Pause(true);
+    private final StatementInterpreterService statementInterpreterService;
 
     private final CallStack stack = new CallStack();
-    protected final Consumer<Boolean> onStatusChange;
-    private final Runnable finished;
+    private final OnFinishedAction onFinishedAction;
 
-    protected TrackExecutionContext context;
+    private final BlockExecutionContext context;
+    private final Future<Void> future;
 
-    public BlockExecutor(
-            String name,
-            Statement statement,
-            boolean looping,
-            SoundscapePlayer soundscapePlayer,
-            Consumer<Boolean> onStatusChange,
-            Runnable finished,
-            StatementInterpreterService statementInterpreterService,
+    BlockExecutor(
+            BlockExecutionContext context, Statement statement,
+            OnFinishedAction onFinishedAction, StatementInterpreterService statementInterpreterService,
             ExecutionThreadPool executionThreadPool) {
-
-        this.name = name;
         this.statement = statement;
-        this.looping = looping;
-        this.soundscapePlayer = soundscapePlayer;
-        this.onStatusChange = onStatusChange;
-        this.finished = finished;
         this.statementInterpreterService = statementInterpreterService;
-        this.executionThreadPool = executionThreadPool;
+        this.onFinishedAction = onFinishedAction;
+        this.context = context;
 
         resetStack();
-        executionThreadPool.submitThread(this::runAsync);
-    }
-
-    protected void setContext(TrackExecutionContext context) {
-        this.context = context;
+        future = executionThreadPool.submitThread(this::runAsync);
     }
 
     private void resetStack() {
@@ -61,60 +38,42 @@ public class BlockExecutor {
 
     private void runAsync() {
         try {
-            while (!quit) {
-                pause.awaitToPass();
-                if (quit) {
+            while (!context.isQuit()) {
+                context.awaitPauseToPass();
+                if (context.isQuit()) {
                     return;
                 }
 
                 boolean hasMore = stack.next(context);
 
                 if (!hasMore) {
-                    resetStack();
-                    if (!looping) {
-                        pause.pause();
+                    switch (onFinishedAction) {
+                        case EXIT -> {
+                            LOG.trace("Thread {}: executed all statements - exiting", context.getName());
+                            return;
+                        }
+                        case PAUSE -> {
+                            LOG.trace("Thread {}: executed all statements - pause thread", context.getName());
+                            resetStack();
+                            context.pause();
+                        }
+                        case LOOP -> {
+                            LOG.trace("Thread {}: executed all statements - restarting", context.getName());
+                            resetStack();
+                        }
                     }
                 }
             }
         } catch (Exception e) {
             LOG.error("Unhandled exception in block execution", e);
         }
-
-        LOG.trace("Thread {}: executed all statements - run finished block", name);
-        finished.run();
     }
 
-    public synchronized void pause() {
-        if (pause.pause()) {
-            context.pauseTasks();
-            LOG.trace("Thread " + name + " is now paused");
-            onStatusChange.accept(false);
-        } else {
-            LOG.trace("Thread " + name + " already is paused");
-        }
+    Future<Void> getFuture() {
+        return future;
     }
 
-    public synchronized void resume() {
-        if (pause.resume()) {
-            LOG.trace("Thread " + name + " is now resumed");
-            context.resumeTasks();
-            onStatusChange.accept(true);
-        } else {
-            LOG.trace("Thread " + name + " already is resumed");
-        }
-    }
-
-    public void abort() {
-        quit = true;
-        pause.resume();
-        context.abortTasks();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isLooping() {
-        return looping;
+    enum OnFinishedAction {
+        LOOP, PAUSE, EXIT
     }
 }

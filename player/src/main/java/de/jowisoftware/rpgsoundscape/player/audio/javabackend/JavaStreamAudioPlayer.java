@@ -1,11 +1,10 @@
 package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioConverter;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.sample.LookupResult;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +18,12 @@ import javax.sound.sampled.SourceDataLine;
 public class JavaStreamAudioPlayer extends AbstractJavaAudioPlayer {
     private static final Logger LOG = LoggerFactory.getLogger(JavaStreamAudioPlayer.class);
 
-    public JavaStreamAudioPlayer(SampleRepository sampleRepository, AudioConverter audioConverter, ApplicationSettings applicationSettings) {
-        super(sampleRepository, audioConverter, applicationSettings);
+    public JavaStreamAudioPlayer(SampleRepository sampleRepository, ApplicationSettings applicationSettings) {
+        super(sampleRepository, applicationSettings);
     }
 
     @Override
-    protected void playStream(AudioInputStream is, TrackExecutionContext context, Play play, LookupResult resolvedSample)
+    protected void playStream(AudioInputStream is, BlockExecutionContext context, Play play, LookupResult resolvedSample)
             throws Exception {
         SourceDataLine line = createLine(is.getFormat());
         try {

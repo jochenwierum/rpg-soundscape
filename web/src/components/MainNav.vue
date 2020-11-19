@@ -20,12 +20,21 @@
       <nav-button v-show="problemsCount > 0" :active="active === 'problems'" @click="$emit('select', 'problems')">
         <image-errors class="h-4 w-4"/>
         Problems
-        <span class="inline-block rounded-full text-white bg-red-500 px-2 text-xs font-bold text-sm">{{ problemsCount }}</span>
+        <span class="inline-block rounded-full text-white bg-red-500 px-2 text-xs font-bold text-sm">{{
+            problemsCount
+          }}</span>
       </nav-button>
     </ul>
-    <button @click="requestFullScreen" class="m-4">
-      <image-fullscreen class="h-6 w-6"/>
-    </button>
+
+    <span class="mr-4">
+      <button v-if="exit" @click="sendExit" class="ml-3">
+        <image-shutdown class="h-8 w-8"/>
+      </button>
+
+      <button v-if="fullscreen" @click="requestFullScreen" class="ml-3">
+        <image-fullscreen class="h-8 w-8"/>
+      </button>
+    </span>
   </nav>
 </template>
 
@@ -38,15 +47,37 @@ import ImageMusic from "@/components/icons/ImageMusic";
 import ImageEffect from "@/components/icons/ImageEffect";
 import ImageErrors from "@/components/icons/ImageErrors";
 import ImageFullscreen from "@/components/icons/ImageFullscreen";
+import ImageShutdown from "@/components/icons/ImageShutdown";
 
 export default {
   name: 'MainNav',
-  components: {ImageFullscreen, ImageErrors, ImageEffect, ImageMusic, ImageSoundscape, ImagePlayer, NavButton},
+  components: {
+    ImageShutdown,
+    ImageFullscreen, ImageErrors, ImageEffect, ImageMusic, ImageSoundscape, ImagePlayer, NavButton
+  },
+
+  data() {
+    return {
+      exit: false,
+      fullscreen: false
+    }
+  },
+
   props: {
     active: {type: String, required: true},
     problemsCount: {type: Number, default: () => 0}
   },
   emits: ['select'],
+
+  created() {
+    fetch('/api/system/config')
+        .then(response => response.json())
+        .then(data => {
+          this.exit = data.exit;
+          this.fullscreen = data.fullscreen;
+        })
+        .catch(e => console.log("Could not fetch config:", e));
+  },
 
   methods: {
     requestFullScreen() {
@@ -55,6 +86,15 @@ export default {
       } else {
         document.documentElement.requestFullscreen();
       }
+    },
+
+    sendExit() {
+      fetch('/api/system/exit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
     }
   }
 }

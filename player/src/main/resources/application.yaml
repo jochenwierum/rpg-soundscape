@@ -2,17 +2,38 @@ spring:
   main.banner-mode: 'off'
   lifecycle.timeout-per-shutdown-phase: 20s
 
-  resources:
-    static-locations: classpath:/static/
-    cache.cachecontrol:
-      max-age: 120
-      must-revalidate: true
-    chain:
-      enabled: true
-      compressed: true # look for .br and .gz static files
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        cachecontrol:
+          max-age: 120
+          must-revalidate: true
+      chain:
+        enabled: true
+        compressed: true
 
 server:
   port: 8008
+
+management:
+  endpoints:
+    jmx.exposure.include: '*'
+    web.exposure.include: '*'
+  endpoint:
+    beans.enabled: true
+    conditions.enabled: true
+    configprops.enabled: true
+    env.enabled: true
+    health.enabled: true
+    health.probes.enabled: true
+    heapdump.enabled: true
+    httptrace.enabled: true
+    info.enabled: true
+    loggers.enabled: true
+    mappings.enabled: true
+    startup.enabled: true
+    threaddump.enabled: true
 
 application:
   freesound:
@@ -20,4 +41,5 @@ application:
     secret: OHwOZdqN41JCG4w4fsVMF0v7z1U8QsckzOMeMRCt
 
 logging.level:
+  root: WARN
   de.jowisoftware.rpgsoundscape: INFO

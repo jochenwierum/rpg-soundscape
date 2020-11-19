@@ -14,7 +14,7 @@ public class CallStack {
         stack.push(threadStep);
     }
 
-    public boolean next(TrackExecutionContext context) {
+    public boolean next(BlockExecutionContext context) {
         StackResult next = stack.peek().apply(context);
         if (next instanceof Finish) {
             stack.pop();

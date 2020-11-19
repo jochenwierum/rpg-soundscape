@@ -17,7 +17,8 @@ import java.util.Optional;
 public final class JavaAudioUtils {
     private static final Logger LOG = LoggerFactory.getLogger(JavaAudioUtils.class);
 
-    private JavaAudioUtils(){}
+    private JavaAudioUtils() {
+    }
 
     public static void modifyAmplification(Play play, Line line) {
         play.collectModifications(AmplificationModification.class, AmplificationModification::merge)

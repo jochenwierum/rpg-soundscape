@@ -1,16 +1,12 @@
 package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioConverter;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.sample.LookupResult;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
-import de.jowisoftware.rpgsoundscape.player.sample.SampleStatus;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -25,17 +21,15 @@ import java.util.Optional;
 import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.bytesToPlay;
 import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.skipStart;
 
-@Component
-@ConditionalOnProperty(name = "application.audio.backend", matchIfMissing = true, havingValue = "JAVA_SOUND_CLIP")
 public class JavaClipAudioPlayer extends AbstractJavaAudioPlayer {
     private static final Logger LOG = LoggerFactory.getLogger(JavaClipAudioPlayer.class);
 
-    public JavaClipAudioPlayer(SampleRepository sampleRepository, AudioConverter audioConverter, ApplicationSettings applicationSettings) {
-        super(sampleRepository, audioConverter, applicationSettings);
+    public JavaClipAudioPlayer(SampleRepository sampleRepository, ApplicationSettings applicationSettings) {
+        super(sampleRepository, applicationSettings);
     }
 
     @Override
-    protected void playStream(AudioInputStream inputStream, TrackExecutionContext context, Play play, LookupResult resolvedSample)
+    protected void playStream(AudioInputStream inputStream, BlockExecutionContext context, Play play, LookupResult resolvedSample)
             throws Exception {
         try (Clip clip = createClip(inputStream.getFormat())) {
             try (inputStream) {
@@ -50,19 +44,15 @@ public class JavaClipAudioPlayer extends AbstractJavaAudioPlayer {
     }
 
     private byte[] getBytesToPlay(AudioInputStream inputStream, Play play, LookupResult resolvedSample) {
-        Optional<byte[]> bytesToPlay = Optional.empty();
-
-        if (resolvedSample.sampleStatus() != SampleStatus.ERROR) {
-            skipStart(play, inputStream);
-            bytesToPlay = bytesToPlay(play, inputStream.getFormat())
-                    .map(byteCount -> {
-                        try {
-                            return inputStream.readNBytes(byteCount.intValue());
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
-        }
+        skipStart(play, inputStream);
+        Optional<byte[]> bytesToPlay = bytesToPlay(play, inputStream.getFormat())
+                .map(byteCount -> {
+                    try {
+                        return inputStream.readNBytes(byteCount.intValue());
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
 
         return bytesToPlay.orElseGet(() -> {
             try {

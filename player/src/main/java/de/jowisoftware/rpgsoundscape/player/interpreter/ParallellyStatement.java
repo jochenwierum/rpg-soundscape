@@ -1,36 +1,30 @@
 package de.jowisoftware.rpgsoundscape.player.interpreter;
 
 import de.jowisoftware.rpgsoundscape.model.Parallelly;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.AbstractAsyncInterruptibleTaskAdapter;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-public class ParallellyStatement extends AbstractAsyncInterruptibleTaskAdapter {
-    public ParallellyStatement(TrackExecutionContext context, Parallelly parallelly) {
-        var remaining = new AtomicInteger(parallelly.statements().size());
+public class ParallellyStatement {
+    private final BlockExecutionContext context;
+    private final Parallelly parallelly;
 
-        parallelly.statements().forEach(statement ->
-                context.getTrackExecutor().createBlockExecutor(statement, () -> {
-                    if (remaining.decrementAndGet() == 0) {
-                        finish();
+    public ParallellyStatement(BlockExecutionContext context, Parallelly parallelly) {
+        this.context = context;
+        this.parallelly = parallelly;
+    }
+
+    public void run() {
+        parallelly.statements().stream()
+                .map(s -> context.startBlockExecutor(s, false))
+                .collect(Collectors.toList())
+                .forEach(f -> {
+                    try {
+                        f.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
                     }
-                })
-        );
-    }
-
-    @Override
-    public void pause() {
-        // blocking sub statement's pause() methods are called too, so no need to do anything here
-    }
-
-    @Override
-    public void startOrResume() {
-        // blocking sub statement's startOrResume() methods are called too, so no need to do anything here
-    }
-
-    @Override
-    public void abort() {
-        // blocking sub statement's abort() methods are called too, so no need to do anything here
+                });
     }
 }

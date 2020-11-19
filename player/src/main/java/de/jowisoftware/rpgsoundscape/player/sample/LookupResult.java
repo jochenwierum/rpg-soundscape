@@ -4,9 +4,7 @@ import de.jowisoftware.rpgsoundscape.model.Modification.AttributionModification;
 import de.jowisoftware.rpgsoundscape.model.Sample;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository.UriLookupResult;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.nio.file.Path;
 
 public class LookupResult {
     private final UriLookupResult uriLookupResult;
@@ -17,12 +15,8 @@ public class LookupResult {
         this.sample = sample;
     }
 
-    public InputStream open() throws IOException {
-        try {
-            return uriLookupResult.inputStreamSupplier().get();
-        } catch (UncheckedIOException e) {
-            throw e.getCause();
-        }
+    public Path file() {
+        return uriLookupResult.file();
     }
 
     public Sample sample() {
@@ -31,10 +25,6 @@ public class LookupResult {
 
     public SampleStatus sampleStatus() {
         return uriLookupResult.sampleStatus();
-    }
-
-    public boolean isPreconverted() {
-        return uriLookupResult.isPreconverted();
     }
 
     public String attribution() {

@@ -1,14 +1,14 @@
 <template>
   <h2 class="maintitle">
     <span class="flex items-center">
-        <span v-show="soundscape!==''">
-          <a href="#" class="appbutton" @click.prevent="soundscapeCommand('reset')">
-            <image-reset class="w-8 h-8"/>
-          </a>
-          <a href="#" class="appbutton" @click.prevent="soundscapeCommand('pauseAll')">
-            <image-pause class="w-8 h-8"/>
-          </a>
-        </span>
+      <span v-show="soundscape!==''">
+        <a href="#" class="appbutton" @click.prevent="soundscapeCommand('reset')">
+          <image-reset class="w-8 h-8"/>
+        </a>
+        <a href="#" class="appbutton" @click.prevent="soundscapeCommand('pauseAll')">
+          <image-pause class="w-8 h-8"/>
+        </a>
+      </span>
 
       <span class="flex-grow text-center text-2xl font-bold">
           <image-soundscape class="w-6 h-6 pr-2"/>

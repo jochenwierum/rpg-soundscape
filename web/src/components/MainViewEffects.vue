@@ -3,7 +3,7 @@
     <image-effect class="w-8 h-8"/>
     Effects
   </h2>
-  <ul class="m-4">
+  <ul>
     <li v-for="effect in effects" :key="effect">
       <clip-control
           :track="track(effect)"

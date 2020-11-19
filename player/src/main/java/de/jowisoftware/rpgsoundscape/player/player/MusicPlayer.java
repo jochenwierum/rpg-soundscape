@@ -1,46 +1,38 @@
 package de.jowisoftware.rpgsoundscape.player.player;
 
 import de.jowisoftware.rpgsoundscape.model.Effect;
+import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
 import de.jowisoftware.rpgsoundscape.player.library.LibraryUpdatedEvent;
 import de.jowisoftware.rpgsoundscape.player.library.MusicLibrary;
-import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
-import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
 import de.jowisoftware.rpgsoundscape.player.status.StatusReporter;
+import de.jowisoftware.rpgsoundscape.player.status.event.MusicChangedEvent;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import de.jowisoftware.rpgsoundscape.player.threading.ExecutionThreadPool;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
-import de.jowisoftware.rpgsoundscape.player.threading.ThreadStep;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.function.Consumer;
+
 @Component
 public class MusicPlayer {
-    private static final Logger LOG = LoggerFactory.getLogger(MusicPlayer.class);
-
     private final StatusReporter statusReporter;
+    private final ExecutionThreadPool executionThreadPool;
     private final StatementInterpreterService statementInterpreterService;
     private final MusicLibrary library;
 
-    private final Pause pause = new Pause(true);
-    private volatile ThreadStep currentStep;
-    private volatile boolean quit;
-
-    private final TrackExecutionContext context = new TrackExecutionContext("music", null, null);
+    private volatile BlockExecutionContext context;
     private volatile Effect currentMusic = null;
 
     public MusicPlayer(
             StatusReporter statusReporter,
             ExecutionThreadPool executionThreadPool, StatementInterpreterService statementInterpreterService, MusicLibrary musicLibrary) {
         this.statusReporter = statusReporter;
+        this.executionThreadPool = executionThreadPool;
         this.statementInterpreterService = statementInterpreterService;
         this.library = musicLibrary;
 
         executionThreadPool.onShutdown(this::quit);
-        executionThreadPool.submitThread(this::runAsync);
     }
-
 
     @EventListener(LibraryUpdatedEvent.class)
     public void libraryReloaded() {
@@ -51,35 +43,15 @@ public class MusicPlayer {
         library.get(currentMusic.name()).ifPresentOrElse(
                 this::switchMusic,
                 () -> {
-                    if (currentStep == null) {
+                    if (context == null) {
                         return;
                     }
 
-                    pause.pause();
-                    context.abortTasks();
+                    context.abort();
                     this.currentMusic = null;
-                    this.currentStep = null;
                     reportStatus(false);
                 }
         );
-    }
-
-    private void runAsync() {
-        while (!quit) {
-            pause.awaitToPass();
-            if (quit) {
-                return;
-            }
-
-            if (currentStep != null) {
-                reportStatus(true);
-                LOG.trace("Starting to play music " + currentMusic);
-                currentStep.apply(context);
-                LOG.trace("Music finished: " + currentMusic);
-            } else {
-                pause.pause(); // should never happen
-            }
-        }
     }
 
     private void reportStatus(boolean playing) {
@@ -87,9 +59,9 @@ public class MusicPlayer {
     }
 
     private void quit() {
-        this.quit = true;
-        context.abortTasks();
-        pause.resume();
+        if (context != null) {
+            context.abort();
+        }
     }
 
     public synchronized void switchMusic(Effect music) {
@@ -97,42 +69,42 @@ public class MusicPlayer {
             return;
         }
 
-        if (currentStep != null) {
-            context.abortTasks();
+        if (context != null) {
+            context.abort();
         }
 
         currentMusic = music;
-        currentStep = statementInterpreterService.createStep(music.play());
-        pause.resume();
+        recreateContext();
+    }
+
+    private void recreateContext() {
+        context = new BlockExecutionContext("music", this::reportStatus,
+                statementInterpreterService, executionThreadPool);
+
+        context.resume();
+        context.startBlockExecutor(currentMusic.play(), true);
     }
 
     public void pause() {
-        if (currentStep == null) {
-            return;
-        }
-
-        pause.pause();
-        context.pauseTasks();
-        reportStatus(false);
+        ifContext(BlockExecutionContext::pause);
     }
 
     public void resume() {
-        if (currentStep == null) {
-            return;
-        }
-
-        pause.resume();
-        context.resumeTasks();
-        reportStatus(true);
+        ifContext(BlockExecutionContext::resume);
     }
 
     public void restart() {
-        if (currentStep == null) {
+        ifContext(c -> {
+            c.abort();
+            recreateContext();
+        });
+    }
+
+    private void ifContext(Consumer<BlockExecutionContext> action) {
+        if (context == null) {
             return;
         }
 
-        pause.resume();
-        context.abortTasks();
-        reportStatus(true);
+        action.accept(context);
     }
 }

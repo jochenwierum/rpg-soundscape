@@ -1,7 +1,12 @@
 plugins {
     id 'application'
-    id 'org.springframework.boot' version '2.3.5.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'org.springframework.boot' version '2.4.0'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+}
+
+ext {
+    version_javacpp = '1.5.4'
+    version_ffmpeg = "4.3.1-$version_javacpp"
 }
 
 repositories {
@@ -12,36 +17,42 @@ dependencies {
     implementation project(':standalone-parser')
     runtimeOnly project(':web')
 
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf'
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-actuator') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2'
+
+    runtime group: 'com.lmax', name: 'disruptor', version: '3.3.6'
 
     implementation group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '1.9.5.4'
     implementation group: 'com.googlecode.soundlibs', name: 'vorbisspi', version: '1.0.3.3'
 
+    implementation(group: 'org.bytedeco', name: 'ffmpeg-platform', version: "$version_ffmpeg") {
+        exclude group: 'org.bytedeco', module: 'ffmpeg'
+        exclude group: 'org.bytedeco', module: 'javacpp'
+    }
+    implementation group: 'org.bytedeco', name: 'ffmpeg', version: "$version_ffmpeg"
+    runtime group: 'org.bytedeco', name: 'ffmpeg', version: "$version_ffmpeg", classifier: "linux-x86_64"
+    runtime group: 'org.bytedeco', name: 'ffmpeg', version: "$version_ffmpeg", classifier: "linux-armhf"
+    runtime group: 'org.bytedeco', name: 'ffmpeg', version: "$version_ffmpeg", classifier: "windows-x86_64"
+    runtime group: 'org.bytedeco', name: 'javacpp', version: "$version_javacpp", classifier: "linux-x86_64"
+    runtime group: 'org.bytedeco', name: 'javacpp', version: "$version_javacpp", classifier: "linux-armhf"
+    runtime group: 'org.bytedeco', name: 'javacpp', version: "$version_javacpp", classifier: "windows-x86_64"
+
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 test {
     useJUnitPlatform()
 }
-
-/*
-distributions {
-    main {
-        distributionBaseName = 'soundscape'
-        setVersion('')
-
-        contents {
-            from(generateHtml) {
-                into 'docs'
-            }
-            from(file("${project.projectDir}/src/main/templates"))
-        }
-    }
-}
-*/
 
 springBoot {
     buildInfo()

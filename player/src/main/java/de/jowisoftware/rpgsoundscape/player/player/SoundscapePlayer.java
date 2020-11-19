@@ -2,14 +2,13 @@ package de.jowisoftware.rpgsoundscape.player.player;
 
 import de.jowisoftware.rpgsoundscape.model.Soundscape;
 import de.jowisoftware.rpgsoundscape.model.Track;
+import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
 import de.jowisoftware.rpgsoundscape.player.library.LibraryUpdatedEvent;
 import de.jowisoftware.rpgsoundscape.player.library.SoundscapeLibrary;
-import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterService;
-import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
 import de.jowisoftware.rpgsoundscape.player.status.StatusReporter;
-import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutor;
+import de.jowisoftware.rpgsoundscape.player.status.event.SoundscapeChangeEvent;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import de.jowisoftware.rpgsoundscape.player.threading.ExecutionThreadPool;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutor;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -21,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Component
@@ -30,7 +30,7 @@ public class SoundscapePlayer implements DisposableBean {
     private final StatusReporter statusReporter;
     private final SoundscapeLibrary library;
 
-    private final Set<TrackExecutor> tracks = ConcurrentHashMap.newKeySet();
+    private final Set<BlockExecutionContext> contexts = ConcurrentHashMap.newKeySet();
     private final Set<String> running = ConcurrentHashMap.newKeySet();
     private Soundscape soundscape;
 
@@ -63,27 +63,30 @@ public class SoundscapePlayer implements DisposableBean {
     }
 
     private void addTrackExecution(String name, Track track) {
-        tracks.add(new TrackExecutor(name, track, this, (nowRunning) -> {
+        Consumer<Boolean> statusChanged = (nowRunning) -> {
             if (!nowRunning && this.running.remove(name)) {
                 broadcastState();
             } else if (nowRunning && this.running.add(name)) {
                 broadcastState();
             }
-        }, statementInterpreterService, executionThreadPool));
+        };
+
+        contexts.add(new BlockExecutionContext(track, statusChanged, this,
+                statementInterpreterService, executionThreadPool));
     }
 
     private void clear() {
-        tracks.forEach(BlockExecutor::abort);
-        tracks.clear();
+        contexts.forEach(BlockExecutionContext::abort);
+        contexts.clear();
         running.clear();
     }
 
-    public List<TrackExecutor> getTrackExecutors() {
-        return new ArrayList<>(tracks);
+    public List<BlockExecutionContext> getTrackContexts() {
+        return new ArrayList<>(contexts);
     }
 
-    public Optional<TrackExecutor> getTaskExecutor(String track) {
-        return tracks.stream()
+    public Optional<BlockExecutionContext> getTrackContext(String track) {
+        return contexts.stream()
                 .filter(t -> t.getName().equals(track))
                 .findAny();
     }
@@ -111,13 +114,13 @@ public class SoundscapePlayer implements DisposableBean {
 
         initTracks(soundscape);
 
-        for (TrackExecutor track : tracks) {
-            Boolean oldValue = oldExisting.get(track.getName());
+        for (BlockExecutionContext context : contexts) {
+            Boolean oldValue = oldExisting.get(context.getName());
             if (oldValue != null && oldValue) {
-                track.resume();
+                context.resume();
             }
             if (oldValue != null && !oldValue) {
-                track.pause();
+                context.pause();
             }
         }
     }
@@ -125,7 +128,7 @@ public class SoundscapePlayer implements DisposableBean {
     public synchronized void resetAllTracks() {
         // TODO: reduce number of events?
         // pauseAll = true;
-        tracks.forEach(executor -> {
+        contexts.forEach(executor -> {
             Track track = soundscape.tracks().get(executor.getName());
 
             if (track != null && track.autoStart()) {
@@ -139,25 +142,25 @@ public class SoundscapePlayer implements DisposableBean {
     }
 
     public synchronized void resumeTrack(String track) {
-        Optional<TrackExecutor> thread = getTaskExecutor(track);
-        if (thread.isEmpty()) {
+        Optional<BlockExecutionContext> context = getTrackContext(track);
+        if (context.isEmpty()) {
             return;
         }
 
-        thread.get().resume();
+        context.get().resume();
     }
 
     public synchronized void pauseTrack(String track) {
-        Optional<TrackExecutor> thread = getTaskExecutor(track);
-        if (thread.isEmpty()) {
+        Optional<BlockExecutionContext> context = getTrackContext(track);
+        if (context.isEmpty()) {
             return;
         }
 
-        thread.get().pause();
+        context.get().pause();
     }
 
     public synchronized void pauseAll() {
-        tracks.forEach(BlockExecutor::pause);
+        contexts.forEach(BlockExecutionContext::pause);
     }
 
     private void broadcastState() {

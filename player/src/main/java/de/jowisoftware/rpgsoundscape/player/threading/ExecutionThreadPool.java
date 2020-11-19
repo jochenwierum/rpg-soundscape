@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Component
 public class ExecutionThreadPool implements DisposableBean {
@@ -17,14 +18,14 @@ public class ExecutionThreadPool implements DisposableBean {
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final List<Runnable> shutdownHooks = Collections.synchronizedList(new ArrayList<>());
 
-    public void submitThread(Runnable r) {
-        threadPool.submit(() -> {
+    public Future<Void> submitThread(Runnable r) {
+        return threadPool.submit(() -> {
             try {
                 r.run();
             } catch (RuntimeException e) {
                 LOG.error("Unhandled exception in worker thread", e);
             }
-        });
+        }, null);
     }
 
     public void onShutdown(Runnable runnable) {

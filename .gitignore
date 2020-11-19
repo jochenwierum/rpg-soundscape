@@ -4,6 +4,7 @@
 *.zip
 
 .cache
+config.properties
 
 .gradle
 build

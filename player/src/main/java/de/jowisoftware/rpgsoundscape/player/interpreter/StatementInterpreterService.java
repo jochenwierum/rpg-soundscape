@@ -16,8 +16,7 @@ import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
 import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
 import de.jowisoftware.rpgsoundscape.player.threading.StackResult;
 import de.jowisoftware.rpgsoundscape.player.threading.ThreadStep;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutionContext;
-import de.jowisoftware.rpgsoundscape.player.threading.TrackExecutor;
+import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -30,11 +29,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class StatementInterpreterService {
     private static final Logger LOG = LoggerFactory.getLogger(StatementInterpreterService.class);
 
-    private final PriorityTimer timer;
     private final AudioPlayer audioPlayer;
 
-    public StatementInterpreterService(PriorityTimer timer, AudioPlayer audioPlayer) {
-        this.timer = timer;
+    public StatementInterpreterService(AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
     }
 
@@ -100,7 +97,7 @@ public class StatementInterpreterService {
         return context -> {
             long i = remaining.decrementAndGet();
             trace(context, "Track: {}: next iteration (i = {} of {})",
-                    context.getTrackExecutor().getName(), count - i, count);
+                    context.getName(), count - i, count);
             if (i == -1) {
                 return StackResult.finish();
             } else {
@@ -115,8 +112,10 @@ public class StatementInterpreterService {
             long millis = Math.max(25, range.max()
                     .map(max -> randomlyBetween(range.min().toMillis(), max.toMillis()))
                     .orElse(range.min().toMillis()));
-            trace(context, "Track: {}: sleeping {}ms", context.getTrackExecutor().getName(), millis);
-            context.runInterruptible(timer.createTask(millis));
+
+            trace(context, "Track: {}: sleeping {}ms", context.getName(), millis);
+            context.runInterruptible(new SleepStatement(millis));
+            trace(context, "Track: {}: sleep finished");
             return StackResult.finish();
         };
     }
@@ -136,7 +135,7 @@ public class StatementInterpreterService {
             }
 
             trace(context, "Track {}: Selected {}. option (summed weight={} of total weight={})",
-                    context.getTrackExecutor().getName(), i, selectedWeight, totalWeight);
+                    context.getName(), i, selectedWeight, totalWeight);
             RandomChoice selectedChoice = statement.choices().get(i);
 
             return StackResult.replace(createStep(selectedChoice.statement()));
@@ -145,18 +144,18 @@ public class StatementInterpreterService {
 
     private ThreadStep pause(Pause statement) {
         return context -> {
-            SoundscapePlayer executor = context.getSoundscapeExecutor();
+            SoundscapePlayer player = context.getSoundscapePlayer();
             switch (statement.pauseMode()) {
-                case THIS -> context.getTrackExecutor().pause();
-                case SPECIFIC -> executor.getTaskExecutor(statement.track())
+                case THIS -> context.pause();
+                case SPECIFIC -> player.getTrackContext(statement.track())
                         .orElseThrow(() -> new IllegalStateException("Track '" + statement.track() + "' does not exist"))
                         .pause();
-                case ALL -> executor.getTrackExecutors()
-                        .forEach(TrackExecutor::pause);
-                case OTHER -> executor.getTrackExecutors()
+                case ALL -> player.getTrackContexts()
+                        .forEach(BlockExecutionContext::pause);
+                case OTHER -> player.getTrackContexts()
                         .stream()
-                        .filter(t -> t.getName().equals(context.getTrackExecutor().getName()))
-                        .forEach(TrackExecutor::pause);
+                        .filter(t -> t.getName().equals(context.getName()))
+                        .forEach(BlockExecutionContext::pause);
             }
 
             return StackResult.finish();
@@ -165,14 +164,14 @@ public class StatementInterpreterService {
 
     private ThreadStep resume(Resume statement) {
         return context -> {
-            SoundscapePlayer executor = context.getSoundscapeExecutor();
+            SoundscapePlayer player = context.getSoundscapePlayer();
 
             switch (statement.resumeMode()) {
-                case LOOPING -> context.getSoundscapeExecutor().getTrackExecutors()
+                case LOOPING -> context.getSoundscapePlayer().getTrackContexts()
                         .stream()
-                        .filter(TrackExecutor::isLooping)
-                        .forEach(TrackExecutor::pause);
-                case SPECIFIC -> executor.getTaskExecutor(statement.track())
+                        .filter(BlockExecutionContext::isLooping)
+                        .forEach(BlockExecutionContext::pause);
+                case SPECIFIC -> player.getTrackContext(statement.track())
                         .orElseThrow(() -> new IllegalStateException("Track '" + statement.track() + "' does not exist"))
                         .resume();
             }
@@ -186,7 +185,8 @@ public class StatementInterpreterService {
 
     private ThreadStep parallelly(Parallelly statement) {
         return context -> {
-            context.runInterruptible(new ParallellyStatement(context, statement));
+            ParallellyStatement runner = new ParallellyStatement(context, statement);
+            runner.run();
             return StackResult.finish();
         };
     }
@@ -196,7 +196,7 @@ public class StatementInterpreterService {
         return minInclusive + (long) (Math.random() * (range + 1));
     }
 
-    private void trace(TrackExecutionContext context, String message, Object... args) {
+    private void trace(BlockExecutionContext context, String message, Object... args) {
         LOG.trace("Thread " + context.getName() + ": " + message, args);
     }
 }
