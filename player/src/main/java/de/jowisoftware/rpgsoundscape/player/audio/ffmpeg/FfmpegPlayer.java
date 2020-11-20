@@ -27,7 +27,7 @@ public class FfmpegPlayer extends AudioPlayer {
         long skipBytes = bytesToSkip(play, FfmpegClip.TARGET_FORMAT).orElse(0L);
         long playBytes = bytesToPlay(play, FfmpegClip.TARGET_FORMAT).orElse(-1L);
 
-        context.runInterruptible(new FfmpegClip(file, skipBytes, playBytes));
+        context.runInterruptible(new FfmpegClip(play, file, skipBytes, playBytes));
         LOG.trace("Completed play of {}", play);
     }
 }

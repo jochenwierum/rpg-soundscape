@@ -51,7 +51,8 @@ public class SystemController {
     public Map<String, Boolean> config() {
         return Map.of(
                 "fullscreen", applicationSettings.getUi().isAllowFullscreen(),
-                "exit", applicationSettings.getUi().getExitType() != ExitType.DISABLED
+                "exit", applicationSettings.getUi().getExitType() != ExitType.DISABLED,
+                "logs", applicationSettings.getUi().getLogs().isEnabled()
         );
     }
 

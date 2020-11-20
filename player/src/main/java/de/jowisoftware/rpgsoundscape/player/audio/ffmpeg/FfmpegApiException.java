@@ -60,7 +60,6 @@ public class FfmpegApiException extends RuntimeException {
 
     public FfmpegApiException(int res, String message) {
         super(message + ", status: " + res + getStatusText(res).map(s -> " (" + s + ")").orElse(""));
-        LOG.warn("About to throw: " + getMessage());
     }
 
     private static Optional<String> getStatusText(int res) {

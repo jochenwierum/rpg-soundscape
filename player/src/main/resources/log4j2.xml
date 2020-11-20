@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration
+        status="WARN"
+        packages="de.jowisoftware.rpgsoundscape.player.status.logs"
+>
     <Properties>
         <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
         <Property name="LOG_LEVEL_PATTERN">%5p</Property>
@@ -11,20 +14,23 @@
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${sys:CONSOLE_LOG_PATTERN}" charset="UTF-8"/>
         </Console>
+
+        <CachingAppender name="cachingAppender" />
     </Appenders>
 
     <Loggers>
-        <AsyncLogger name="org.apache.catalina.startup.DigesterFactory" level="error" />
-        <AsyncLogger name="org.apache.catalina.util.LifecycleBase" level="error" />
-        <AsyncLogger name="org.apache.coyote.http11.Http11NioProtocol" level="warn" />
+        <AsyncLogger name="org.apache.catalina.startup.DigesterFactory" level="error"/>
+        <AsyncLogger name="org.apache.catalina.util.LifecycleBase" level="error"/>
+        <AsyncLogger name="org.apache.coyote.http11.Http11NioProtocol" level="warn"/>
         <AsyncLogger name="org.apache.sshd.common.util.SecurityUtils" level="warn"/>
-        <AsyncLogger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn" />
-        <AsyncLogger name="org.eclipse.jetty.util.component.AbstractLifeCycle" level="error" />
-        <AsyncLogger name="org.hibernate.validator.internal.util.Version" level="warn" />
+        <AsyncLogger name="org.apache.tomcat.util.net.NioSelectorPool" level="warn"/>
+        <AsyncLogger name="org.eclipse.jetty.util.component.AbstractLifeCycle" level="error"/>
+        <AsyncLogger name="org.hibernate.validator.internal.util.Version" level="warn"/>
         <AsyncLogger name="org.springframework.boot.actuate.endpoint.jmx" level="warn"/>
 
         <AsyncRoot level="INFO">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="cachingAppender"/>
         </AsyncRoot>
     </Loggers>
 </Configuration>

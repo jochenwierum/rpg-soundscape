@@ -48,6 +48,7 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
 
     public ApplicationStatusCollector(ApplicationSettings applicationSettings) {
         this.debugParser = applicationSettings.isDebugParser();
+        readingThread.setDaemon(true);
         readingThread.start();
     }
 

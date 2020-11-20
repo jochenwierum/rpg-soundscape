@@ -3,7 +3,6 @@ package de.jowisoftware.rpgsoundscape.player;
 import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,7 @@ public class Main {
         }
 
         SpringApplication application = new SpringApplication(Main.class);
-        application.setApplicationStartup(new BufferingApplicationStartup(1500));
+        //application.setApplicationStartup(new BufferingApplicationStartup(1500));
         application.run(argList.toArray(String[]::new));
     }
 }

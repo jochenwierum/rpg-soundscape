@@ -96,8 +96,10 @@ public class DebounceService implements DisposableBean {
                         lastValue = updateValue;
                     }
                 }
-            }, name);
+            });
 
+            t.setName(name);
+            t.setDaemon(true);
             t.start();
             return t;
         }

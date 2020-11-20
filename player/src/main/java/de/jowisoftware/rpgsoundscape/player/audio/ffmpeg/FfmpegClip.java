@@ -1,5 +1,6 @@
 package de.jowisoftware.rpgsoundscape.player.audio.ffmpeg;
 
+import de.jowisoftware.rpgsoundscape.model.Play;
 import de.jowisoftware.rpgsoundscape.player.threading.concurrency.InterruptibleTask;
 import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
@@ -19,7 +20,9 @@ import javax.sound.sampled.DataLine.Info;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.modifyAmplification;
 import static org.bytedeco.ffmpeg.global.avcodec.av_init_packet;
+import static org.bytedeco.ffmpeg.global.avcodec.av_packet_alloc;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_unref;
 import static org.bytedeco.ffmpeg.global.avcodec.avcodec_alloc_context3;
@@ -66,17 +69,20 @@ public class FfmpegClip implements InterruptibleTask {
     private static final int BYTES_PER_SAMPLE = TARGET_FORMAT.getChannels() * TARGET_FORMAT.getSampleSizeInBits() / 8;
 
     private final String file;
+    private final Play play;
     private long skipBytes;
     private long playBytes;
 
     private final Pause pause = new Pause(false);
+    private volatile boolean quit = false;
 
     private SourceDataLine line;
 
-    public FfmpegClip(String file, long skipBytes, long playBytes) {
+    public FfmpegClip(Play play, String file, long skipBytes, long playBytes) {
         this.file = file;
         this.skipBytes = skipBytes;
         this.playBytes = playBytes;
+        this.play = play;
     }
 
     @Override
@@ -112,30 +118,27 @@ public class FfmpegClip implements InterruptibleTask {
                         audioFrameDecoded.channels(fileCodecContext.channels());
                         audioFrameDecoded.sample_rate(fileCodecContext.sample_rate());
 
-                        AVPacket packet = new AVPacket();
-                        packet.data(null);
-                        packet.size(0);
-                        av_init_packet(packet);
-
+                        AVPacket packet = av_packet_alloc();
                         try {
                             line = (SourceDataLine) AudioSystem.getLine(new Info(SourceDataLine.class, TARGET_FORMAT));
                             line.open(TARGET_FORMAT);
+                            modifyAmplification(play, line);
 
                             if (resume) {
                                 startOrResume();
                             }
 
-                            PointerPointer<BytePointer> convertedData = new PointerPointer<>(2L);
+                            PointerPointer<BytePointer> convertedData = new PointerPointer<>(new long[]{0, 0});
+
                             byte[] bufferBytes = new byte[0];
                             int convertedDataSize = -1;
                             int outSamples, outBytes, written;
                             int read = 0;
 
-                            while (read >= 0 && line.isOpen()) {
-                                reinitPacket(packet);
-
+                            while (read >= 0 && !quit && line.isOpen()) {
                                 read = av_read_frame(formatContext, packet);
                                 if (packet.stream_index() != streamId) {
+                                    av_packet_unref(packet);
                                     continue;
                                 }
 
@@ -144,8 +147,9 @@ public class FfmpegClip implements InterruptibleTask {
                                 } else {
                                     sendPacket(fileCodecContext, packet);
                                 }
+                                av_packet_unref(packet);
 
-                                while (receiveFrame(fileCodecContext, audioFrameDecoded)) {
+                                while (!quit && receiveFrame(fileCodecContext, audioFrameDecoded)) {
                                     outSamples = (int) av_rescale_rnd(
                                             swr_get_delay(swrContext, (int) TARGET_FORMAT.getSampleRate()) +
                                                     audioFrameDecoded.nb_samples(),
@@ -179,7 +183,7 @@ public class FfmpegClip implements InterruptibleTask {
                                                 .get(bufferBytes, 0, outBytes);
 
                                         written = (int) skipBytes + line.write(bufferBytes, (int) skipBytes, outBytes - (int) skipBytes);
-                                        while (written < outBytes && line.isOpen()) {
+                                        while (written < outBytes && !quit && line.isOpen()) {
                                             pause.awaitToPass(); // prevent 100% cpu usage
                                             written += line.write(bufferBytes, written, outBytes - written);
                                         }
@@ -201,7 +205,6 @@ public class FfmpegClip implements InterruptibleTask {
                             throw new RuntimeException(e);
                         } finally {
                             line.close();
-                            av_packet_unref(packet);
                             av_packet_free(packet);
                         }
                     } finally {
@@ -297,11 +300,16 @@ public class FfmpegClip implements InterruptibleTask {
         avcodec_send_packet(avctx, avpkt);
     }
 
-    private void reinitPacket(AVPacket inPacket) {
-        av_packet_unref(inPacket);
-        inPacket.data(null);
-        inPacket.size(0);
-        av_init_packet(inPacket);
+    private void reinitPacket(AVPacket packet) {
+        if (packet.size() > 0) {
+            System.out.println("unref");
+            av_packet_unref(packet);
+            packet.data(null);
+            packet.size(0);
+            av_init_packet(packet);
+        } else {
+            System.out.println("Skip unref");
+        }
     }
 
     @Override
@@ -326,6 +334,7 @@ public class FfmpegClip implements InterruptibleTask {
             line.stop();
             line.close();
         }
+        quit = true;
         pause.resume();
     }
 }

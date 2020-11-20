@@ -131,6 +131,8 @@ public class ApplicationSettings {
     }
 
     public static class Ui {
+        private Logs logs = new Logs();
+
         private boolean allowFullscreen = true;
         private ExitType exitType = ExitType.QUIT;
         private String exitCommand = "";
@@ -157,6 +159,35 @@ public class ApplicationSettings {
 
         public void setExitCommand(String exitCommand) {
             this.exitCommand = exitCommand;
+        }
+
+        public Logs getLogs() {
+            return logs;
+        }
+
+        public void setLogs(Logs logs) {
+            this.logs = logs;
+        }
+    }
+
+    public static class Logs {
+        private boolean enabled = false;
+        private int size = 2000;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(int size) {
+            this.size = size;
         }
     }
 

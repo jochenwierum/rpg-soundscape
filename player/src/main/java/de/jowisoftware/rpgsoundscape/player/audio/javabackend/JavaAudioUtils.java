@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.FloatControl.Type;
 import javax.sound.sampled.Line;
 import java.io.IOException;
 import java.util.Optional;
@@ -23,11 +24,13 @@ public final class JavaAudioUtils {
     public static void modifyAmplification(Play play, Line line) {
         play.collectModifications(AmplificationModification.class, AmplificationModification::merge)
                 .ifPresent(amplification -> {
-                    double volume = Math.max(Math.min(1.0 + amplification.percentage().toDouble(), 2.0), 0.0);
-                    FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
-                    float value = 20f * (float) Math.log10(volume);
-                    LOG.trace("Modifying volume to factor {} ({} dB)", volume, value);
-                    gainControl.setValue(value);
+                    float volume = 20f * (float) Math.log10(1 + amplification.percentage().toDouble());
+
+                    FloatControl gainControl = (FloatControl) line.getControl(Type.MASTER_GAIN);
+                    volume = Math.min(Math.max(gainControl.getMinimum(), volume), gainControl.getMaximum());
+
+                    LOG.trace("Modifying volume to {} dB", volume);
+                    gainControl.setValue(volume);
                 });
     }
 

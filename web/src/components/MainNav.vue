@@ -27,6 +27,10 @@
     </ul>
 
     <span class="mr-4">
+      <button v-if="logs" @click="$emit('select', 'logs')" class="ml-3">
+        <image-logs class="h-8 w-8"/>
+      </button>
+
       <button v-if="exit" @click="sendExit" class="ml-3">
         <image-shutdown class="h-8 w-8"/>
       </button>
@@ -48,18 +52,19 @@ import ImageEffect from "@/components/icons/ImageEffect";
 import ImageErrors from "@/components/icons/ImageErrors";
 import ImageFullscreen from "@/components/icons/ImageFullscreen";
 import ImageShutdown from "@/components/icons/ImageShutdown";
+import ImageLogs from "@/components/icons/ImageLogs";
 
 export default {
   name: 'MainNav',
   components: {
-    ImageShutdown,
-    ImageFullscreen, ImageErrors, ImageEffect, ImageMusic, ImageSoundscape, ImagePlayer, NavButton
+    ImageLogs, ImageShutdown, ImageFullscreen, ImageErrors, ImageEffect, ImageMusic, ImageSoundscape, ImagePlayer, NavButton
   },
 
   data() {
     return {
       exit: false,
-      fullscreen: false
+      fullscreen: false,
+      logs: false
     }
   },
 
@@ -75,6 +80,7 @@ export default {
         .then(data => {
           this.exit = data.exit;
           this.fullscreen = data.fullscreen;
+          this.logs = data.logs;
         })
         .catch(e => console.log("Could not fetch config:", e));
   },

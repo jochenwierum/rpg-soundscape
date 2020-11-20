@@ -38,6 +38,7 @@
                     @describe=" describeClip=$event"/>
 
       <problem-view v-if="selected === 'problems'" :problems-count="problemsCount"/>
+      <logs-view v-if="selected === 'logs'" />
     </main>
 
     <clip-info :show-description="describeClip"/>
@@ -55,10 +56,12 @@ import MusicView from "@/components/MusicView";
 import EffectsView from "@/components/EffectsView";
 import ClipInfo from "@/components/ClipInfo";
 import ResolvedStatus from "@/components/ResolvedStatus";
+import LogsView from "@/components/LogsView";
 
 export default {
   name: 'App',
   components: {
+    LogsView,
     ResolvedStatus,
     ClipInfo,
     EffectsView,

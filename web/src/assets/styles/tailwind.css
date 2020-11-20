@@ -84,4 +84,12 @@
     .button-group.button-disabled:hover {
         @apply bg-white;
     }
+
+
+    tr.logline td {
+        @apply pr-2 text-sm;
+    }
+    tr.logline:nth-child(2n) {
+        @apply bg-gray-300;
+    }
 }
