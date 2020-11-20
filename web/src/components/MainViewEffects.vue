@@ -1,6 +1,6 @@
 <template>
   <h2 class="maintitle">
-    <image-effect class="w-8 h-8"/>
+    <image-effect class="icon"/>
     Effects
   </h2>
   <ul>

@@ -1,30 +1,30 @@
 <template>
-  <h2 class="maintitle">
+  <h2 class="maintitle nomb">
     <span class="flex items-center" v-show="music!==''">
       <span class="pr-2">
         <a href="#" class="appbutton" @click.prevent="musicCommand('restart')">
-          <image-reset class="w-10 h-10"/>
+          <image-reset class="icon"/>
         </a>
-        <a href="#" class="appbutton" v-show="playing" @click.prevent="musicCommand('pause')">
-          <image-pause class="w-10 h-10"/>
+        <a href="#" class="appbutton ml-1 md:ml-2" v-show="playing" @click.prevent="musicCommand('pause')">
+          <image-pause class="icon"/>
         </a>
-        <a href="#" class="appbutton" v-show="!playing" @click.prevent="musicCommand('resume')">
-          <image-play class="w-10 h-10"/>
+        <a href="#" class="appbutton ml-1 md:ml-2" v-show="!playing" @click.prevent="musicCommand('resume')">
+          <image-play class="icon"/>
         </a>
       </span>
 
-      <span class="flex-grow text-center font-bold">
+      <span class="flex-grow text-center">
         <image-music class="w-6 h-6 pr-2"/>
         {{ music }}
       </span>
 
       <a href="#" class="appbutton" @click.prevent="$emit('info')">
-        <image-info class="w-8 h-8"/>
+        <image-info class="icon"/>
       </a>
     </span>
 
     <span v-show="music===''">
-      <image-music class="w-6 h-6"/> (none)
+      <image-music class="icon"/> (none)
     </span>
   </h2>
 </template>

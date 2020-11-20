@@ -7,7 +7,7 @@
     />
 
     <ul>
-      <li v-for="soundscape in soundscapes" :key="soundscape" class="p-4">
+      <li v-for="soundscape in soundscapes" :key="soundscape" class="resultlist">
         <selectable-clip
             :name="soundscape"
             @open="switchTo(soundscape)"

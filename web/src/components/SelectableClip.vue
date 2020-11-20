@@ -5,7 +5,7 @@
           href="#"
           class="appbutton"
           @click.prevent="$emit('open')">
-        <image-play class="w-8 h-8"/>
+        <image-play class="icon"/>
       </a>
 
       <a
@@ -13,7 +13,7 @@
           class="appbutton ml-2"
           v-if="showPin"
           @click.prevent="$emit('pin')">
-        <image-pin class="w-8 h-8"/>
+        <image-pin class="icon"/>
       </a>
 
       <a
@@ -21,7 +21,7 @@
           class="appbutton ml-2"
           v-if="showDelete"
           @click.prevent="$emit('delete')">
-        <image-delete class="w-8 h-8"/>
+        <image-delete class="icon"/>
       </a>
 
       {{ name }}
@@ -32,7 +32,7 @@
           href="#"
           class="appbutton ml-2"
           @click.prevent="$emit('describe')">
-        <image-info class="w-8 h-8"/>
+        <image-info class="icon"/>
       </a>
     </span>
   </div>

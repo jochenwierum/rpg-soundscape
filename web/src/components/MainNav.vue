@@ -7,7 +7,7 @@
       </nav-button>
       <nav-button :active="active === 'soundscapes'" @click="$emit('select', 'soundscapes')">
         <image-soundscape class="h-4 w-4"/>
-        Sound Scapes
+        Soundscapes
       </nav-button>
       <nav-button :active="active === 'music'" @click="$emit('select', 'music')">
         <image-music class="h-4 w-4"/>
@@ -20,23 +20,21 @@
       <nav-button v-show="problemsCount > 0" :active="active === 'problems'" @click="$emit('select', 'problems')">
         <image-errors class="h-4 w-4"/>
         Problems
-        <span class="inline-block rounded-full text-white bg-red-500 px-2 text-xs font-bold text-sm">{{
-            problemsCount
-          }}</span>
+        <span class="inline-block rounded-full text-white bg-red-500 px-2 text-xs font-bold text-sm">{{ problemsCount }}</span>
       </nav-button>
     </ul>
 
-    <span class="mr-4">
+    <span class="my-4 mr-4 absolute right-0">
       <button v-if="logs" @click="$emit('select', 'logs')" class="ml-3">
-        <image-logs class="h-8 w-8"/>
+        <image-logs class="h-6 w-6"/>
       </button>
 
       <button v-if="exit" @click="sendExit" class="ml-3">
-        <image-shutdown class="h-8 w-8"/>
+        <image-shutdown class="h-6 w-6"/>
       </button>
 
       <button v-if="fullscreen" @click="requestFullScreen" class="ml-3">
-        <image-fullscreen class="h-8 w-8"/>
+        <image-fullscreen class="h-6 w-6"/>
       </button>
     </span>
   </nav>
@@ -57,7 +55,15 @@ import ImageLogs from "@/components/icons/ImageLogs";
 export default {
   name: 'MainNav',
   components: {
-    ImageLogs, ImageShutdown, ImageFullscreen, ImageErrors, ImageEffect, ImageMusic, ImageSoundscape, ImagePlayer, NavButton
+    ImageLogs,
+    ImageShutdown,
+    ImageFullscreen,
+    ImageErrors,
+    ImageEffect,
+    ImageMusic,
+    ImageSoundscape,
+    ImagePlayer,
+    NavButton
   },
 
   data() {

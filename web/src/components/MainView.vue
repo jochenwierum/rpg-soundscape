@@ -1,19 +1,19 @@
 <template>
   <div class="flex justify-between flex-col" style="height: calc(100vh - 65px);">
     <div class="flex overflow-y-scroll flex-grow">
-      <div class="w-3/4">
+      <div class="w-7/12 xl:w-3/4">
         <main-view-soundscape
             :soundscape="soundscape"
             :running-tracks="runningTracks"
         />
       </div>
 
-      <div class="w-1/4">
+      <div class="w-5/12 xl:w-1/4">
         <main-view-effects :effects="effects" @unpin="$emit('unpin', $event)"/>
       </div>
     </div>
 
-    <div class="mt-2">
+    <div class="mt-1 xl:mt-2">
       <main-view-music
           :music="music"
           :playing="musicPlaying"/>

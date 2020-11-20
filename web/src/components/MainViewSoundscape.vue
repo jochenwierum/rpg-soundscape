@@ -2,22 +2,22 @@
   <h2 class="maintitle">
     <span class="flex items-center">
       <span v-show="soundscape!==''">
-        <a href="#" class="appbutton" @click.prevent="soundscapeCommand('reset')">
-          <image-reset class="w-8 h-8"/>
+        <a href="#" class="appbutton appbutton-sm" @click.prevent="soundscapeCommand('reset')">
+          <image-reset class="icon"/>
         </a>
-        <a href="#" class="appbutton" @click.prevent="soundscapeCommand('pauseAll')">
-          <image-pause class="w-8 h-8"/>
+        <a href="#" class="appbutton appbutton-sm ml-1 md:ml-2" @click.prevent="soundscapeCommand('pauseAll')">
+          <image-pause class="icon"/>
         </a>
       </span>
 
-      <span class="flex-grow text-center text-2xl font-bold">
-          <image-soundscape class="w-6 h-6 pr-2"/>
+      <span class="flex-grow text-center">
+          <image-soundscape class="icon pr-2"/>
           {{ soundscape }}
           <span v-show="soundscape===''">(none)</span>
         </span>
 
-      <a href="#" class="appbutton" v-show="soundscape!==''">
-        <image-info class="w-8 h-8"/>
+      <a href="#" class="appbutton appbutton-sm" v-show="soundscape!==''">
+        <image-info class="icon"/>
       </a>
     </span>
   </h2>

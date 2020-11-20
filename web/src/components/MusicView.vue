@@ -7,7 +7,7 @@
     />
 
     <ul>
-      <li v-for="music in musics" :key="music" class="p-4">
+      <li v-for="music in musics" :key="music" class="resultlist">
         <selectable-clip
             :name="music"
             @open="switchTo(music)"

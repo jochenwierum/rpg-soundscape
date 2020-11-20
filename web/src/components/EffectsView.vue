@@ -7,7 +7,7 @@
     />
 
     <ul>
-      <li v-for="effect in state" :key="effect.name" class="p-4">
+      <li v-for="effect in state" :key="effect.name" class="resultlist">
         <selectable-clip
             :name="effect.name"
             :show-pin="!effect.pinned"

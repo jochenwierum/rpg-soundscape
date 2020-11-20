@@ -83,11 +83,14 @@ export default {
       c: "", p: "", q: ""
     };
     this.updateContent = () => {
-      if (this.lastRequest.c === this.category && this.lastRequest.p === this.page && this.lastRequest.q === this.search) {
+      if (this.lastRequest.c === this.category
+          && this.lastRequest.cv === this.categoryValue
+          && this.lastRequest.p === this.page
+          && this.lastRequest.q === this.search) {
         return;
       } else {
         this.lastRequest = {
-          c: this.category, p: this.page, q: this.search
+          c: this.category, p: this.page, q: this.search, cv: this.categoryValue
         };
       }
 

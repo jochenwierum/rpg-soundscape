@@ -14,11 +14,25 @@
     }
 
     a.appbutton {
-        @apply border-2 rounded inline-block p-2
+        @apply border-2 rounded inline-block p-2;
+    }
+
+    a.appbutton.appbutton-sm {
+        @apply p-1;
     }
 
     .maintitle {
-        @apply text-xl mb-6 text-center text-2xl font-bold mx-4 bg-gray-400 rounded border-8 border-transparent border-solid;
+        @apply text-center font-bold bg-gray-400 rounded border-transparent border-solid;
+        @apply mb-2 text-xl mx-1 border-4 p-1;
+    }
+
+    @screen xl {
+        .maintitle {
+            @apply mb-6 text-2xl mx-4 border-8 p-0;
+        }
+    }
+    .maintitle.nomb {
+        @apply mb-0;
     }
 
     select {
@@ -36,45 +50,37 @@
     input[ŧype=text]:focus,
     select:focus {
         @apply outline-none shadow-outline border-blue-300;
-        box-shadow: 0 0 0 3px rgba(164,202,254,.45);
+        box-shadow: 0 0 0 3px rgba(164, 202, 254, .45);
     }
 
-    /* button-groups */
     .button-group {
-        @apply cursor-pointer
-        text-gray-800 font-bold text-sm
-        border border-blue-300
-        py-0 px-0 inline-block;
+        @apply cursor-pointer text-gray-800 font-bold text-sm border border-blue-300 py-0 px-0 inline-block;
     }
     .button-group:hover {
         @apply bg-blue-400;
     }
-
     .button-group a {
         @apply block py-1 px-3;
     }
-
     .button-group:first-child {
         @apply rounded-l;
     }
     .button-group:last-child {
         @apply rounded-r;
     }
-
     .button-group-active {
         @apply bg-blue-300;
     }
-
     @screen md {
         .button-group {
             @apply py-1 px-2 text-base;
         }
+
         .button-group a {
             @apply block py-1 px-2;
         }
     }
 
-    /* Common Button Styles */
     .button-group.button-disabled {
         @apply cursor-not-allowed text-gray-300 border-gray-300;
     }
@@ -91,5 +97,33 @@
     }
     tr.logline:nth-child(2n) {
         @apply bg-gray-300;
+    }
+
+
+    .icon {
+        @apply w-6 h-6;
+    }
+    .maintitle .icon {
+        margin: calc(.25rem + 4px) 0 calc(.25rem + 4px) 0;
+    }
+    .maintitle .appbutton .icon {
+        @apply m-0;
+    }
+    @screen xl {
+        .icon {
+            @apply w-8 h-8;
+        }
+        .maintitle .icon {
+            margin: calc(.25rem + 2px) 0 calc(.25rem + 2px) 0;
+        }
+    }
+
+    .resultlist {
+        @apply p-2;
+    }
+    @screen xl {
+        .resultlist {
+            @apply p-4;
+        }
     }
 }
