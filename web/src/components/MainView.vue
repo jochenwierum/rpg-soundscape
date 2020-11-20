@@ -5,6 +5,7 @@
         <main-view-soundscape
             :soundscape="soundscape"
             :running-tracks="runningTracks"
+            :soundscape-version="soundscapeVersion"
         />
       </div>
 
@@ -37,6 +38,7 @@ export default {
   props: {
     soundscape: {type: String, required: true},
     runningTracks: {type: Array, required: true},
+    soundscapeVersion: {required: true},
 
     music: {type: String, required: true},
     musicPlaying: {type: Boolean, required: true},

@@ -123,18 +123,20 @@ public class SoundscapePlayer implements DisposableBean {
                 context.pause();
             }
         }
+
+        broadcastState(true);
     }
 
     public synchronized void resetAllTracks() {
         // TODO: reduce number of events?
         // pauseAll = true;
-        contexts.forEach(executor -> {
-            Track track = soundscape.tracks().get(executor.getName());
+        contexts.forEach(context -> {
+            Track track = soundscape.tracks().get(context.getName());
 
             if (track != null && track.autoStart()) {
-                executor.resume();
+                context.resume();
             } else if (track != null) {
-                executor.pause();
+                context.pause();
             }
         });
         // pauseAll = false;
@@ -164,9 +166,13 @@ public class SoundscapePlayer implements DisposableBean {
     }
 
     private void broadcastState() {
+        broadcastState(false);
+    }
+
+    private void broadcastState(boolean forceReload) {
         String name = this.soundscape != null ? this.soundscape.name() : "";
         statusReporter.reportSoundscapeChanged(
-                new SoundscapeChangeEvent(name, new HashSet<>(running)));
+                new SoundscapeChangeEvent(name, forceReload, new HashSet<>(running)));
     }
 
     @Override

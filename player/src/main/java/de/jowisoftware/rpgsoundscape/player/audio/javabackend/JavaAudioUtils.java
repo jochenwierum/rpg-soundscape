@@ -34,15 +34,15 @@ public final class JavaAudioUtils {
                 });
     }
 
-    public static float bytesPerMillisecond(AudioFormat format) {
-        return format.getFrameSize() * format.getFrameRate() / 1000;
+    public static int bytesPerMillisecond(AudioFormat format) {
+        return (int) (format.getFrameSize() * format.getFrameRate() / 1000);
     }
 
     public static Optional<Long> bytesToSkip(Play play, AudioFormat format) {
         return play.collectModifications(StartOmissionModification.class, StartOmissionModification::merge)
                 .map(omission -> omission.duration().toMillis())
                 .map(milliseconds -> {
-                    long bytes = (long) (bytesPerMillisecond(format) * milliseconds);
+                    long bytes = bytesPerMillisecond(format) * milliseconds;
                     LOG.trace("Skip first {} milliseconds (= {} bytes)", milliseconds, bytes);
                     return bytes;
                 });
@@ -52,7 +52,7 @@ public final class JavaAudioUtils {
         return play.collectModifications(LimitModification.class, LimitModification::merge)
                 .map(omission -> omission.duration().toMillis())
                 .map(milliseconds -> {
-                    long bytes = (long) (bytesPerMillisecond(format) * milliseconds);
+                    long bytes = bytesPerMillisecond(format) * milliseconds;
                     LOG.trace("play only {} milliseconds (= {} bytes)", milliseconds, bytes);
                     return bytes;
                 });

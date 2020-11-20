@@ -52,7 +52,8 @@ export default {
   components: {ImageInfo, ImagePause, ImageReset, ImageSoundscape, ClipControl},
   props: {
     soundscape: {type: String, required: true},
-    runningTracks: {type: Array, required: true}
+    runningTracks: {type: Array, required: true},
+    soundscapeVersion: {required: true}
   },
 
   data() {
@@ -83,11 +84,10 @@ export default {
 
   watch: {
     soundscape() {
-      if (this.soundscape !== '') {
-        this.updateSoundscape();
-      } else {
-        this.tracks.splice(0, this.tracks.length);
-      }
+      this.updateSoundscape();
+    },
+    soundscapeVersion() {
+      this.updateSoundscape();
     },
 
     runningTracks: {

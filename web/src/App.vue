@@ -11,11 +11,12 @@
 
     <main style="padding-top: 56px">
       <main-view v-if="selected === 'main'"
+                 :soundscape="soundscape"
+                 :soundscape-version="soundscapeVersion"
                  :running-tracks="runningTracks"
                  :music="music"
                  :music-playing="musicPlaying"
                  :effects="effects"
-                 :soundscape="soundscape"
                  @unpin="unpin($event)"
                  @describe="describeClip = $event"
       />
@@ -38,7 +39,7 @@
                     @describe=" describeClip=$event"/>
 
       <problem-view v-if="selected === 'problems'" :problems-count="problemsCount"/>
-      <logs-view v-if="selected === 'logs'" />
+      <logs-view v-if="selected === 'logs'"/>
     </main>
 
     <clip-info :show-description="describeClip"/>
@@ -84,6 +85,7 @@ export default {
 
       soundscape: '',
       runningTracks: [],
+      soundscapeVersion: 0,
 
       music: '',
       musicPlaying: true,
@@ -110,6 +112,7 @@ export default {
       this.eventSource.addEventListener("soundscapeChanged", (event) => {
         const data = JSON.parse(event.data);
         this.soundscape = data.soundscape;
+        if (data.forceReload) this.soundscapeVersion++;
         this.runningTracks.splice(0, this.runningTracks.length, ...data.runningTracks);
       });
 

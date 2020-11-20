@@ -1,0 +1,4 @@
+Include "_people.soundscape";
+
+Effect "applause (small)" from applause_small;
+Effect "applause (big)" from applause_big;

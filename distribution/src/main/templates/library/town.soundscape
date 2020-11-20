@@ -1,0 +1,49 @@
+Include "_common.soundscape";
+Include "_people.soundscape";
+Include "_buildings.soundscape";
+
+load sample mug1 from "freesound:///179997";
+load sample mug2 from "freesound:///495645";
+load sample mug_breaking from "freesound:///85557" with amplification of -50%;
+
+load sample spoon from "freesound:///369910";
+load sample spoon_falling from "freesound:///376854";
+load sample spoons from "freesound:///376854";
+
+load sample dice from "freesound:///220744";
+
+soundscape "tavern" {
+    looping track people {
+        play sample people_crowd /*with amplification of 10% and*/ with limit to 60s;
+    }
+
+    looping track bonfire {
+      play sample bonfire with amplification of -5%;
+    }
+
+    looping track tavern_sounds {
+        sleep between 2s and 8s;
+        randomly {
+            weighted with 40 play sample spoon;
+            weighted with 40 play sample mug1;
+            weighted with 40 play sample mug2;
+            weighted with 35 {
+              play sample dice;
+              randomly {
+                weighted with 1 play people_cheering with amplification of -80%;
+                weighted with 10 do nothing;
+              }
+            }
+            weighted with 30 play people_laughing;
+            weighted with 20 play spoon_falling;
+            weighted with 30 play spoons;
+            weighted with 20 play chair;
+            weighted with 10 play sample door_wooden;
+            weighted with 10 play sample coins1;
+            weighted with 10 play sample coins2;
+            weighted with 10 play sample coins3;
+            weighted with 7 play sample mug_breaking;
+            weighted with 1 play sample coins4 with amplification of -90%;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+Load sample people_crowd from "freesound:///455908";
+Load sample people_huge_crowd from "freesound:///464497";
+Load sample people_laughing from "freesound:///324894";
+Load sample people_cheering from "freesound:///333404";
+
+Load sample applause_small from "freesound:///209792";
+Load sample applause_big from "freesound:///219241";
+
+Load sample steps_leaves from "freesound:///347850";

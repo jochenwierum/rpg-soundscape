@@ -38,7 +38,7 @@ ESC="\\" ( [^] | "u" {HEX}{HEX}{HEX}{HEX})
 CHAR=[^\r\n\'\"\\]
 
 IntegerNumber={DIGIT}+
-Percentage="-"? {DIGIT}+ "%"
+Percentage=("-"|"+")? {DIGIT}+ "%"
 Duration={DIGIT}+ ("ms" | "s" | "m")
 
 STRING_BAD1=\" ({CHAR} | {ESC} | \')*

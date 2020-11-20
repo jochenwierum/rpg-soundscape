@@ -1,0 +1,17 @@
+load sample horse_whinnying from "freesound:///419231";
+load sample horse_breathing from "freesound:///184503";
+
+load sample horse_gallop from "freesound:///32679"
+    with omission of first 3s
+    and with limit to 5500ms;
+
+
+Load sample birds_long1 from "freesound:///339326";
+
+load sample owl1 from "freesound:///398734";
+load sample owl2 from "freesound:///251937";
+load sample owl3 from "freesound:///181134";
+
+load sample bird_night_1 from "freesound:///240131";
+
+load sample grasshoppers from "freesound:///401856";

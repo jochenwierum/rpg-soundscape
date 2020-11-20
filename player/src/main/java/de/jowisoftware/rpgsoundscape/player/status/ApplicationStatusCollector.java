@@ -86,7 +86,7 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
 
         listener.reportSoundscapeChanged(
                 soundscapeChangeEventDeduplicator.getLast()
-                        .orElseGet(() -> new SoundscapeChangeEvent("", Set.of())));
+                        .orElseGet(() -> new SoundscapeChangeEvent("", false, Set.of())));
 
         listener.reportMusicChanged(
                 musicChangeEventDeduplicator.getLast()
