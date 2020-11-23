@@ -19,9 +19,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine.Info;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.util.concurrent.CountDownLatch;
 
 import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.modifyAmplification;
-import static org.bytedeco.ffmpeg.global.avcodec.av_init_packet;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_alloc;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_unref;
@@ -73,7 +73,8 @@ public class FfmpegClip implements InterruptibleTask {
     private long skipBytes;
     private long playBytes;
 
-    private final Pause pause = new Pause(false);
+    private final Pause pause = new Pause(true);
+    private final CountDownLatch starting = new CountDownLatch(1);
     private volatile boolean quit = false;
 
     private SourceDataLine line;
@@ -87,139 +88,153 @@ public class FfmpegClip implements InterruptibleTask {
 
     @Override
     public void run(boolean resume) throws RuntimeException {
-        AVFormatContext formatContext = new AVFormatContext(null);
-        int res;
-        if ((res = avformat_open_input(formatContext, file, null, null)) != 0) {
-            throw new FfmpegApiException(res, "avformat_open_input: " + file);
-        }
         try {
-            if ((res = avformat_find_stream_info(formatContext, (PointerPointer<?>) null)) < 0) {
-                throw new FfmpegApiException(res, "avformat_find_stream_info");
+            synchronized (this) {
+                line = (SourceDataLine) AudioSystem.getLine(new Info(SourceDataLine.class, TARGET_FORMAT));
+                line.open(TARGET_FORMAT);
+                line.start();
+
+                if (resume) {
+                    pause.resume();
+                } else {
+                    pause.pause();
+                }
+                starting.countDown();
             }
 
-            AVCodec codec = new AVCodec();
-            int streamId = findAudioStream(formatContext, codec);
-            AVCodecContext fileCodecContext = openCodec(formatContext, codec, streamId);
-
-            if (fileCodecContext.channel_layout() == 0) {
-                fileCodecContext.channel_layout(av_get_default_channel_layout(fileCodecContext.channels()));
+            AVFormatContext formatContext = new AVFormatContext(null);
+            int res;
+            if ((res = avformat_open_input(formatContext, file, null, null)) != 0) {
+                throw new FfmpegApiException(res, "avformat_open_input: " + file);
             }
-
             try {
-                SwrContext swrContext = createResamplingContext(fileCodecContext);
+                if ((res = avformat_find_stream_info(formatContext, (PointerPointer<?>) null)) < 0) {
+                    throw new FfmpegApiException(res, "avformat_find_stream_info");
+                }
+
+                AVCodec codec = new AVCodec();
+                int streamId = findAudioStream(formatContext, codec);
+                AVCodecContext fileCodecContext = openCodec(formatContext, codec, streamId);
+
+                if (fileCodecContext.channel_layout() == 0) {
+                    fileCodecContext.channel_layout(av_get_default_channel_layout(fileCodecContext.channels()));
+                }
+
                 try {
-                    AVFrame audioFrameDecoded = av_frame_alloc();
-                    if (audioFrameDecoded.isNull()) {
-                        throw new FfmpegApiException(0, "Could not allocate audio frame");
-                    }
+                    SwrContext swrContext = createResamplingContext(fileCodecContext);
                     try {
-                        audioFrameDecoded.format(fileCodecContext.sample_fmt());
-                        audioFrameDecoded.channel_layout(fileCodecContext.channel_layout());
-                        audioFrameDecoded.channels(fileCodecContext.channels());
-                        audioFrameDecoded.sample_rate(fileCodecContext.sample_rate());
-
-                        AVPacket packet = av_packet_alloc();
+                        AVFrame audioFrameDecoded = av_frame_alloc();
+                        if (audioFrameDecoded.isNull()) {
+                            throw new FfmpegApiException(0, "Could not allocate audio frame");
+                        }
                         try {
-                            line = (SourceDataLine) AudioSystem.getLine(new Info(SourceDataLine.class, TARGET_FORMAT));
-                            line.open(TARGET_FORMAT);
-                            modifyAmplification(play, line);
+                            audioFrameDecoded.format(fileCodecContext.sample_fmt());
+                            audioFrameDecoded.channel_layout(fileCodecContext.channel_layout());
+                            audioFrameDecoded.channels(fileCodecContext.channels());
+                            audioFrameDecoded.sample_rate(fileCodecContext.sample_rate());
 
-                            if (resume) {
-                                startOrResume();
-                            }
+                            AVPacket packet = av_packet_alloc();
+                            try {
+                                modifyAmplification(play, line);
 
-                            PointerPointer<BytePointer> convertedData = new PointerPointer<>(new long[]{0, 0});
+                                PointerPointer<BytePointer> convertedData = new PointerPointer<>(new long[]{0, 0});
 
-                            byte[] bufferBytes = new byte[0];
-                            int convertedDataSize = -1;
-                            int outSamples, outBytes, written;
-                            int read = 0;
+                                byte[] bufferBytes = new byte[0];
+                                int convertedDataSize = -1;
+                                int outSamples, outBytes, written;
+                                int read = 0;
 
-                            while (read >= 0 && !quit && line.isOpen()) {
-                                read = av_read_frame(formatContext, packet);
-                                if (packet.stream_index() != streamId) {
-                                    av_packet_unref(packet);
-                                    continue;
-                                }
+                                while (read >= 0 && !quit && line.isOpen()) {
+                                    read = av_read_frame(formatContext, packet);
+                                    if (packet.stream_index() != streamId) {
+                                        av_packet_unref(packet);
+                                        continue;
+                                    }
 
-                                if (read == AVERROR_EOF()) {
-                                    sendFlush(fileCodecContext, packet);
-                                } else {
-                                    sendPacket(fileCodecContext, packet);
-                                }
-                                av_packet_unref(packet);
-
-                                while (!quit && receiveFrame(fileCodecContext, audioFrameDecoded)) {
-                                    outSamples = (int) av_rescale_rnd(
-                                            swr_get_delay(swrContext, (int) TARGET_FORMAT.getSampleRate()) +
-                                                    audioFrameDecoded.nb_samples(),
-                                            audioFrameDecoded.sample_rate(),
-                                            (int) TARGET_FORMAT.getSampleRate(), AV_ROUND_UP);
-
-                                    convertedDataSize = reallocConvertedData(convertedData, convertedDataSize, outSamples);
-
-                                    outSamples = swr_convert(swrContext, convertedData, outSamples,
-                                            audioFrameDecoded.data(), audioFrameDecoded.nb_samples());
-
-                                    outBytes = outSamples * BYTES_PER_SAMPLE;
-
-                                    if (skipBytes < outBytes) {
-                                        if (playBytes > 0) {
-                                            if ((outBytes - skipBytes) > playBytes) {
-                                                outBytes = (int) (playBytes - skipBytes);
-                                                playBytes = 0;
-                                            } else {
-                                                playBytes -= outBytes + skipBytes;
-                                            }
-                                        }
-
-                                        if (bufferBytes.length < outBytes) {
-                                            bufferBytes = new byte[outBytes];
-                                        }
-
-                                        convertedData.get(BytePointer.class, 0)
-                                                .limit(outBytes)
-                                                .asByteBuffer()
-                                                .get(bufferBytes, 0, outBytes);
-
-                                        written = (int) skipBytes + line.write(bufferBytes, (int) skipBytes, outBytes - (int) skipBytes);
-                                        while (written < outBytes && !quit && line.isOpen()) {
-                                            pause.awaitToPass(); // prevent 100% cpu usage
-                                            written += line.write(bufferBytes, written, outBytes - written);
-                                        }
-
-                                        skipBytes = 0;
-                                        if (playBytes == 0) {
-                                            read = -1; // EOF
-                                            break;
-                                        }
+                                    if (read == AVERROR_EOF()) {
+                                        sendFlush(fileCodecContext, packet);
                                     } else {
-                                        skipBytes -= outBytes;
+                                        sendPacket(fileCodecContext, packet);
+                                    }
+                                    av_packet_unref(packet);
+
+                                    while (!quit && receiveFrame(fileCodecContext, audioFrameDecoded)) {
+                                        outSamples = (int) av_rescale_rnd(
+                                                swr_get_delay(swrContext, (int) TARGET_FORMAT.getSampleRate()) +
+                                                        audioFrameDecoded.nb_samples(),
+                                                audioFrameDecoded.sample_rate(),
+                                                (int) TARGET_FORMAT.getSampleRate(), AV_ROUND_UP);
+
+                                        convertedDataSize = reallocConvertedData(convertedData, convertedDataSize, outSamples);
+
+                                        outSamples = swr_convert(swrContext, convertedData, outSamples,
+                                                audioFrameDecoded.data(), audioFrameDecoded.nb_samples());
+
+                                        outBytes = outSamples * BYTES_PER_SAMPLE;
+
+                                        if (skipBytes < outBytes) {
+                                            if (playBytes > 0) {
+                                                if ((outBytes - skipBytes) > playBytes) {
+                                                    outBytes = (int) (playBytes - skipBytes);
+                                                    playBytes = 0;
+                                                } else {
+                                                    playBytes -= outBytes + skipBytes;
+                                                }
+                                            }
+
+                                            if (bufferBytes.length < outBytes) {
+                                                bufferBytes = new byte[outBytes];
+                                            }
+
+                                            convertedData.get(BytePointer.class, 0)
+                                                    .limit(outBytes)
+                                                    .asByteBuffer()
+                                                    .get(bufferBytes, 0, outBytes);
+
+                                            written = (int) skipBytes + line.write(bufferBytes, (int) skipBytes, outBytes - (int) skipBytes);
+                                            while ((written < outBytes && !quit && line.isOpen()) || pause.isPaused()) {
+                                                pause.awaitToPass(); // prevent 100% cpu usage
+                                                if (written < outBytes) {
+                                                    written += line.write(bufferBytes, written, outBytes - written);
+                                                }
+                                            }
+
+                                            skipBytes = 0;
+                                            if (playBytes == 0) {
+                                                read = -1; // EOF
+                                                break;
+                                            }
+                                        } else {
+                                            skipBytes -= outBytes;
+                                        }
                                     }
                                 }
-                            }
 
-                            av_freep(convertedData);
-                            line.drain();
-                        } catch (LineUnavailableException e) {
-                            throw new RuntimeException(e);
+                                av_freep(convertedData);
+                                line.drain();
+                            } finally {
+                                line.close();
+                                av_packet_free(packet);
+                            }
                         } finally {
-                            line.close();
-                            av_packet_free(packet);
+                            av_frame_free(audioFrameDecoded);
                         }
                     } finally {
-                        av_frame_free(audioFrameDecoded);
+                        swr_close(swrContext);
+                        swr_free(swrContext);
                     }
                 } finally {
-                    swr_close(swrContext);
-                    swr_free(swrContext);
+                    avcodec_close(fileCodecContext);
+                    avcodec_free_context(fileCodecContext);
                 }
             } finally {
-                avcodec_close(fileCodecContext);
-                avcodec_free_context(fileCodecContext);
+                avformat_close_input(formatContext);
             }
+        } catch (LineUnavailableException e) {
+            starting.countDown();
+            throw new RuntimeException(e);
         } finally {
-            avformat_close_input(formatContext);
+            line.close();
         }
     }
 
@@ -300,20 +315,9 @@ public class FfmpegClip implements InterruptibleTask {
         avcodec_send_packet(avctx, avpkt);
     }
 
-    private void reinitPacket(AVPacket packet) {
-        if (packet.size() > 0) {
-            System.out.println("unref");
-            av_packet_unref(packet);
-            packet.data(null);
-            packet.size(0);
-            av_init_packet(packet);
-        } else {
-            System.out.println("Skip unref");
-        }
-    }
-
     @Override
-    public void pause() {
+    public synchronized void pause() {
+        finishStarting();
         pause.pause();
         if (line != null) {
             line.stop();
@@ -321,7 +325,8 @@ public class FfmpegClip implements InterruptibleTask {
     }
 
     @Override
-    public void startOrResume() {
+    public synchronized void startOrResume() {
+        finishStarting();
         if (line != null) {
             line.start();
         }
@@ -329,12 +334,20 @@ public class FfmpegClip implements InterruptibleTask {
     }
 
     @Override
-    public void abort() {
+    public synchronized void abort() {
+        finishStarting();
         if (line != null) {
             line.stop();
             line.close();
         }
         quit = true;
         pause.resume();
+    }
+
+    private void finishStarting() {
+        try {
+            starting.await();
+        } catch (InterruptedException ignored) {
+        }
     }
 }

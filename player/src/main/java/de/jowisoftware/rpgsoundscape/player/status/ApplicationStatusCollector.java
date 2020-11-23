@@ -162,19 +162,19 @@ public class ApplicationStatusCollector implements StatusReporter, DisposableBea
 
     @Override
     public void reportSoundscapeChanged(SoundscapeChangeEvent event) {
-        LOG.info("Soundscape changed: " + event.toString());
+        LOG.debug("Soundscape changed: " + event.toString());
         soundscapeChangeEventDeduplicator.accept(event);
     }
 
     @Override
     public void reportMusicChanged(MusicChangedEvent event) {
-        LOG.info("Music changed: " + event.toString());
+        LOG.debug("Music changed: " + event.toString());
         musicChangeEventDeduplicator.accept(event);
     }
 
     @Override
     public void reportResolved(ResolvedStatus event) {
-        LOG.info("Resolved status changed: " + event.toString());
+        LOG.debug("Resolved status changed: " + event.toString());
         resolvedStatusDeduplicator.accept(event);
     }
 }

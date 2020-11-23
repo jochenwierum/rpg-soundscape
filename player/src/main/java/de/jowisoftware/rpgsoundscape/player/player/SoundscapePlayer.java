@@ -116,10 +116,9 @@ public class SoundscapePlayer implements DisposableBean {
 
         for (BlockExecutionContext context : contexts) {
             Boolean oldValue = oldExisting.get(context.getName());
-            if (oldValue != null && oldValue) {
+            if (Boolean.TRUE.equals(oldValue)) {
                 context.resume();
-            }
-            if (oldValue != null && !oldValue) {
+            } else if (Boolean.FALSE.equals(oldValue)) {
                 context.pause();
             }
         }

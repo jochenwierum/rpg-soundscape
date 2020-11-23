@@ -102,6 +102,10 @@ soundscape "blacksmith" {
         }
     }
 
+    looping track bonfire {
+        play sample bonfire with amplification of 150%;
+    }
+
     looping track persons {
         sleep between 5s and 15s;
         play sample steps_stone_indoor;

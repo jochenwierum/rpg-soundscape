@@ -24,6 +24,10 @@ includable soundscape _forest_base {
     looping track creek {
         play sample creek with amplification of -70%;
     }
+
+    looping track wind {
+        play sample wind_leaf with amplification of -30%;
+    }
 }
 
 soundscape "forest by food" {
@@ -65,6 +69,10 @@ soundscape "forest night camp" {
 
     looping track creek {
         play sample creek with amplification of -80%;
+    }
+
+    looping track wind {
+        play sample wind_leaf with amplification of -10%;
     }
 
     looping track campfire {

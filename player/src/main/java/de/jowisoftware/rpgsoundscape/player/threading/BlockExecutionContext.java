@@ -90,9 +90,11 @@ public class BlockExecutionContext {
             interruptibleTasks.add(task);
         }
 
-        task.run(!pause.isPaused());
-
-        interruptibleTasks.remove(task);
+        try {
+            task.run(!pause.isPaused());
+        } finally {
+            interruptibleTasks.remove(task);
+        }
     }
 
     public synchronized void pause() {
