@@ -97,7 +97,7 @@ public class SoundscapeLineMarkerProvider extends RelatedItemLineMarkerProvider 
 
     private NavigationGutterIconBuilder<PsiElement> createMarker(SIncludableSoundscapeRef element) {
         return createMarker(element, ReferenceUtil::findIncludableSoundscape,
-                SoundscapeIcons.INCLUDABLE_TRACK, "Navigate to includable soundscape definition");
+                SoundscapeIcons.INCLUDABLE_SOUNDSCAPE, "Navigate to includable soundscape definition");
     }
 
     private NavigationGutterIconBuilder<PsiElement> createNewMusicMarker() {

@@ -12,8 +12,13 @@ includable soundscape _forest_base {
     include soundscape _forest_meta;
     categorized as "travel" in "type";
 
-    looping track birds {
+    looping track birds_1 {
         play sample birds_long1 with amplification of 20%;
+    }
+
+    looping track birds_2 {
+        sleep between 15s and 30s;
+        play sample eagle with amplification of -10%;
     }
 
     looping track creek {
@@ -35,11 +40,13 @@ soundscape "forest by horse" {
 
     include soundscape _forest_base;
 
-    looping track horse_gallop {
+    looping paused track horse_gallop {
         play sample horse_gallop with amplification of -50%;
     }
 
-  // TODO: horse walking?
+    looping track horse_walking {
+        play sample horse_walking with amplification of -50%;
+    }
 
     looping track horses_sounds {
         sleep between 30s and 2m;

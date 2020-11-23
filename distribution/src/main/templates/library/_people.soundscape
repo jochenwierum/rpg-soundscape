@@ -7,3 +7,4 @@ Load sample applause_small from "freesound:///209792";
 Load sample applause_big from "freesound:///219241";
 
 Load sample steps_leaves from "freesound:///347850";
+Load sample steps_stone_indoor from "freesound:///423710";

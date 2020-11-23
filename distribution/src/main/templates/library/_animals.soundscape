@@ -5,8 +5,13 @@ load sample horse_gallop from "freesound:///32679"
     with omission of first 3s
     and with limit to 5500ms;
 
+load sample horse_walking from "freesound:///79083"
+    with omission of first 750ms
+    and with limit to 2500ms;
+
 
 Load sample birds_long1 from "freesound:///339326";
+Load sample eagle from "freesound:///104911";
 
 load sample owl1 from "freesound:///398734";
 load sample owl2 from "freesound:///251937";

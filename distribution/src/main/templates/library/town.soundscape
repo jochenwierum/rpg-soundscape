@@ -77,7 +77,7 @@ soundscape "blacksmith" {
     categorized as "peaceful" in "mood";
     categorized as "jochen" in "author";
 
-    looping paused track blacksmith {
+    looping track blacksmith {
         play sample bellows;
 
         sleep between 3s and 5s;
@@ -102,8 +102,13 @@ soundscape "blacksmith" {
         }
     }
 
+    looping track persons {
+        sleep between 5s and 15s;
+        play sample steps_stone_indoor;
+    }
+
     looping track utilities {
-        sleep between 5s and 20s;
+        sleep between 5s and 15s;
         randomly {
           weighted with 5 play riveting;
           weighted with 5 play nails;
