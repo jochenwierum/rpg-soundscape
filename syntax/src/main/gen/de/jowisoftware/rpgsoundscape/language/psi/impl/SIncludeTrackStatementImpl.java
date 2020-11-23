@@ -11,14 +11,14 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class STrackContentImpl extends ASTWrapperPsiElement implements STrackContent {
+public class SIncludeTrackStatementImpl extends ASTWrapperPsiElement implements SIncludeTrackStatement {
 
-  public STrackContentImpl(@NotNull ASTNode node) {
+  public SIncludeTrackStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitTrackContent(this);
+    visitor.visitIncludeTrackStatement(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,19 +28,8 @@ public class STrackContentImpl extends ASTWrapperPsiElement implements STrackCon
 
   @Override
   @Nullable
-  public SBlock getBlock() {
-    return findChildByClass(SBlock.class);
-  }
-
-  @Override
-  @Nullable
   public SIncludableTrackRef getIncludableTrackRef() {
     return findChildByClass(SIncludableTrackRef.class);
-  }
-
-  @Override
-  public boolean skipInStructureView() {
-    return PsiImplUtil.skipInStructureView(this);
   }
 
 }

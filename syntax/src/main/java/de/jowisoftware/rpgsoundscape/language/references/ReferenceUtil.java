@@ -4,6 +4,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeId;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeRef;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackRef;
@@ -51,6 +54,14 @@ public class ReferenceUtil {
                 .findFirst();
     }
 
+
+    public static Optional<SIncludableSoundscapeId> findIncludableSoundscape(SIncludableSoundscapeRef element, String name) {
+        return resolveIncludes(((SoundscapeFile) element.getContainingFile()))
+                .flatMap(file -> findInFile(file, SIncludableSoundscapeDefinition.class, SIncludableSoundscapeId.class))
+                .filter(id -> id.getText().equals(name))
+                .findFirst();
+    }
+
     public static Optional<STrackId> findTrack(STrackRef element, String name) {
         return findInSoundscape(element, STrackDefinition.class, STrackId.class)
                 .filter(id -> id.getText().equals(name))
@@ -62,11 +73,16 @@ public class ReferenceUtil {
     }
 
     public static Stream<STrackId> findTracks(PsiElement element) {
-        return collectUsableDefinitions(element, STrackDefinition.class, STrackId.class);
+        return findInSoundscape(element, STrackDefinition.class, STrackId.class);
     }
 
     public static Stream<SIncludableTrackId> findIncludableTracks(PsiElement element) {
         return collectUsableDefinitions(element, SIncludableTrackDefinition.class, SIncludableTrackId.class);
+    }
+
+    public static Stream<SIncludableSoundscapeId> findIncludableSoundscapes(SIncludableSoundscapeRef element) {
+        return resolveIncludes((SoundscapeFile) element.getContainingFile())
+                .flatMap(file -> findInFile(file, SIncludableSoundscapeDefinition.class, SIncludableSoundscapeId.class));
     }
 
     private static <T extends PsiElement> Stream<T> collectUsableDefinitions(
@@ -97,11 +113,11 @@ public class ReferenceUtil {
         Set<String> seen = new HashSet<>();
         Stack<SoundscapeFile> agenda = new Stack<>();
 
-        if (psiFile.getVirtualFile() == null || psiFile.getVirtualFile().getCanonicalPath() == null) {
+        if (psiFile.getOriginalFile().getVirtualFile() == null || psiFile.getOriginalFile().getVirtualFile().getCanonicalPath() == null) {
             return Stream.empty();
         }
 
-        seen.add(psiFile.getVirtualFile().getCanonicalPath());
+        seen.add(psiFile.getOriginalFile().getVirtualFile().getCanonicalPath());
         agenda.add(psiFile);
 
         Iterator<SoundscapeFile> iterator = new Iterator<>() {
@@ -114,9 +130,8 @@ public class ReferenceUtil {
             public SoundscapeFile next() {
                 SoundscapeFile includedFile = agenda.pop();
 
-                Set<String> newFiles = searchIncludes(includedFile);
-                newFiles.stream()
-                        .map(newFile -> includedFile.getVirtualFile().findFileByRelativePath("../" + newFile))
+                searchIncludes(includedFile).stream()
+                        .map(newFile -> includedFile.getOriginalFile().getVirtualFile().findFileByRelativePath("../" + newFile))
                         .filter(Objects::nonNull)
                         .filter(vf -> seen.add(vf.getCanonicalPath()))
                         .map(virtualFile -> (SoundscapeFile) PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile))

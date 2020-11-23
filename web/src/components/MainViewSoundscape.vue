@@ -53,7 +53,6 @@ export default {
   props: {
     soundscape: {type: String, required: true},
     runningTracks: {type: Array, required: true},
-    soundscapeVersion: {required: true}
   },
 
   data() {
@@ -84,9 +83,6 @@ export default {
 
   watch: {
     soundscape() {
-      this.updateSoundscape();
-    },
-    soundscapeVersion() {
       this.updateSoundscape();
     },
 

@@ -35,6 +35,12 @@ public class SSoundscapeDefinitionImpl extends ASTWrapperPsiElement implements S
 
   @Override
   @NotNull
+  public List<SIncludeSoundscapeDefinition> getIncludeSoundscapeDefinitionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, SIncludeSoundscapeDefinition.class);
+  }
+
+  @Override
+  @NotNull
   public List<SLoadDefinition> getLoadDefinitionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, SLoadDefinition.class);
   }

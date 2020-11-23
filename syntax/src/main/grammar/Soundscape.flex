@@ -106,10 +106,10 @@ Identifier=[:jletter:] [:jletterdigit:]*
     "effect" { return EFFECT; }
     "first" { return FIRST; }
     "from" { return FROM; }
+    "hidden" { return HIDDEN; }
     "in" { return IN; }
     "includable" { return INCLUDABLE; }
     "include" { return INCLUDE; }
-    "includes" { return INCLUDES; }
     "limit" { return LIMIT; }
     "load" { return LOAD; }
     "looping" { return LOOPING; }

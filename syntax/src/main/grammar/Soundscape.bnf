@@ -26,7 +26,9 @@
     methods("filename")=[getReference parsed]
 
     extends(".*PlayModification|.*LoadModification")="sampleModification"
-    extends(".*Modifications")="sampleModificationList"
+    extends(".*Modifications_")="sampleModificationList"
+    extends("includableSoundscapeDefinition")="soundscapeDefinition"
+    methods("includableSoundscapeDefinition")=[getString]
 
     implements(".*Definition|.*Statement|block|statement|randomlyWeight|rootContent|trackContent")="de.jowisoftware.rpgsoundscape.language.psi.SoundscapeStructureViewPsiElement"
     methods(".*Definition|.*Statement|block|randomlyWeight")=[getName getPresentation]
@@ -42,7 +44,7 @@ private rootItem_ ::=
     sep_ |
     (includeDefinition sep_) |
     (loadDefinition sep_) |
-    includableTrackDefinition |
+    includableDefinitions_ |
     soundscapeDefinition |
     musicDefinition |
     effectDefinition
@@ -57,10 +59,12 @@ includeDefinition ::= INCLUDE filename {pin=1}
 
 loadDefinition ::= LOAD SAMPLE? sampleId FROM string loadModifications_? {pin=1}
 
-// INCLUDABLE
+// INCLUDABLE TRACK & INCLUDABLE SOUNDSCAPE
 
-includableTrackDefinition ::= INCLUDABLE TRACK includableTrackId block {pin=1}
-
+private includableTrackDefinition_ ::= INCLUDABLE includableTrackDefinition {pin=1}
+private includableDefinitions_ ::= INCLUDABLE (includableTrackDefinition | includableSoundscapeDefinition) {pin=1}
+includableTrackDefinition ::= TRACK includableTrackId block {pin=1}
+includableSoundscapeDefinition ::= SOUNDSCAPE includableSoundscapeId CURLY_L soundscapeBlockStatement_* CURLY_R {pin=1}
 
 // SOUNDSCAPE
 
@@ -68,24 +72,25 @@ soundscapeDefinition ::= SOUNDSCAPE string CURLY_L soundscapeBlockStatement_* CU
 
 private soundscapeBlockStatement_ ::= (
     sep_ |
+    (includeSoundscapeDefinition sep_) |
     (loadDefinition sep_) |
-    includableTrackDefinition |
+    includableTrackDefinition_ |
     trackDefinition |
     (metadataStatement sep_)
     )+ {recoverWhile=soundscapeBlockStatement_recover_}
-private soundscapeBlockStatement_recover_ ::= !(CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | DESCRIBED | CATEGORIZED)
+private soundscapeBlockStatement_recover_ ::= !(CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | INCLUDE | DESCRIBED | CATEGORIZED)
 
 // TRACK
 
-trackDefinition ::= trackModifier_ TRACK trackId (WITH TITLE string)? trackContent {pin=2}
+trackDefinition ::= trackModifier_ TRACK trackId (WITH TITLE string)? block {pin=2}
 
-trackContent ::= (block | INCLUDES includableTrackRef sep_)
 private trackModifier_ ::= loopingTrackModifier | manualTrackModifier {recoverWhile=track_recover_}
 private track_recover_ ::= !TRACK
-loopingTrackModifier ::= LOOPING pausedModifier? {pin=1}
+loopingTrackModifier ::= LOOPING pausedModifier? hiddenModifier? {pin=1}
 manualTrackModifier ::= MANUAL autostartingModifier? {pin=1}
 pausedModifier ::= PAUSED
 autostartingModifier ::= AUTOSTARTING
+hiddenModifier ::= HIDDEN
 
 // statement
 statement ::=
@@ -96,6 +101,7 @@ statement ::=
     (pauseStatement sep_) |
     (resumeStatement sep_) |
     (doNothingStatement sep_) |
+    (includeTrackStatement sep_) |
     repeatStatement |
     randomlyStatement |
     parallellyStatement
@@ -103,7 +109,7 @@ statement ::=
     pin(".*")=1
     recoverWhile=statement_recover_
     }
-private statement_recover_ ::= !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED)
+private statement_recover_ ::= !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED | INCLUDE)
 
 block ::= CURLY_L statement+ CURLY_R {pin=1}
 
@@ -136,21 +142,27 @@ repeatStatement ::= REPEAT (simpleRepeatStatement_ | complexRepeatStatement_) TI
 private simpleRepeatStatement_ ::= int
 private complexRepeatStatement_ ::= BETWEEN int AND int {pin=1}
 
-
 // RANDOMLY
 
 randomlyStatement ::= RANDOMLY CURLY_L randomlyWeight randomlyWeight+ CURLY_R {pin=1}
 randomlyWeight ::= WEIGHTED WITH int statement {pin=1 recoverWhile=randomly_recover_}
+
+// PARALLEL
+
+parallellyStatement ::= PARALLELLY CURLY_L statement statement+ CURLY_R {pin=1}
+
+// INCLUDE
+
+includeTrackStatement ::= INCLUDE includableTrackRef {pin=1}
 
 // DO NOTHING
 
 doNothingStatement ::= DO NOTHING {pin=1}
 private randomly_recover_ ::= !(CURLY_R | WEIGHTED)
 
-// PARALLEL
+// INCLUDE SOUNDSCAPE
 
-parallellyStatement ::= PARALLELLY CURLY_L statement statement+ CURLY_R {pin=1}
-
+includeSoundscapeDefinition ::= INCLUDE SOUNDSCAPE includableSoundscapeRef {pin=1}
 
 // MUSIC & EFFECT
 
@@ -214,6 +226,9 @@ trackId ::= IDENTIFIER
 
 includableTrackRef ::= IDENTIFIER
 includableTrackId ::= IDENTIFIER
+
+includableSoundscapeRef ::= IDENTIFIER
+includableSoundscapeId ::= IDENTIFIER
 
 filename ::= TEXT
 

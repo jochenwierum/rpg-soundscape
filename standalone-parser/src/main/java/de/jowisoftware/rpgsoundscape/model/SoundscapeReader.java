@@ -1,6 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
 import de.jowisoftware.rpgsoundscape.language.psi.SEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SMusicDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SMusicEffectDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SRootContent;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SoundscapeReader {
@@ -23,14 +26,15 @@ public final class SoundscapeReader {
     public static Set<String> readIncludes(SoundscapeFile psiFile) {
         Set<String> result = new HashSet<>();
         collect(List.of(psiFile), SRootContent::getIncludeDefinitionList)
-                .forEach(item -> result.add(item.content().getFilename().parsed()));
+                .forEach(definition -> result.add(definition.getFilename().parsed()));
         return result;
     }
 
     public static SoundscapeFileContent read(List<SoundscapeFile> files) {
         Context context = Context.create();
         context = readSamples(files, context);
-        context = readIncludableTracks(files, context);
+        context = collectIncludableTracks(files, context);
+        context = collectIncludableSoundscapes(files, context);
 
         Map<String, Soundscape> soundscapes = readSoundscapes(files, context);
         Map<String, Effect> music = readMusic(files, context);
@@ -46,11 +50,12 @@ public final class SoundscapeReader {
             List<SoundscapeFile> files, Context context) {
         Map<String, Soundscape> soundscapes = new HashMap<>();
 
-        collect(files, SRootContent::getSoundscapeDefinitionList).forEach(tuple ->
-                Util.collectChecked(
-                        tuple.content(), soundscapes,
-                        tuple.content().getString().parsed(),
-                        Soundscape.from(tuple.content(), context.withFile(tuple.file()))));
+        collect(files, SRootContent::getSoundscapeDefinitionList)
+                .filter(Predicate.not(SIncludableSoundscapeDefinition.class::isInstance))
+                .forEach(definition -> Util.collectChecked(
+                        definition, soundscapes,
+                        definition.getString().parsed(),
+                        Soundscape.from(definition, context)));
 
         return soundscapes;
     }
@@ -68,51 +73,53 @@ public final class SoundscapeReader {
         Map<String, Effect> effects = new HashMap<>();
 
         collect(files, SRootContent::getMusicEffectDefinitionList)
-                .filter(x -> selector.isInstance(x.content()))
-                .forEach(tuple ->
-                        Util.collectChecked(tuple.content(), effects,
-                                tuple.content().getString().parsed(),
-                                Effect.from(tuple.content(), context.withFile(tuple.file()))));
+                .filter(selector::isInstance)
+                .forEach(definition -> Util.collectChecked(definition, effects,
+                        definition.getString().parsed(),
+                        Effect.from(definition, context)));
 
         return effects;
     }
 
-    private static Context readIncludableTracks(List<SoundscapeFile> files, Context context) {
-        Map<String, Statement> includableTracks = new HashMap<>();
+    private static Context collectIncludableTracks(List<SoundscapeFile> files, Context context) {
+        return Util.collectIncludableTracks(collect(files, SRootContent::getIncludableTrackDefinitionList), context);
+    }
 
-        collect(files, SRootContent::getIncludableTrackDefinitionList).forEach(tuple ->
-                Util.collectChecked(
-                        tuple.content(), includableTracks,
-                        tuple.content().getIncludableTrackId().getText(),
-                        Block.from(tuple.content().getBlock(), context.withFile(tuple.file()))));
+    private static Context collectIncludableSoundscapes(List<SoundscapeFile> files, Context context) {
+        Stream<SIncludableSoundscapeDefinition> includableSoundScapeChildren = collect(files, SRootContent::getSoundscapeDefinitionList)
+                .flatMap(Util.filterCast(SIncludableSoundscapeDefinition.class));
 
-        return context.withAdditionalIncludableTracks(includableTracks);
+        Map<String, Soundscape> includableSoundscapes = new HashMap<>();
+        return Util.dagResolve(includableSoundScapeChildren, context.withIncludableSoundscapes(includableSoundscapes), includableSoundscapes,
+                def -> def.getIncludableSoundscapeId().getText(),
+                def -> def, SoundscapeReader::collectDependencies, Soundscape::from);
+    }
+
+    private static List<String> collectDependencies(SIncludableSoundscapeDefinition definition) {
+        return definition.getIncludeSoundscapeDefinitionList().stream()
+                .map(d -> d.getIncludableSoundscapeRef().getText())
+                .collect(Collectors.toList());
     }
 
     private static Context readSamples(
             List<SoundscapeFile> files, Context context) {
         Map<String, Sample> samples = new HashMap<>();
 
-        collect(files, SRootContent::getLoadDefinitionList).forEach(tuple ->
-                Util.collectChecked(tuple.content(), samples,
-                        tuple.content().getSampleId().getText(),
-                        Sample.from(tuple.content())));
+        collect(files, SRootContent::getLoadDefinitionList).forEach(definition ->
+                Util.collectChecked(definition, samples,
+                        definition.getSampleId().getText(),
+                        Sample.from(definition)));
 
         return context.withAdditionalSamples(samples);
     }
 
-    private static record Tuple<T>(
-            SoundscapeFile file,
-            T content) {
-    }
-
-    private static <T> Stream<Tuple<T>> collect(List<SoundscapeFile> files,
+    private static <T> Stream<T> collect(List<SoundscapeFile> files,
             Function<SRootContent, List<T>> contentSelector) {
         return files.stream()
                 .flatMap(file -> Arrays.stream(file.getChildren())
                         .filter(SRootContent.class::isInstance)
                         .flatMap(sr -> contentSelector.apply((SRootContent) sr).stream())
-                        .map(x -> new Tuple<>(file, x)));
+                );
     }
 
 }

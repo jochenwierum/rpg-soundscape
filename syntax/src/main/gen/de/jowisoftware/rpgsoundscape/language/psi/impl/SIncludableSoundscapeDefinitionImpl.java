@@ -8,18 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 import com.intellij.navigation.ItemPresentation;
 
-public class STrackDefinitionImpl extends ASTWrapperPsiElement implements STrackDefinition {
+public class SIncludableSoundscapeDefinitionImpl extends SSoundscapeDefinitionImpl implements SIncludableSoundscapeDefinition {
 
-  public STrackDefinitionImpl(@NotNull ASTNode node) {
+  public SIncludableSoundscapeDefinitionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitTrackDefinition(this);
+    visitor.visitIncludableSoundscapeDefinition(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -29,32 +28,13 @@ public class STrackDefinitionImpl extends ASTWrapperPsiElement implements STrack
 
   @Override
   @Nullable
-  public SBlock getBlock() {
-    return findChildByClass(SBlock.class);
+  public SIncludableSoundscapeId getIncludableSoundscapeId() {
+    return findChildByClass(SIncludableSoundscapeId.class);
   }
 
   @Override
-  @Nullable
-  public SLoopingTrackModifier getLoopingTrackModifier() {
-    return findChildByClass(SLoopingTrackModifier.class);
-  }
-
-  @Override
-  @Nullable
-  public SManualTrackModifier getManualTrackModifier() {
-    return findChildByClass(SManualTrackModifier.class);
-  }
-
-  @Override
-  @Nullable
   public SString getString() {
-    return findChildByClass(SString.class);
-  }
-
-  @Override
-  @Nullable
-  public STrackId getTrackId() {
-    return findChildByClass(STrackId.class);
+    return PsiImplUtil.getString(this);
   }
 
   @Override

@@ -8,17 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
+import com.intellij.psi.PsiReference;
 
-public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements SLoopingTrackModifier {
+public class SIncludableSoundscapeRefImpl extends SReferenceImpl implements SIncludableSoundscapeRef {
 
-  public SLoopingTrackModifierImpl(@NotNull ASTNode node) {
+  public SIncludableSoundscapeRefImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitLoopingTrackModifier(this);
+    visitor.visitIncludableSoundscapeRef(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,15 +27,8 @@ public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements S
   }
 
   @Override
-  @Nullable
-  public SHiddenModifier getHiddenModifier() {
-    return findChildByClass(SHiddenModifier.class);
-  }
-
-  @Override
-  @Nullable
-  public SPausedModifier getPausedModifier() {
-    return findChildByClass(SPausedModifier.class);
+  public PsiReference getReference() {
+    return PsiImplUtil.getReference(this);
   }
 
 }

@@ -6,11 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 interface Context {
+
     class RootContext implements Context {
-        @Override
-        public String fileName() {
-            return null;
-        }
 
         @Override
         public Sample sample(String name) {
@@ -26,6 +23,11 @@ interface Context {
         public boolean knowsTrack(String name) {
             return false;
         }
+
+        @Override
+        public Soundscape includableSoundscape(String name) {
+            return null;
+        }
     }
 
     abstract class DerivedContext implements Context {
@@ -33,11 +35,6 @@ interface Context {
 
         public DerivedContext(Context parent) {
             this.parent = parent;
-        }
-
-        @Override
-        public String fileName() {
-            return parent.fileName();
         }
 
         @Override
@@ -54,13 +51,18 @@ interface Context {
         public boolean knowsTrack(String name) {
             return parent.knowsTrack(name);
         }
-    }
 
-    String fileName();
+        @Override
+        public Soundscape includableSoundscape(String name) {
+            return parent.includableSoundscape(name);
+        }
+    }
 
     Sample sample(String name);
 
     Statement includableTrack(String name);
+
+    Soundscape includableSoundscape(String name);
 
     boolean knowsTrack(String name);
 
@@ -99,9 +101,15 @@ interface Context {
 
     default Context withFile(SoundscapeFile f) {
         return new DerivedContext(this) {
+
+        };
+    }
+
+    default Context withIncludableSoundscapes(Map<String, Soundscape> includableSoundscapes) {
+        return new DerivedContext(this) {
             @Override
-            public String fileName() {
-                return f.getContainingFile().getName();
+            public Soundscape includableSoundscape(String name) {
+                return includableSoundscapes.get(name);
             }
         };
     }

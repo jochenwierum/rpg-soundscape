@@ -51,8 +51,25 @@ public class SVisitor extends PsiElementVisitor {
     visitString(o);
   }
 
+  public void visitHiddenModifier(@NotNull SHiddenModifier o) {
+    visitPsiElement(o);
+  }
+
   public void visitId(@NotNull SId o) {
     visitPsiElement(o);
+  }
+
+  public void visitIncludableSoundscapeDefinition(@NotNull SIncludableSoundscapeDefinition o) {
+    visitSoundscapeDefinition(o);
+  }
+
+  public void visitIncludableSoundscapeId(@NotNull SIncludableSoundscapeId o) {
+    visitId(o);
+    // visitoundscapeNamedElement(o);
+  }
+
+  public void visitIncludableSoundscapeRef(@NotNull SIncludableSoundscapeRef o) {
+    visitReference(o);
   }
 
   public void visitIncludableTrackDefinition(@NotNull SIncludableTrackDefinition o) {
@@ -69,6 +86,14 @@ public class SVisitor extends PsiElementVisitor {
   }
 
   public void visitIncludeDefinition(@NotNull SIncludeDefinition o) {
+    visitoundscapeStructureViewPsiElement(o);
+  }
+
+  public void visitIncludeSoundscapeDefinition(@NotNull SIncludeSoundscapeDefinition o) {
+    visitoundscapeStructureViewPsiElement(o);
+  }
+
+  public void visitIncludeTrackStatement(@NotNull SIncludeTrackStatement o) {
     visitoundscapeStructureViewPsiElement(o);
   }
 
@@ -207,10 +232,6 @@ public class SVisitor extends PsiElementVisitor {
 
   public void visitTimespan(@NotNull STimespan o) {
     visitPsiElement(o);
-  }
-
-  public void visitTrackContent(@NotNull STrackContent o) {
-    visitoundscapeStructureViewPsiElement(o);
   }
 
   public void visitTrackDefinition(@NotNull STrackDefinition o) {

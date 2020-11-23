@@ -3,6 +3,8 @@ package de.jowisoftware.rpgsoundscape.intellij.language;
 import com.intellij.psi.ElementDescriptionLocation;
 import com.intellij.psi.PsiElement;
 import com.intellij.usageView.UsageViewTypeLocation;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SLoadDefinition;
@@ -23,6 +25,8 @@ public class SoundscapeElementDescriptionProvider implements com.intellij.psi.El
                 return "includable track";
             } else if (element instanceof STrackDefinition || element instanceof STrackId) {
                 return "track";
+            } else if (element instanceof SIncludableSoundscapeDefinition || element instanceof SIncludableSoundscapeId) {
+                return "includable soundscape";
             }
         }
         return null;

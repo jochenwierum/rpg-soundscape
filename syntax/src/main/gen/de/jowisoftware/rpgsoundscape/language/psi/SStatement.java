@@ -14,6 +14,9 @@ public interface SStatement extends SoundscapeStructureViewPsiElement {
   SDoNothingStatement getDoNothingStatement();
 
   @Nullable
+  SIncludeTrackStatement getIncludeTrackStatement();
+
+  @Nullable
   SParallellyStatement getParallellyStatement();
 
   @Nullable

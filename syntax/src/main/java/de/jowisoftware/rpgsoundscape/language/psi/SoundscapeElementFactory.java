@@ -41,6 +41,14 @@ public class SoundscapeElementFactory {
         return createAndFind(STrackId.class, project, String.format(SOUNDSCAPE, "LOOPING TRACK " + newName + " { SLEEP 1s; } }"));
     }
 
+    public static PsiElement createIncludableSoundscapeRef(Project project, String newName) {
+        return createAndFind(SIncludableSoundscapeRef.class, project, String.format(SOUNDSCAPE, "INCLUDE SOUNDSCAPE " + newName + ";"));
+    }
+
+    public static PsiElement createIncludableSoundscapeId(Project project, String newName) {
+        return createAndFind(SIncludableSoundscapeId.class, project, "INCLUDABLE SOUNDSCAPE " + newName + " {}");
+    }
+
     public static STrackRef createTrackRef(Project project, String newName) {
         PsiElement file = createFile(project, String.format(STATEMENT, "PAUSE TRACK " + newName));
         return findChildOfType(findChildOfType(file, SPauseStatement.class), STrackRef.class);

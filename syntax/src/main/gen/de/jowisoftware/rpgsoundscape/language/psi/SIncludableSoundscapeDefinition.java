@@ -6,22 +6,12 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.navigation.ItemPresentation;
 
-public interface STrackDefinition extends SoundscapeStructureViewPsiElement {
+public interface SIncludableSoundscapeDefinition extends SSoundscapeDefinition {
 
   @Nullable
-  SBlock getBlock();
+  SIncludableSoundscapeId getIncludableSoundscapeId();
 
-  @Nullable
-  SLoopingTrackModifier getLoopingTrackModifier();
-
-  @Nullable
-  SManualTrackModifier getManualTrackModifier();
-
-  @Nullable
   SString getString();
-
-  @Nullable
-  STrackId getTrackId();
 
   String getName();
 

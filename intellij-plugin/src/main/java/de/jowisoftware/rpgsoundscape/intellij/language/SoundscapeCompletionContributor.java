@@ -32,6 +32,7 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                         item("Include \"", null, true),
                         item("Load sample ", SoundscapeIcons.NEW_SAMPLE, false),
                         item("Includable track ", SoundscapeIcons.NEW_INCLUDABLE_TRACK, false),
+                        item("Includable soundscape ", SoundscapeIcons.NEW_INCLUDABLE_SOUNDSCAPE, false),
                         item("Soundscape ", SoundscapeIcons.NEW_SOUNDSCAPE, false),
                         item("Music ", SoundscapeIcons.NEW_MUSIC, false),
                         item("Effect ", SoundscapeIcons.NEW_EFFECT, false)
@@ -39,11 +40,15 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
 
         addCompletion(psiElement(SoundscapeTypes.IDENTIFIER)
                         .withParent(customError("<metadata statement>")
-                                .withParent(psiElement(SoundscapeTypes.SOUNDSCAPE_DEFINITION))),
+                                .andOr(
+                                        psiElement().withParent(psiElement(SoundscapeTypes.SOUNDSCAPE_DEFINITION)),
+                                        psiElement().withParent(psiElement(SoundscapeTypes.INCLUDABLE_SOUNDSCAPE_DEFINITION))
+                                )),
                 List.of(
                         item("Looping ", SoundscapeIcons.NEW_TRACK, true),
                         item("Manual ", SoundscapeIcons.NEW_TRACK, true),
                         item("Includable track ", SoundscapeIcons.NEW_INCLUDABLE_TRACK, false),
+                        item("Include soundscape ", SoundscapeIcons.INCLUDABLE_SOUNDSCAPE, false),
                         item("Load sample ", SoundscapeIcons.NEW_SAMPLE, false),
                         item("Described as \""),
                         item("Categorized ", null, true)
@@ -60,10 +65,11 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
                 List.of(
                         item("Play sample ", SoundscapeIcons.SAMPLE, true),
                         item("Sleep ", null, true),
+                        item("Repeat ", SoundscapeIcons.TRACK, true),
+                        item("Include track ", SoundscapeIcons.INCLUDABLE_TRACK, true),
                         item("Parallelly "),
                         item("Pause ", null, true),
                         item("Randomly "),
-                        item("Repeat ", SoundscapeIcons.TRACK, true),
                         item("Resume ", SoundscapeIcons.TRACK, true)
                 ));
 
@@ -171,7 +177,7 @@ public class SoundscapeCompletionContributor extends CompletionContributor {
 
     private Capture<PsiErrorElement> customError(final String text) {
         return psiElement(PsiErrorElement.class)
-                .with(new PatternCondition<PsiErrorElement>("custom error: " + text) {
+                .with(new PatternCondition<>("custom error: " + text) {
                     @Override
                     public boolean accepts(@NotNull PsiErrorElement psiErrorElement, ProcessingContext context) {
                         return psiErrorElement.getErrorDescription().contains(text);

@@ -12,6 +12,9 @@ public interface SSoundscapeDefinition extends SoundscapeStructureViewPsiElement
   List<SIncludableTrackDefinition> getIncludableTrackDefinitionList();
 
   @NotNull
+  List<SIncludeSoundscapeDefinition> getIncludeSoundscapeDefinitionList();
+
+  @NotNull
   List<SLoadDefinition> getLoadDefinitionList();
 
   @NotNull

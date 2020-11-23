@@ -36,10 +36,11 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(INCLUDABLE_SOUNDSCAPE_DEFINITION, SOUNDSCAPE_DEFINITION),
     create_token_set_(EFFECT_DEFINITION, MUSIC_DEFINITION),
     create_token_set_(FILENAME, STRING),
-    create_token_set_(INCLUDABLE_TRACK_REF, SAMPLE_REF, TRACK_REF),
-    create_token_set_(INCLUDABLE_TRACK_ID, SAMPLE_ID, TRACK_ID),
+    create_token_set_(INCLUDABLE_SOUNDSCAPE_REF, INCLUDABLE_TRACK_REF, SAMPLE_REF, TRACK_REF),
+    create_token_set_(INCLUDABLE_SOUNDSCAPE_ID, INCLUDABLE_TRACK_ID, SAMPLE_ID, TRACK_ID),
     create_token_set_(AMPLIFICATION_PLAY_MODIFICATION, ATTRIBUTION_LOAD_MODIFICATION, LIMIT_PLAY_MODIFICATION, NO_CONVERSION_LOAD_MODIFICATION,
       OMISSION_PLAY_MODIFICATION),
   };
@@ -285,16 +286,117 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // INCLUDABLE TRACK includableTrackId block
-  public static boolean includableTrackDefinition(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "includableTrackDefinition")) return false;
+  // HIDDEN
+  public static boolean hiddenModifier(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "hiddenModifier")) return false;
+    if (!nextTokenIs(b, HIDDEN)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, HIDDEN);
+    exit_section_(b, m, HIDDEN_MODIFIER, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // INCLUDABLE (includableTrackDefinition | includableSoundscapeDefinition)
+  static boolean includableDefinitions_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableDefinitions_")) return false;
     if (!nextTokenIs(b, INCLUDABLE)) return false;
     boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = consumeToken(b, INCLUDABLE);
+    p = r; // pin = 1
+    r = r && includableDefinitions__1(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // includableTrackDefinition | includableSoundscapeDefinition
+  private static boolean includableDefinitions__1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableDefinitions__1")) return false;
+    boolean r;
+    r = includableTrackDefinition(b, l + 1);
+    if (!r) r = includableSoundscapeDefinition(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // SOUNDSCAPE includableSoundscapeId CURLY_L soundscapeBlockStatement_* CURLY_R
+  public static boolean includableSoundscapeDefinition(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableSoundscapeDefinition")) return false;
+    if (!nextTokenIs(b, SOUNDSCAPE)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INCLUDABLE_SOUNDSCAPE_DEFINITION, null);
+    r = consumeToken(b, SOUNDSCAPE);
+    p = r; // pin = 1
+    r = r && report_error_(b, includableSoundscapeId(b, l + 1));
+    r = p && report_error_(b, consumeToken(b, CURLY_L)) && r;
+    r = p && report_error_(b, includableSoundscapeDefinition_3(b, l + 1)) && r;
+    r = p && consumeToken(b, CURLY_R) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  // soundscapeBlockStatement_*
+  private static boolean includableSoundscapeDefinition_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableSoundscapeDefinition_3")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!soundscapeBlockStatement_(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "includableSoundscapeDefinition_3", c)) break;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER
+  public static boolean includableSoundscapeId(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableSoundscapeId")) return false;
+    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    exit_section_(b, m, INCLUDABLE_SOUNDSCAPE_ID, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER
+  public static boolean includableSoundscapeRef(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableSoundscapeRef")) return false;
+    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    exit_section_(b, m, INCLUDABLE_SOUNDSCAPE_REF, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // TRACK includableTrackId block
+  public static boolean includableTrackDefinition(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableTrackDefinition")) return false;
+    if (!nextTokenIs(b, TRACK)) return false;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, INCLUDABLE_TRACK_DEFINITION, null);
-    r = consumeTokens(b, 1, INCLUDABLE, TRACK);
+    r = consumeToken(b, TRACK);
     p = r; // pin = 1
     r = r && report_error_(b, includableTrackId(b, l + 1));
     r = p && block(b, l + 1) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // INCLUDABLE includableTrackDefinition
+  static boolean includableTrackDefinition_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includableTrackDefinition_")) return false;
+    if (!nextTokenIs(b, INCLUDABLE)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = consumeToken(b, INCLUDABLE);
+    p = r; // pin = 1
+    r = r && includableTrackDefinition(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -333,6 +435,34 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, INCLUDE);
     p = r; // pin = 1
     r = r && filename(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // INCLUDE SOUNDSCAPE includableSoundscapeRef
+  public static boolean includeSoundscapeDefinition(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includeSoundscapeDefinition")) return false;
+    if (!nextTokenIs(b, INCLUDE)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INCLUDE_SOUNDSCAPE_DEFINITION, null);
+    r = consumeTokens(b, 1, INCLUDE, SOUNDSCAPE);
+    p = r; // pin = 1
+    r = r && includableSoundscapeRef(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
+  /* ********************************************************** */
+  // INCLUDE includableTrackRef
+  public static boolean includeTrackStatement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "includeTrackStatement")) return false;
+    if (!nextTokenIs(b, INCLUDE)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, INCLUDE_TRACK_STATEMENT, null);
+    r = consumeToken(b, INCLUDE);
+    p = r; // pin = 1
+    r = r && includableTrackRef(b, l + 1);
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -456,7 +586,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // LOOPING pausedModifier?
+  // LOOPING pausedModifier? hiddenModifier?
   public static boolean loopingTrackModifier(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "loopingTrackModifier")) return false;
     if (!nextTokenIs(b, LOOPING)) return false;
@@ -464,7 +594,8 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b, l, _NONE_, LOOPING_TRACK_MODIFIER, null);
     r = consumeToken(b, LOOPING);
     p = r; // pin = 1
-    r = r && loopingTrackModifier_1(b, l + 1);
+    r = r && report_error_(b, loopingTrackModifier_1(b, l + 1));
+    r = p && loopingTrackModifier_2(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }
@@ -473,6 +604,13 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   private static boolean loopingTrackModifier_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "loopingTrackModifier_1")) return false;
     pausedModifier(b, l + 1);
+    return true;
+  }
+
+  // hiddenModifier?
+  private static boolean loopingTrackModifier_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "loopingTrackModifier_2")) return false;
+    hiddenModifier(b, l + 1);
     return true;
   }
 
@@ -1009,7 +1147,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   // sep_ |
   //     (includeDefinition sep_) |
   //     (loadDefinition sep_) |
-  //     includableTrackDefinition |
+  //     includableDefinitions_ |
   //     soundscapeDefinition |
   //     musicDefinition |
   //     effectDefinition
@@ -1020,7 +1158,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     r = sep_(b, l + 1);
     if (!r) r = rootItem__1(b, l + 1);
     if (!r) r = rootItem__2(b, l + 1);
-    if (!r) r = includableTrackDefinition(b, l + 1);
+    if (!r) r = includableDefinitions_(b, l + 1);
     if (!r) r = soundscapeDefinition(b, l + 1);
     if (!r) r = musicDefinition(b, l + 1);
     if (!r) r = effectDefinition(b, l + 1);
@@ -1142,8 +1280,9 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // (
   //     sep_ |
+  //     (includeSoundscapeDefinition sep_) |
   //     (loadDefinition sep_) |
-  //     includableTrackDefinition |
+  //     includableTrackDefinition_ |
   //     trackDefinition |
   //     (metadataStatement sep_)
   //     )+
@@ -1162,8 +1301,9 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   // sep_ |
+  //     (includeSoundscapeDefinition sep_) |
   //     (loadDefinition sep_) |
-  //     includableTrackDefinition |
+  //     includableTrackDefinition_ |
   //     trackDefinition |
   //     (metadataStatement sep_)
   private static boolean soundscapeBlockStatement__0(PsiBuilder b, int l) {
@@ -1172,16 +1312,28 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     Marker m = enter_section_(b);
     r = sep_(b, l + 1);
     if (!r) r = soundscapeBlockStatement__0_1(b, l + 1);
-    if (!r) r = includableTrackDefinition(b, l + 1);
+    if (!r) r = soundscapeBlockStatement__0_2(b, l + 1);
+    if (!r) r = includableTrackDefinition_(b, l + 1);
     if (!r) r = trackDefinition(b, l + 1);
-    if (!r) r = soundscapeBlockStatement__0_4(b, l + 1);
+    if (!r) r = soundscapeBlockStatement__0_5(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // includeSoundscapeDefinition sep_
+  private static boolean soundscapeBlockStatement__0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "soundscapeBlockStatement__0_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = includeSoundscapeDefinition(b, l + 1);
+    r = r && sep_(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // loadDefinition sep_
-  private static boolean soundscapeBlockStatement__0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "soundscapeBlockStatement__0_1")) return false;
+  private static boolean soundscapeBlockStatement__0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "soundscapeBlockStatement__0_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = loadDefinition(b, l + 1);
@@ -1191,8 +1343,8 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   // metadataStatement sep_
-  private static boolean soundscapeBlockStatement__0_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "soundscapeBlockStatement__0_4")) return false;
+  private static boolean soundscapeBlockStatement__0_5(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "soundscapeBlockStatement__0_5")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = metadataStatement(b, l + 1);
@@ -1202,7 +1354,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // !(CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | DESCRIBED | CATEGORIZED)
+  // !(CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | INCLUDE | DESCRIBED | CATEGORIZED)
   static boolean soundscapeBlockStatement_recover_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "soundscapeBlockStatement_recover_")) return false;
     boolean r;
@@ -1212,7 +1364,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | DESCRIBED | CATEGORIZED
+  // CURLY_R | LOAD | LOOPING | MANUAL | INCLUDABLE | INCLUDE | DESCRIBED | CATEGORIZED
   private static boolean soundscapeBlockStatement_recover__0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "soundscapeBlockStatement_recover__0")) return false;
     boolean r;
@@ -1221,6 +1373,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, LOOPING);
     if (!r) r = consumeToken(b, MANUAL);
     if (!r) r = consumeToken(b, INCLUDABLE);
+    if (!r) r = consumeToken(b, INCLUDE);
     if (!r) r = consumeToken(b, DESCRIBED);
     if (!r) r = consumeToken(b, CATEGORIZED);
     return r;
@@ -1262,6 +1415,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   //     (pauseStatement sep_) |
   //     (resumeStatement sep_) |
   //     (doNothingStatement sep_) |
+  //     (includeTrackStatement sep_) |
   //     repeatStatement |
   //     randomlyStatement |
   //     parallellyStatement
@@ -1276,6 +1430,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     if (!r) r = statement_4(b, l + 1);
     if (!r) r = statement_5(b, l + 1);
     if (!r) r = statement_6(b, l + 1);
+    if (!r) r = statement_7(b, l + 1);
     if (!r) r = repeatStatement(b, l + 1);
     if (!r) r = randomlyStatement(b, l + 1);
     if (!r) r = parallellyStatement(b, l + 1);
@@ -1343,8 +1498,20 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return r || p;
   }
 
+  // includeTrackStatement sep_
+  private static boolean statement_7(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "statement_7")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_);
+    r = includeTrackStatement(b, l + 1);
+    p = r; // pin = 1
+    r = r && sep_(b, l + 1);
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
+  }
+
   /* ********************************************************** */
-  // !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED)
+  // !(CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED | INCLUDE)
   static boolean statement_recover_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "statement_recover_")) return false;
     boolean r;
@@ -1354,7 +1521,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED
+  // CURLY_L | CURLY_R | sep_ | PLAY | SLEEP | REPEAT | PAUSE | RESUME | RANDOMLY | PARALLELLY | WEIGHTED | INCLUDE
   private static boolean statement_recover__0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "statement_recover__0")) return false;
     boolean r;
@@ -1369,6 +1536,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, RANDOMLY);
     if (!r) r = consumeToken(b, PARALLELLY);
     if (!r) r = consumeToken(b, WEIGHTED);
+    if (!r) r = consumeToken(b, INCLUDE);
     return r;
   }
 
@@ -1397,32 +1565,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // block | INCLUDES includableTrackRef sep_
-  public static boolean trackContent(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "trackContent")) return false;
-    if (!nextTokenIs(b, "<track content>", CURLY_L, INCLUDES)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, TRACK_CONTENT, "<track content>");
-    r = block(b, l + 1);
-    if (!r) r = trackContent_1(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  // INCLUDES includableTrackRef sep_
-  private static boolean trackContent_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "trackContent_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, INCLUDES);
-    r = r && includableTrackRef(b, l + 1);
-    r = r && sep_(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // trackModifier_ TRACK trackId (WITH TITLE string)? trackContent
+  // trackModifier_ TRACK trackId (WITH TITLE string)? block
   public static boolean trackDefinition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "trackDefinition")) return false;
     if (!nextTokenIs(b, "<track definition>", LOOPING, MANUAL)) return false;
@@ -1433,7 +1576,7 @@ public class SoundscapeParser implements PsiParser, LightPsiParser {
     p = r; // pin = 2
     r = r && report_error_(b, trackId(b, l + 1));
     r = p && report_error_(b, trackDefinition_3(b, l + 1)) && r;
-    r = p && trackContent(b, l + 1) && r;
+    r = p && block(b, l + 1) && r;
     exit_section_(b, l, m, r, p, null);
     return r || p;
   }

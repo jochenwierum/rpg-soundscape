@@ -37,6 +37,7 @@ public class FileSampleResolver implements SampleResolver {
             resolverCallback.reject(new IllegalArgumentException(
                     "Referenced file '%s' (expected as '%s') could not be found"
                             .formatted(uri, file)));
+            return;
         }
 
         resolverCallback.resolve(new ResolvedSample(file, Optional.empty()));

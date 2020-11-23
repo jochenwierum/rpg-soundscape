@@ -19,10 +19,16 @@ public interface SoundscapeTypes {
   IElementType DO_NOTHING_STATEMENT = new SoundscapeElementType("DO_NOTHING_STATEMENT");
   IElementType EFFECT_DEFINITION = new SoundscapeElementType("EFFECT_DEFINITION");
   IElementType FILENAME = new SoundscapeElementType("FILENAME");
+  IElementType HIDDEN_MODIFIER = new SoundscapeElementType("HIDDEN_MODIFIER");
+  IElementType INCLUDABLE_SOUNDSCAPE_DEFINITION = new SoundscapeElementType("INCLUDABLE_SOUNDSCAPE_DEFINITION");
+  IElementType INCLUDABLE_SOUNDSCAPE_ID = new SoundscapeElementType("INCLUDABLE_SOUNDSCAPE_ID");
+  IElementType INCLUDABLE_SOUNDSCAPE_REF = new SoundscapeElementType("INCLUDABLE_SOUNDSCAPE_REF");
   IElementType INCLUDABLE_TRACK_DEFINITION = new SoundscapeElementType("INCLUDABLE_TRACK_DEFINITION");
   IElementType INCLUDABLE_TRACK_ID = new SoundscapeElementType("INCLUDABLE_TRACK_ID");
   IElementType INCLUDABLE_TRACK_REF = new SoundscapeElementType("INCLUDABLE_TRACK_REF");
   IElementType INCLUDE_DEFINITION = new SoundscapeElementType("INCLUDE_DEFINITION");
+  IElementType INCLUDE_SOUNDSCAPE_DEFINITION = new SoundscapeElementType("INCLUDE_SOUNDSCAPE_DEFINITION");
+  IElementType INCLUDE_TRACK_STATEMENT = new SoundscapeElementType("INCLUDE_TRACK_STATEMENT");
   IElementType INT = new SoundscapeElementType("INT");
   IElementType LIMIT_PLAY_MODIFICATION = new SoundscapeElementType("LIMIT_PLAY_MODIFICATION");
   IElementType LOAD_DEFINITION = new SoundscapeElementType("LOAD_DEFINITION");
@@ -53,7 +59,6 @@ public interface SoundscapeTypes {
   IElementType STATEMENT = new SoundscapeElementType("STATEMENT");
   IElementType STRING = new SoundscapeElementType("STRING");
   IElementType TIMESPAN = new SoundscapeElementType("TIMESPAN");
-  IElementType TRACK_CONTENT = new SoundscapeElementType("TRACK_CONTENT");
   IElementType TRACK_DEFINITION = new SoundscapeElementType("TRACK_DEFINITION");
   IElementType TRACK_ID = new SoundscapeElementType("TRACK_ID");
   IElementType TRACK_REF = new SoundscapeElementType("TRACK_REF");
@@ -77,11 +82,11 @@ public interface SoundscapeTypes {
   IElementType EFFECT = new SoundscapeTokenType("EFFECT");
   IElementType FIRST = new SoundscapeTokenType("FIRST");
   IElementType FROM = new SoundscapeTokenType("FROM");
+  IElementType HIDDEN = new SoundscapeTokenType("HIDDEN");
   IElementType IDENTIFIER = new SoundscapeTokenType("IDENTIFIER");
   IElementType IN = new SoundscapeTokenType("IN");
   IElementType INCLUDABLE = new SoundscapeTokenType("INCLUDABLE");
   IElementType INCLUDE = new SoundscapeTokenType("INCLUDE");
-  IElementType INCLUDES = new SoundscapeTokenType("INCLUDES");
   IElementType LIMIT = new SoundscapeTokenType("LIMIT");
   IElementType LIST_DELIMITER = new SoundscapeTokenType("LIST_DELIMITER");
   IElementType LOAD = new SoundscapeTokenType("LOAD");
@@ -152,6 +157,18 @@ public interface SoundscapeTypes {
       else if (type == FILENAME) {
         return new SFilenameImpl(node);
       }
+      else if (type == HIDDEN_MODIFIER) {
+        return new SHiddenModifierImpl(node);
+      }
+      else if (type == INCLUDABLE_SOUNDSCAPE_DEFINITION) {
+        return new SIncludableSoundscapeDefinitionImpl(node);
+      }
+      else if (type == INCLUDABLE_SOUNDSCAPE_ID) {
+        return new SIncludableSoundscapeIdImpl(node);
+      }
+      else if (type == INCLUDABLE_SOUNDSCAPE_REF) {
+        return new SIncludableSoundscapeRefImpl(node);
+      }
       else if (type == INCLUDABLE_TRACK_DEFINITION) {
         return new SIncludableTrackDefinitionImpl(node);
       }
@@ -163,6 +180,12 @@ public interface SoundscapeTypes {
       }
       else if (type == INCLUDE_DEFINITION) {
         return new SIncludeDefinitionImpl(node);
+      }
+      else if (type == INCLUDE_SOUNDSCAPE_DEFINITION) {
+        return new SIncludeSoundscapeDefinitionImpl(node);
+      }
+      else if (type == INCLUDE_TRACK_STATEMENT) {
+        return new SIncludeTrackStatementImpl(node);
       }
       else if (type == INT) {
         return new SIntImpl(node);
@@ -253,9 +276,6 @@ public interface SoundscapeTypes {
       }
       else if (type == TIMESPAN) {
         return new STimespanImpl(node);
-      }
-      else if (type == TRACK_CONTENT) {
-        return new STrackContentImpl(node);
       }
       else if (type == TRACK_DEFINITION) {
         return new STrackDefinitionImpl(node);

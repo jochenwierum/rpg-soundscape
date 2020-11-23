@@ -393,7 +393,7 @@ The following modifications are possible:
 
 ## Resusing Tracks and Samples
 
-Some sounds are so important that they are used in different places. There are two ways to share them:
+Some parts of soundscapes are so important that they are used in different places. There are two three to share them:
 
 ### Including other files
 
@@ -407,23 +407,28 @@ include "_common_city_sounds.soundscape"
 The included file name should start with an underscore (`_`).
 Such files are excluded and not automatically imported in the library.
 
-It is recommended to define only samples ("`Load sample`") and includable tracks inside those files.  
+It is recommended to define only samples ("`Load sample`"), includable soundscapes and includable tracks inside those files.
+I.e., adding soundscapes, effects or music would lead to multiple imports if the file is included several times.  
 
 ### Reusing Tracks
 
 Sometimes there are whole tracks that are worth to be reused.
-Such tracks can be defined outside of a soundscape.
-Instead of defining the content of a track in a soundscape, an importable track can be referenced:
+Such tracks can be defined inside or outside of a soundscape.
+An importable track can be referenced inside a normal track - possibly mixed with other statements:
 
 ~~~
 Load sample bird1 from "file:///birds.wav";
 // could also be included from a common file:
-includable track track_birds { 
+includable track _track_birds { 
   play bird1;
 }
 
 Soundscape "forest" {
-  looping track birds includes track_birds;
+  looping track birds {
+    // possible more statements here
+    include _track_birds;
+    // possible more statements here
+  }
 
   looping track other_track {
     // …
@@ -431,16 +436,41 @@ Soundscape "forest" {
 }
 
 Soundscape "sea" {
-  manual autostarting track birds includes track_birds;
-
-  looping track other_track {
-    // …
+  manual autostarting track birds {
+    include _track_birds;
   }
 }
 ~~~
 
 It is also allowed to define them inside a soundscape but there are only a few cases where this makes sense
 (e.g. to define two identical tracks). 
+
+### Reusing soundscapes
+
+It is also possible to define parts of a soundscape which can be reused in multiple soundscapes:
+
+~~~
+Load sample bird1 from "file:///birds.wav";
+// could also be included from a common file:
+includable soundscape _birds {
+  looping track birds { 
+    play bird1;
+  }
+}
+
+Soundscape "forest" {
+  include _birds;
+  include _common_metadata;
+
+  looping track birds {
+    // possible more statements here
+    include _track_birds;
+    // possible more statements here
+  }
+}
+~~~
+
+If multiple soundscapes are included with conflicting tracks, the last include wins.
 
 ## Music and Effects
 

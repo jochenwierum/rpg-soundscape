@@ -85,8 +85,7 @@ public sealed interface Modification {
     private static <T extends PsiElement, E extends PsiElement> Optional<E> singleOrEmpty(
             List<T> list, Class<E> targetType, String type) {
         List<E> matching = list.stream()
-                .filter(targetType::isInstance)
-                .map(targetType::cast)
+                .flatMap(Util.filterCast(targetType))
                 .collect(Collectors.toList());
 
         if (matching.size() == 0) {
@@ -97,4 +96,5 @@ public sealed interface Modification {
             throw new SemanticException(matching.get(1), "Only one " + type + " can be specified");
         }
     }
+
 }

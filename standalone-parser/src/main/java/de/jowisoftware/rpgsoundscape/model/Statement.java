@@ -1,5 +1,7 @@
 package de.jowisoftware.rpgsoundscape.model;
 
+import de.jowisoftware.rpgsoundscape.exceptions.SemanticException;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludeTrackStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SStatement;
 
 import java.util.Set;
@@ -24,11 +26,24 @@ public sealed interface Statement
             return Parallelly.from(statement.getParallellyStatement(), context);
         } else if (statement.getRepeatStatement() != null) {
             return Repeat.from(statement.getRepeatStatement(), context);
+        } else if (statement.getIncludeTrackStatement() != null) {
+            return importTrack(statement.getIncludeTrackStatement(), context);
         } else if (statement.getDoNothingStatement() != null) {
             return new NoOp();
         } else {
             throw new IllegalArgumentException("Statement not implemented: " + statement.getText());
         }
+    }
+
+    static Statement importTrack(SIncludeTrackStatement statement, Context context) {
+        String name = statement.getIncludableTrackRef().getText();
+        Statement includedStatement = context.includableTrack(name);
+
+        if (includedStatement == null) {
+            throw new SemanticException(statement, "Included track '%s' does not exist".formatted(name));
+        }
+
+        return includedStatement;
     }
 
     default void collectSamples(Set<Sample> samples) {};

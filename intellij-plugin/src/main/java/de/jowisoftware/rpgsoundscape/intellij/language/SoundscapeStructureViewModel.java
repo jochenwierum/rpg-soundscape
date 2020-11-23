@@ -7,6 +7,7 @@ import com.intellij.ide.util.treeView.smartTree.Sorter;
 import de.jowisoftware.rpgsoundscape.language.psi.SCategoryStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SDescribedStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludeDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludeTrackStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SLoadDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SPauseStatement;
 import de.jowisoftware.rpgsoundscape.language.psi.SPlayStatement;
@@ -44,6 +45,7 @@ public class SoundscapeStructureViewModel
                 || value instanceof SPauseStatement
                 || value instanceof SResumeStatement
                 || value instanceof SSleepStatement
+                || value instanceof SIncludeTrackStatement
                 || value instanceof SIncludeDefinition
                 || value instanceof SCategoryStatement
                 || value instanceof SDescribedStatement

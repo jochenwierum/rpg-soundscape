@@ -2,66 +2,83 @@ Include "_animals.soundscape";
 Include "_people.soundscape";
 Include "_common.soundscape";
 
-includable track _birds {
-    play sample birds_long1 with amplification of 20%;
+includable soundscape _forest_meta {
+    categorized as "forest" in "environment";
+    categorized as "peaceful" in "mood";
+    categorized as "jochen" in "author";
 }
 
-includable track _creek {
-    play sample creek with amplification of -70%;
+includable soundscape _forest_base {
+    include soundscape _forest_meta;
+    categorized as "travel" in "type";
+
+    looping track birds {
+        play sample birds_long1 with amplification of 20%;
+    }
+
+    looping track creek {
+        play sample creek with amplification of -70%;
+    }
 }
 
 soundscape "forest by food" {
-  looping track birds includes _birds;
-  looping track creek includes _creek;
+    described as "Traveling a forest by foot";
+    include soundscape _forest_base;
 
-  looping track steps {
-    play sample steps_leaves;
-  }
+    looping track steps {
+        play sample steps_leaves;
+    }
 }
 
 soundscape "forest by horse" {
-  looping track birds includes _birds;
-  looping track creek includes _creek;
+    described as "Traveling a forest by horse";
 
-  looping track horse_gallop {
-    play sample horse_gallop with amplification of -50%;
-  }
+    include soundscape _forest_base;
+
+    looping track horse_gallop {
+        play sample horse_gallop with amplification of -50%;
+    }
 
   // TODO: horse walking?
 
-  looping track horses_sounds {
-    sleep between 30s and 2m;
-    randomly {
-      weighted with 1 play sample horse_breathing;
-      weighted with 1 play sample horse_whinnying;
+    looping track horses_sounds {
+        sleep between 30s and 2m;
+        randomly {
+            weighted with 1 play sample horse_breathing;
+            weighted with 1 play sample horse_whinnying;
+        }
     }
-  }
 }
 
 soundscape "forest night camp" {
-  looping track creek {
-      play sample creek with amplification of -80%;
-  }
+    described as "Night camp in a forest";
+    categorized as "location" in "type";
 
-  looping track campfire {
-    play sample bonfire with amplification of 150%;
-  }
+    include soundscape _forest_meta;
 
-  looping track birds {
-    sleep between 30s and 2m;
-    play sample bird_night_1;
-  }
-
-  looping track owls {
-    sleep between 10s and 1m;
-    randomly {
-      weighted with 1 play sample owl1;
-      weighted with 1 play sample owl2;
-      weighted with 1 play sample owl3;
+    looping track creek {
+        play sample creek with amplification of -80%;
     }
-  }
 
-  looping track grasshoppers {
-    play sample grasshoppers;
-  }
+    looping track campfire {
+        play sample bonfire with amplification of 150%;
+    }
+
+    looping track birds {
+        sleep between 30s and 2m;
+        play sample bird_night_1;
+    }
+
+    looping track owls {
+        sleep between 10s and 1m;
+        randomly {
+            weighted with 1 play sample owl1;
+            weighted with 1 play sample owl2;
+            weighted with 1 play sample owl3;
+        }
+    }
+
+    looping track grasshoppers {
+        play sample grasshoppers;
+    }
 }

@@ -7,6 +7,8 @@ import javax.swing.*;
 public class SoundscapeIcons {
   public static final Icon SOUNDSCAPE = IconLoader.getIcon("/icons/soundscape.svg");
   public static final Icon NEW_SOUNDSCAPE = IconLoader.getIcon("/icons/new-soundscape.svg");
+  public static final Icon INCLUDABLE_SOUNDSCAPE = IconLoader.getIcon("/icons/soundscape.svg"); // TODO
+  public static final Icon NEW_INCLUDABLE_SOUNDSCAPE = IconLoader.getIcon("/icons/soundscape.svg"); // TODO
 
   public static final Icon SAMPLE = IconLoader.getIcon("/icons/sample.svg");
   public static final Icon NEW_SAMPLE = IconLoader.getIcon("/icons/new-sample.svg");

@@ -11,14 +11,14 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements SLoopingTrackModifier {
+public class SIncludeSoundscapeDefinitionImpl extends ASTWrapperPsiElement implements SIncludeSoundscapeDefinition {
 
-  public SLoopingTrackModifierImpl(@NotNull ASTNode node) {
+  public SIncludeSoundscapeDefinitionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitLoopingTrackModifier(this);
+    visitor.visitIncludeSoundscapeDefinition(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,14 +28,8 @@ public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements S
 
   @Override
   @Nullable
-  public SHiddenModifier getHiddenModifier() {
-    return findChildByClass(SHiddenModifier.class);
-  }
-
-  @Override
-  @Nullable
-  public SPausedModifier getPausedModifier() {
-    return findChildByClass(SPausedModifier.class);
+  public SIncludableSoundscapeRef getIncludableSoundscapeRef() {
+    return findChildByClass(SIncludableSoundscapeRef.class);
   }
 
 }

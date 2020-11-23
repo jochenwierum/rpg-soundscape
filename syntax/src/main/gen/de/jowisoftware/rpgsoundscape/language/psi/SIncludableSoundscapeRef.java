@@ -4,13 +4,10 @@ package de.jowisoftware.rpgsoundscape.language.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
-public interface SLoopingTrackModifier extends PsiElement {
+public interface SIncludableSoundscapeRef extends SReference {
 
-  @Nullable
-  SHiddenModifier getHiddenModifier();
-
-  @Nullable
-  SPausedModifier getPausedModifier();
+  PsiReference getReference();
 
 }

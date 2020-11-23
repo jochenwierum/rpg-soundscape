@@ -8,17 +8,16 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements SLoopingTrackModifier {
+public class SIncludableSoundscapeIdImpl extends SIdImpl implements SIncludableSoundscapeId {
 
-  public SLoopingTrackModifierImpl(@NotNull ASTNode node) {
+  public SIncludableSoundscapeIdImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitLoopingTrackModifier(this);
+    visitor.visitIncludableSoundscapeId(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,15 +26,18 @@ public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements S
   }
 
   @Override
-  @Nullable
-  public SHiddenModifier getHiddenModifier() {
-    return findChildByClass(SHiddenModifier.class);
+  public String getName() {
+    return PsiImplUtil.getName(this);
   }
 
   @Override
-  @Nullable
-  public SPausedModifier getPausedModifier() {
-    return findChildByClass(SPausedModifier.class);
+  public PsiElement getNameIdentifier() {
+    return PsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public PsiElement setName(String newName) {
+    return PsiImplUtil.setName(this, newName);
   }
 
 }

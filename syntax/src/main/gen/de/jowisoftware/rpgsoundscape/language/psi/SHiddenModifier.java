@@ -5,12 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface SLoopingTrackModifier extends PsiElement {
-
-  @Nullable
-  SHiddenModifier getHiddenModifier();
-
-  @Nullable
-  SPausedModifier getPausedModifier();
+public interface SHiddenModifier extends PsiElement {
 
 }

@@ -33,8 +33,7 @@ public record Sample(
 
     public <T extends Modification> Optional<T> getModification(Class<T> modificationClass) {
         return modifications.stream()
-                .filter(modificationClass::isInstance)
-                .map(modificationClass::cast)
+                .flatMap(Util.filterCast(modificationClass))
                 .findAny();
     }
 }

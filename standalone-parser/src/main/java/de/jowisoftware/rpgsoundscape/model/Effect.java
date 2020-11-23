@@ -19,7 +19,7 @@ public record Effect(
             throw new SemanticException(definition, "Sample '%s' is referenced but does not exist".formatted(id));
         }
 
-        Metadata metadata = Metadata.from(context, definition.getMetadataStatementList());
+        Metadata metadata = Metadata.from(definition, definition.getMetadataStatementList());
         Play play = new Play(sample, Modification.from(definition.getSampleModificationList()), new ErrorPosition(definition));
         return new Effect(name, play, metadata);
     }

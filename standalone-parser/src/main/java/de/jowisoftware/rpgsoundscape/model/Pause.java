@@ -6,6 +6,7 @@ import de.jowisoftware.rpgsoundscape.language.psi.SPauseStatement;
 public record Pause(
         PauseMode pauseMode,
         String track) implements Statement {
+
     public enum PauseMode {
         SPECIFIC,
         ALL,
@@ -35,5 +36,10 @@ public record Pause(
         }
 
         return new Pause(pauseMode, track);
+    }
+
+    @Override
+    public boolean isValid() {
+        return pauseMode == PauseMode.THIS;
     }
 }

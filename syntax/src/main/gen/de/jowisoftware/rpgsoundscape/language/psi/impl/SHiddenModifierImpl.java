@@ -11,31 +11,19 @@ import static de.jowisoftware.rpgsoundscape.language.psi.SoundscapeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import de.jowisoftware.rpgsoundscape.language.psi.*;
 
-public class SLoopingTrackModifierImpl extends ASTWrapperPsiElement implements SLoopingTrackModifier {
+public class SHiddenModifierImpl extends ASTWrapperPsiElement implements SHiddenModifier {
 
-  public SLoopingTrackModifierImpl(@NotNull ASTNode node) {
+  public SHiddenModifierImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull SVisitor visitor) {
-    visitor.visitLoopingTrackModifier(this);
+    visitor.visitHiddenModifier(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof SVisitor) accept((SVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public SHiddenModifier getHiddenModifier() {
-    return findChildByClass(SHiddenModifier.class);
-  }
-
-  @Override
-  @Nullable
-  public SPausedModifier getPausedModifier() {
-    return findChildByClass(SPausedModifier.class);
   }
 
 }

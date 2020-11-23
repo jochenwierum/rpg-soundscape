@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import de.jowisoftware.rpgsoundscape.language.psi.SBlock;
 import de.jowisoftware.rpgsoundscape.language.psi.SEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SMusicDefinition;
 import de.jowisoftware.rpgsoundscape.language.psi.SMusicEffectDefinition;
@@ -29,7 +30,7 @@ public class SoundscapeFoldingBuilder extends FoldingBuilderEx implements DumbAw
         return PsiTreeUtil.findChildrenOfAnyType(root,
                 SSoundscapeDefinition.class, STrackDefinition.class, SIncludableTrackDefinition.class,
                 SBlock.class, SRandomlyStatement.class, SParallellyStatement.class,
-                SMusicDefinition.class, SEffectDefinition.class)
+                SMusicDefinition.class, SEffectDefinition.class, SIncludableSoundscapeDefinition.class)
                 .stream()
                 .map(e -> {
                     if (e instanceof SSoundscapeDefinition
@@ -68,7 +69,9 @@ public class SoundscapeFoldingBuilder extends FoldingBuilderEx implements DumbAw
     public String getPlaceholderText(@NotNull ASTNode node) {
         PsiElement psi = node.getPsi();
 
-        if (psi instanceof SSoundscapeDefinition) {
+        if (psi instanceof SIncludableSoundscapeDefinition) {
+            return "Includable soundscape: " + name(psi);
+        } else if (psi instanceof SSoundscapeDefinition) {
             return "Soundscape: " + name(psi);
         } else if (psi instanceof STrackDefinition) {
             return "Track: " + name(psi);
@@ -90,8 +93,9 @@ public class SoundscapeFoldingBuilder extends FoldingBuilderEx implements DumbAw
     }
 
     private String name(PsiElement parent) {
-        if (parent == null)
+        if (parent == null) {
             return "(unnamed)";
+        }
 
         SString title = PsiTreeUtil.getChildOfType(parent, SString.class);
         return title == null || title.getText().isEmpty()

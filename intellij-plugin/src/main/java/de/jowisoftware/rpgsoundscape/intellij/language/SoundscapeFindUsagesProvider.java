@@ -9,6 +9,7 @@ import de.jowisoftware.rpgsoundscape.language.lexer.SoundscapeLexerAdapter;
 import de.jowisoftware.rpgsoundscape.language.parser.SoundscapeParserDefinitionStub;
 import de.jowisoftware.rpgsoundscape.language.psi.PsiImplUtil;
 import de.jowisoftware.rpgsoundscape.language.psi.SId;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SSampleId;
 import de.jowisoftware.rpgsoundscape.language.psi.STrackId;
@@ -55,6 +56,8 @@ public class SoundscapeFindUsagesProvider implements FindUsagesProvider {
       return "includable track";
     }else if (element instanceof SSampleId) {
       return "sample";
+    }else if (element instanceof SIncludableSoundscapeId) {
+      return "includable soundscape";
     } else {
       return "";
     }

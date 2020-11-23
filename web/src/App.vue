@@ -12,7 +12,6 @@
     <main style="padding-top: 56px">
       <main-view v-if="selected === 'main'"
                  :soundscape="soundscape"
-                 :soundscape-version="soundscapeVersion"
                  :running-tracks="runningTracks"
                  :music="music"
                  :music-playing="musicPlaying"
@@ -85,7 +84,6 @@ export default {
 
       soundscape: '',
       runningTracks: [],
-      soundscapeVersion: 0,
 
       music: '',
       musicPlaying: true,
@@ -103,6 +101,7 @@ export default {
       this.eventSource.addEventListener("problems", (event) => {
         this.problemsCount = JSON.parse(event.data);
         if (this.problemsCount === 0 && this.selected === 'problems') this.selected = 'main';
+        else if (this.problemsCount > 0) this.selected = 'problems';
       });
 
       this.eventSource.addEventListener("updateLibrary", () => {
@@ -111,8 +110,10 @@ export default {
 
       this.eventSource.addEventListener("soundscapeChanged", (event) => {
         const data = JSON.parse(event.data);
+        if (data.forceReload) {
+          this.soundscape = '';
+        }
         this.soundscape = data.soundscape;
-        if (data.forceReload) this.soundscapeVersion++;
         this.runningTracks.splice(0, this.runningTracks.length, ...data.runningTracks);
       });
 

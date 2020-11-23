@@ -13,6 +13,11 @@ load sample spoons from "freesound:///376854";
 load sample dice from "freesound:///220744";
 
 soundscape "tavern" {
+    described as "A tavern full of happy people";
+    categorized as "town" in "environment";
+    categorized as "peaceful" in "mood";
+    categorized as "jochen" in "author";
+
     looping track people {
         play sample people_crowd /*with amplification of 10% and*/ with limit to 60s;
     }
@@ -21,29 +26,90 @@ soundscape "tavern" {
       play sample bonfire with amplification of -5%;
     }
 
-    looping track tavern_sounds {
-        sleep between 2s and 8s;
-        randomly {
-            weighted with 40 play sample spoon;
-            weighted with 40 play sample mug1;
-            weighted with 40 play sample mug2;
-            weighted with 35 {
-              play sample dice;
-              randomly {
-                weighted with 1 play people_cheering with amplification of -80%;
-                weighted with 10 do nothing;
-              }
+    includable track _tavern_sounds {
+       sleep between 2s and 8s;
+       randomly {
+           weighted with 40 play sample spoon;
+           weighted with 40 play sample mug1;
+           weighted with 40 play sample mug2;
+           weighted with 35 {
+             play sample dice;
+             randomly {
+               weighted with 1 play people_cheering with amplification of -80%;
+               weighted with 10 do nothing;
+             }
+           }
+           weighted with 30 play people_laughing;
+           weighted with 20 play spoon_falling;
+           weighted with 30 play spoons;
+           weighted with 20 play chair;
+           weighted with 10 play sample door_wooden;
+           weighted with 10 play sample coins1;
+           weighted with 10 play sample coins2;
+           weighted with 10 play sample coins3;
+           weighted with 7 play sample mug_breaking;
+           weighted with 1 play sample coins4 with amplification of -90%;
+       }
+    }
+
+    // play up to 2 sounds at the same time...
+    looping track tavern_sounds_1 { include _tavern_sounds; }
+    looping track tavern_sounds_2 { include _tavern_sounds; }
+}
+
+
+soundscape "blacksmith" {
+    load sample hammer_anvil from "freesound:///274846";
+    load sample hammer_anvil_a from "freesound:///270589";
+    load sample hammer_anvil_b from "freesound:///270588";
+    load sample hiss from "freesound:///330377";
+
+    load sample bellows from "freesound:///157735";
+
+    load sample nails from "freesound:///104789";
+    load sample scratch from "freesound:///325619";
+    load sample iron1 from "freesound:///371353";
+    load sample iron2 from "freesound:///387717";
+    load sample riveting from "freesound:///378683";
+
+    described as "A blacksmith";
+    categorized as "town" in "environment";
+    categorized as "peaceful" in "mood";
+    categorized as "jochen" in "author";
+
+    looping paused track blacksmith {
+        play sample bellows;
+
+        sleep between 3s and 5s;
+
+        play sample hiss;
+
+        sleep between 5s and 8s;
+
+        repeat between 1 and 4 times {
+            randomly {
+                weighted with 1 play hammer_anvil;
+                weighted with 1 {
+                    repeat between 5 and 15 times {
+                    sleep between 10ms and 750ms;
+                        randomly {
+                            weighted with 1 play sample hammer_anvil_a;
+                            weighted with 1 play sample hammer_anvil_b;
+                        }
+                    }
+                }
             }
-            weighted with 30 play people_laughing;
-            weighted with 20 play spoon_falling;
-            weighted with 30 play spoons;
-            weighted with 20 play chair;
-            weighted with 10 play sample door_wooden;
-            weighted with 10 play sample coins1;
-            weighted with 10 play sample coins2;
-            weighted with 10 play sample coins3;
-            weighted with 7 play sample mug_breaking;
-            weighted with 1 play sample coins4 with amplification of -90%;
+        }
+    }
+
+    looping track utilities {
+        sleep between 5s and 20s;
+        randomly {
+          weighted with 5 play riveting;
+          weighted with 5 play nails;
+          weighted with 1 play scratch;
+          weighted with 1 play iron1;
+          weighted with 1 play iron2;
         }
     }
 }

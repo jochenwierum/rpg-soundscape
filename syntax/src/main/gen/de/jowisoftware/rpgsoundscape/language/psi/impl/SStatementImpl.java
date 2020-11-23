@@ -40,6 +40,12 @@ public class SStatementImpl extends ASTWrapperPsiElement implements SStatement {
 
   @Override
   @Nullable
+  public SIncludeTrackStatement getIncludeTrackStatement() {
+    return findChildByClass(SIncludeTrackStatement.class);
+  }
+
+  @Override
+  @Nullable
   public SParallellyStatement getParallellyStatement() {
     return findChildByClass(SParallellyStatement.class);
   }

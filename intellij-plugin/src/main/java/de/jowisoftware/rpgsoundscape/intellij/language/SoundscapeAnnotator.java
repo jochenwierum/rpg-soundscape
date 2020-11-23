@@ -4,8 +4,11 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import de.jowisoftware.rpgsoundscape.language.psi.SFilename;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeId;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeRef;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackRef;
 import de.jowisoftware.rpgsoundscape.language.psi.SSampleId;
@@ -27,12 +30,16 @@ public class SoundscapeAnnotator implements Annotator {
             annotateUnused(element, holder, "sample");
         } else if (element instanceof SIncludableTrackId) {
             annotateUnused(element, holder, "includable track");
+        } else if (element instanceof SIncludableSoundscapeId) {
+            annotateUnused(element, holder, "includable soundscape");
         } else if (element instanceof SSampleRef) {
             annotatePlay(((SSampleRef) element), holder);
         } else if (element instanceof STrackRef) {
             annotateTrack(((STrackRef) element), holder);
         } else if (element instanceof SIncludableTrackRef) {
             annotateIncludableTrack(((SIncludableTrackRef) element), holder);
+        } else if (element instanceof SIncludableSoundscapeRef) {
+            annotateIncludableSoundscape(((SIncludableSoundscapeRef) element), holder);
         }
     }
 
@@ -64,6 +71,15 @@ public class SoundscapeAnnotator implements Annotator {
         }
     }
 
+    private void annotateIncludableSoundscape(SIncludableSoundscapeRef element, AnnotationHolder holder) {
+        if (ReferenceUtil.findIncludableSoundscape(element, element.getText()).isEmpty()) {
+            holder.newAnnotation(ERROR, "Unknown includable soundscape")
+                    .range(element.getTextRange())
+                    .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
+                    .create();
+        }
+    }
+
     private void annotatePlay(SSampleRef element, AnnotationHolder holder) {
         if (ReferenceUtil.findSample(element, element.getText()).isEmpty()) {
             holder.newAnnotation(ERROR, "Unknown sample")
@@ -74,7 +90,8 @@ public class SoundscapeAnnotator implements Annotator {
     }
 
     private void annotateFilename(SFilename element, AnnotationHolder holder) {
-        if (element.getReference().resolve() == null) {
+        PsiReference reference = element.getReference();
+        if (reference == null || reference.resolve() == null) {
             holder.newAnnotation(ERROR, "Unknown file")
                     .range(element.getTextRange())
                     .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)

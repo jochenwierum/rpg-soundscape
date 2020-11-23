@@ -6,6 +6,9 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
 import com.intellij.psi.PsiElement;
 import de.jowisoftware.rpgsoundscape.language.SoundscapeIcons;
 import de.jowisoftware.rpgsoundscape.language.psi.SEffectDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeDefinition;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeId;
+import de.jowisoftware.rpgsoundscape.language.psi.SIncludableSoundscapeRef;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackId;
 import de.jowisoftware.rpgsoundscape.language.psi.SIncludableTrackRef;
 import de.jowisoftware.rpgsoundscape.language.psi.SMusicDefinition;
@@ -28,12 +31,15 @@ public class SoundscapeLineMarkerProvider extends RelatedItemLineMarkerProvider 
             @NotNull PsiElement element,
             @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result) {
         NavigationGutterIconBuilder<PsiElement> marker = createMarker(element);
-        if (marker != null)
-        result.add(marker.createLineMarkerInfo(element.getFirstChild()));
+        if (marker != null) {
+            result.add(marker.createLineMarkerInfo(element.getFirstChild()));
+        }
     }
 
     private NavigationGutterIconBuilder<PsiElement> createMarker(PsiElement element) {
-        if (element instanceof SSoundscapeDefinition) {
+        if (element instanceof SIncludableSoundscapeId) {
+            return createNewIncludableSoundscapeMarker();
+        } else if (element instanceof SSoundscapeDefinition && !(element instanceof SIncludableSoundscapeDefinition)) {
             return createNewSoundscapeMarker();
         } else if (element instanceof SSampleId) {
             return createNewSampleMarker();
@@ -47,6 +53,8 @@ public class SoundscapeLineMarkerProvider extends RelatedItemLineMarkerProvider 
             return createMarkers(((STrackRef) element));
         } else if (element instanceof SIncludableTrackRef) {
             return createMarker(((SIncludableTrackRef) element));
+        } else if (element instanceof SIncludableSoundscapeRef) {
+            return createMarker((SIncludableSoundscapeRef) element);
         } else if (element instanceof SMusicDefinition) {
             return createNewMusicMarker();
         } else if (element instanceof SEffectDefinition) {
@@ -54,6 +62,10 @@ public class SoundscapeLineMarkerProvider extends RelatedItemLineMarkerProvider 
         }
 
         return null;
+    }
+
+    private NavigationGutterIconBuilder<PsiElement> createNewIncludableSoundscapeMarker() {
+        return createIdMarker(SoundscapeIcons.NEW_INCLUDABLE_SOUNDSCAPE);
     }
 
     private NavigationGutterIconBuilder<PsiElement> createNewSampleMarker() {
@@ -81,6 +93,11 @@ public class SoundscapeLineMarkerProvider extends RelatedItemLineMarkerProvider 
     private NavigationGutterIconBuilder<PsiElement> createMarker(SIncludableTrackRef element) {
         return createMarker(element, ReferenceUtil::findIncludableTrack,
                 SoundscapeIcons.INCLUDABLE_TRACK, "Navigate to includable track definition");
+    }
+
+    private NavigationGutterIconBuilder<PsiElement> createMarker(SIncludableSoundscapeRef element) {
+        return createMarker(element, ReferenceUtil::findIncludableSoundscape,
+                SoundscapeIcons.INCLUDABLE_TRACK, "Navigate to includable soundscape definition");
     }
 
     private NavigationGutterIconBuilder<PsiElement> createNewMusicMarker() {

@@ -34,8 +34,7 @@ public record Play(
 
     public <T extends Modification> Optional<T> collectModifications(Class<T> type, BinaryOperator<T> merger) {
         return Stream.concat(modifications.stream(), sample.modifications().stream())
-                .filter(type::isInstance)
-                .map(type::cast)
+                .flatMap(Util.filterCast(type))
                 .reduce(merger);
     }
 
