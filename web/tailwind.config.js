@@ -4,11 +4,5 @@ module.exports = {
     extend: {}
   },
   variants: {},
-  plugins: [],
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true,
-    standardFontWeights: true,
-    defaultLineHeights: true
-  },
+  plugins: []
 };

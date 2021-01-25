@@ -2,7 +2,7 @@
   <div v-if="description !== null"
        class="inset-0 absolute p-12"
        style="background-color: rgba(255,255,255,0.8)">
-    <div class="h-full bg-gray-100 p-4 flex justify-between flex-col">
+    <div class="h-full bg-gray-100 p-4 flex justify-between flex-col overflow-y-scroll">
       <div>
         <h2 class="text-3xl">{{ description.name }}</h2>
         <p v-if="description.description" v-html="save(description.description)"></p>

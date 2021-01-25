@@ -9,21 +9,23 @@
 		"check-for-updates": "ncu"
 	},
 	"dependencies": {
-		"core-js": "^3.6.5",
-		"vue": "^3.0.0"
+		"core-js": "^3.8.3",
+		"vue": "^3.0.5"
 	},
 	"devDependencies": {
-		"@vue/cli-plugin-babel": "~4.5.0",
-		"@vue/cli-plugin-eslint": "~4.5.0",
-		"@vue/cli-service": "~4.5.0",
-		"@vue/compiler-sfc": "^3.0.0",
+		"@tailwindcss/postcss7-compat": "^2.0.2",
+		"@vue/cli-plugin-babel": "~4.5.11",
+		"@vue/cli-plugin-eslint": "~4.5.11",
+		"@vue/cli-service": "~4.5.11",
+		"@vue/compiler-sfc": "^3.0.5",
+		"autoprefixer": "^9.8.6",
 		"babel-eslint": "^10.1.0",
 		"brotli-gzip-webpack-plugin": "^0.5.0",
-		"compression-webpack-plugin": "^6.0.3",
-		"eslint": "^6.7.2",
-		"eslint-plugin-vue": "^7.0.0-0",
-		"npm-check-updates": "^9.0.4",
-		"tailwindcss": "^1.9.1",
+		"compression-webpack-plugin": "^7.1.2",
+		"eslint": "^7.18.0",
+		"eslint-plugin-vue": "^7.5.0",
+		"npm-check-updates": "^11.1.0",
+		"tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.2",
 		"vue-template-compiler": "^2.6.12"
 	},
 	"eslintConfig": {
