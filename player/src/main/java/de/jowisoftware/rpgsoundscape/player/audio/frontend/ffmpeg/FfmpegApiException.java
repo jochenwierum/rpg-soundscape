@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.audio.ffmpeg;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.ffmpeg;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,35 +1,44 @@
 package de.jowisoftware.rpgsoundscape.player.config;
 
-import de.jowisoftware.rpgsoundscape.player.audio.AudioConverter;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
-import de.jowisoftware.rpgsoundscape.player.audio.ffmpeg.FfmpegPlayer;
-import de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioConverter;
-import de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaClipAudioPlayer;
-import de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaStreamAudioPlayer;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioBackend;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.java.JavaAudioBackend;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.AudioConverter;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.AudioFrontend;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.ffmpeg.FfmpegFrontend;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.java.JavaAudioConverter;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.java.JavaClipAudioFrontend;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.java.StreamingAudioFrontend;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ApplicationConfiguration {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationConfiguration.class);
 
     @Bean
-    public AudioPlayer audioPlayer(ApplicationSettings applicationSettings, SampleRepository sampleRepository) {
-        LOG.info("Using backend: " + applicationSettings.getAudio().getBackend());
-        return switch (applicationSettings.getAudio().getBackend()) {
-            case JAVA_CLIP -> new JavaClipAudioPlayer(sampleRepository, applicationSettings);
-            case JAVA_STREAM -> new JavaStreamAudioPlayer(sampleRepository, applicationSettings);
-            case FFMPEG_STREAM -> new FfmpegPlayer(sampleRepository, applicationSettings);
+    public AudioFrontend audioFrontend(ApplicationSettings applicationSettings, SampleRepository sampleRepository,
+            AudioBackend audioBackend) {
+        LOG.info("Using audio frontend: " + applicationSettings.getAudio().getFrontend());
+        return switch (applicationSettings.getAudio().getFrontend()) {
+            case JAVA_CLIP -> {
+                if (audioBackend instanceof JavaAudioBackend jab) {
+                    yield new JavaClipAudioFrontend(sampleRepository, jab);
+                } else {
+                    throw new IllegalStateException("Frontend JAVA_CLIP requires JAVA_AUDIO as backend");
+                }
+            }
+            case JAVA_STREAM -> new StreamingAudioFrontend(sampleRepository, audioBackend);
+            case FFMPEG_STREAM -> new FfmpegFrontend(sampleRepository, audioBackend);
         };
     }
 
     @Bean
-    public AudioConverter audioConverter(ApplicationSettings applicationSettings) {
-        return switch (applicationSettings.getAudio().getBackend()) {
-            case JAVA_CLIP, JAVA_STREAM -> new JavaAudioConverter();
+    public AudioConverter audioConverter(ApplicationSettings applicationSettings, AudioBackend audioBackend) {
+        return switch (applicationSettings.getAudio().getFrontend()) {
+            case JAVA_CLIP, JAVA_STREAM -> new JavaAudioConverter(audioBackend);
             default -> AudioConverter.NULL_CONVERTER;
         };
     }

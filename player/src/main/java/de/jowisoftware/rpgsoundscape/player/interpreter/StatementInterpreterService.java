@@ -12,7 +12,7 @@ import de.jowisoftware.rpgsoundscape.model.Repeat;
 import de.jowisoftware.rpgsoundscape.model.Resume;
 import de.jowisoftware.rpgsoundscape.model.Sleep;
 import de.jowisoftware.rpgsoundscape.model.Statement;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.AudioFrontend;
 import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
 import de.jowisoftware.rpgsoundscape.player.threading.StackResult;
 import de.jowisoftware.rpgsoundscape.player.threading.ThreadStep;
@@ -29,10 +29,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class StatementInterpreterService {
     private static final Logger LOG = LoggerFactory.getLogger(StatementInterpreterService.class);
 
-    private final AudioPlayer audioPlayer;
+    private final AudioFrontend audioFrontend;
 
-    public StatementInterpreterService(AudioPlayer audioPlayer) {
-        this.audioPlayer = audioPlayer;
+    public StatementInterpreterService(AudioFrontend audioFrontend) {
+        this.audioFrontend = audioFrontend;
     }
 
     public ThreadStep createStep(Statement statement) {
@@ -81,7 +81,7 @@ public class StatementInterpreterService {
     private ThreadStep play(Play statement) {
         return context -> {
             trace(context, "Now playing: {}", statement.sample().name());
-            audioPlayer.play(context, statement);
+            audioFrontend.play(context, statement);
             trace(context, "Playing finished: {}", statement.sample().name());
             return StackResult.finish();
         };

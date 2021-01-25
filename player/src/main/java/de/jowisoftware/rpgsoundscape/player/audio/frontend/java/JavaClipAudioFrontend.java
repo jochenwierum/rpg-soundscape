@@ -1,39 +1,36 @@
-package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.java;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
-import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.java.JavaAudioBackend;
 import de.jowisoftware.rpgsoundscape.player.sample.LookupResult;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
 import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine.Info;
-import javax.sound.sampled.LineUnavailableException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
 
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.bytesToPlay;
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.skipStart;
+import static de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils.bytesToPlay;
+import static de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils.skipStart;
 
-public class JavaClipAudioPlayer extends AbstractJavaAudioPlayer {
-    private static final Logger LOG = LoggerFactory.getLogger(JavaClipAudioPlayer.class);
+public class JavaClipAudioFrontend extends AbstractJavaAudioFrontend {
+    private static final Logger LOG = LoggerFactory.getLogger(JavaClipAudioFrontend.class);
 
-    public JavaClipAudioPlayer(SampleRepository sampleRepository, ApplicationSettings applicationSettings) {
-        super(sampleRepository, applicationSettings);
+    public JavaClipAudioFrontend(SampleRepository sampleRepository, JavaAudioBackend audioBackend) {
+        super(sampleRepository, audioBackend);
     }
 
     @Override
     protected void playStream(AudioInputStream inputStream, BlockExecutionContext context, Play play, LookupResult resolvedSample)
             throws Exception {
-        try (Clip clip = createClip(inputStream.getFormat())) {
+
+        try (Clip clip = ((JavaAudioBackend) audioBackend).createClip(inputStream.getFormat())) {
             try (inputStream) {
-                byte[] bytes = getBytesToPlay(inputStream, play, resolvedSample);
+                byte[] bytes = getBytesToPlay(inputStream, play);
                 clip.open(inputStream.getFormat(), bytes, 0, bytes.length);
             }
 
@@ -43,7 +40,7 @@ public class JavaClipAudioPlayer extends AbstractJavaAudioPlayer {
         }
     }
 
-    private byte[] getBytesToPlay(AudioInputStream inputStream, Play play, LookupResult resolvedSample) {
+    private byte[] getBytesToPlay(AudioInputStream inputStream, Play play) {
         skipStart(play, inputStream);
         Optional<byte[]> bytesToPlay = bytesToPlay(play, inputStream.getFormat())
                 .map(byteCount -> {
@@ -61,13 +58,5 @@ public class JavaClipAudioPlayer extends AbstractJavaAudioPlayer {
                 throw new UncheckedIOException(e);
             }
         });
-    }
-
-    private Clip createClip(AudioFormat format) throws LineUnavailableException {
-        if (mixer == null) {
-            return (Clip) AudioSystem.getLine(new Info(Clip.class, format));
-        } else {
-            return (Clip) mixer.getLine(new Info(Clip.class, format));
-        }
     }
 }

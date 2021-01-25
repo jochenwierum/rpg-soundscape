@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.java;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFileFormat.Type;

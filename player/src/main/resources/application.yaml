@@ -43,3 +43,7 @@ application:
 logging.level:
   root: WARN
   de.jowisoftware.rpgsoundscape: INFO
+
+#  de.jowisoftware.rpgsoundscape.player: TRACE
+#  de.jowisoftware.rpgsoundscape.player.threading.DebounceService: INFO
+#  de.jowisoftware.rpgsoundscape.player.sample: WARN

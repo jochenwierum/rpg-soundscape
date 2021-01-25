@@ -6,7 +6,7 @@ import de.jowisoftware.rpgsoundscape.player.interpreter.StatementInterpreterServ
 import de.jowisoftware.rpgsoundscape.player.player.SoundscapePlayer;
 import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutor.OnFinishedAction;
 import de.jowisoftware.rpgsoundscape.player.threading.concurrency.InterruptibleTask;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
+import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Latch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class BlockExecutionContext {
     private final ExecutionThreadPool executionThreadPool;
     private final String name;
 
-    private final Pause pause = new Pause(true);
+    private final Latch latch = new Latch(true);
     private final Consumer<Boolean> onStatusChange;
     private final List<InterruptibleTask> interruptibleTasks = new CopyOnWriteArrayList<>();
     private final boolean looping;
@@ -91,14 +91,14 @@ public class BlockExecutionContext {
         }
 
         try {
-            task.run(!pause.isPaused());
+            task.run(!latch.isClosed());
         } finally {
             interruptibleTasks.remove(task);
         }
     }
 
     public synchronized void pause() {
-        if (!pause.pause()) {
+        if (!latch.close()) {
             LOG.trace("Thread " + name + " is already paused");
             return;
         }
@@ -109,7 +109,7 @@ public class BlockExecutionContext {
     }
 
     public synchronized void resume() {
-        if (!pause.resume()) {
+        if (!latch.open()) {
             LOG.trace("Thread " + name + " already is resumed");
             return;
         }
@@ -120,14 +120,14 @@ public class BlockExecutionContext {
     }
 
     void awaitPauseToPass() {
-        pause.awaitToPass();
+        latch.waitForOpen();
     }
 
     public synchronized void abort() {
         quit = true;
         interruptibleTasks.forEach(InterruptibleTask::abort);
         onStatusChange.accept(false);
-        pause.resume();
+        latch.open();
     }
 
     boolean isQuit() {

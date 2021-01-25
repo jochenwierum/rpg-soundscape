@@ -1,54 +1,51 @@
-package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.java;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioStream;
 import de.jowisoftware.rpgsoundscape.player.sample.LookupResult;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleStatus;
 import de.jowisoftware.rpgsoundscape.player.threading.concurrency.InterruptibleTask;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.bytesToPlay;
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.modifyAmplification;
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.skipStart;
+import static de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils.bytesToPlay;
+import static de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils.skipStart;
 
-class PausableLine implements InterruptibleTask {
-    private static final Logger LOG = LoggerFactory.getLogger(PausableLine.class);
+class PausableStream implements InterruptibleTask {
+    private static final Logger LOG = LoggerFactory.getLogger(PausableStream.class);
 
     private final Play play;
-    private final SourceDataLine line;
+    private final AudioStream audioStream;
     private final AudioInputStream inputStream;
     private final LookupResult lookupResult;
-    private final Pause pause = new Pause(false);
 
-    public PausableLine(LookupResult lookupResult, Play play, SourceDataLine line, AudioInputStream is) {
+    public PausableStream(LookupResult lookupResult, Play play, AudioStream audioStream, AudioInputStream is) {
         this.play = play;
-        this.line = line;
+        this.audioStream = audioStream;
         this.inputStream = is;
         this.lookupResult = lookupResult;
     }
 
     @Override
     public void pause() {
-        pause.pause();
-        line.stop();
+        audioStream.pause();
     }
 
     @Override
     public void startOrResume() {
-        line.start();
-        pause.resume();
+        audioStream.resume();
     }
 
     @Override
     public void abort() {
-        line.stop();
-        line.close();
-        pause.resume();
+        try {
+            audioStream.close();
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -59,10 +56,10 @@ class PausableLine implements InterruptibleTask {
             bytesToPlay = bytesToPlay(play, inputStream.getFormat()).orElse(bytesToPlay);
         }
 
-        modifyAmplification(play, line);
+        audioStream.applyAmplification(play);
 
         try {
-            byte[] buffer = new byte[line.getBufferSize()];
+            byte[] buffer = new byte[audioStream.getBufferSize()];
 
             if (resume) {
                 startOrResume();
@@ -71,21 +68,14 @@ class PausableLine implements InterruptibleTask {
             int read = inputStream.read(buffer);
             while (read != -1
                     && bytesToPlay > 0
-                    && line.isOpen()
+                    && audioStream.isOpen()
             ) {
-                int written = line.write(buffer, 0, read);
-                while (written < read && line.isOpen()) {
-                    pause.awaitToPass(); // prevent 100% cpu usage
-                    written += line.write(buffer, written, read - written);
-                }
-
+                audioStream.write(ByteBuffer.wrap(buffer, 0, read));
                 bytesToPlay -= read;
                 read = inputStream.read(buffer);
             }
 
             LOG.trace("Input finished or line closed - draining and closing track");
-            line.drain();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

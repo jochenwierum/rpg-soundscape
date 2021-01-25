@@ -1,8 +1,8 @@
-package de.jowisoftware.rpgsoundscape.player.audio.ffmpeg;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.ffmpeg;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioStream;
 import de.jowisoftware.rpgsoundscape.player.threading.concurrency.InterruptibleTask;
-import de.jowisoftware.rpgsoundscape.player.threading.concurrency.Pause;
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
@@ -15,13 +15,9 @@ import org.bytedeco.javacpp.PointerPointer;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine.Info;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 import java.util.concurrent.CountDownLatch;
 
-import static de.jowisoftware.rpgsoundscape.player.audio.javabackend.JavaAudioUtils.modifyAmplification;
+import static de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils.bytesPerSample;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_alloc;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_free;
 import static org.bytedeco.ffmpeg.global.avcodec.av_packet_unref;
@@ -41,6 +37,7 @@ import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
 import static org.bytedeco.ffmpeg.global.avutil.AVMEDIA_TYPE_AUDIO;
 import static org.bytedeco.ffmpeg.global.avutil.AV_CH_LAYOUT_STEREO;
 import static org.bytedeco.ffmpeg.global.avutil.AV_ROUND_UP;
+import static org.bytedeco.ffmpeg.global.avutil.AV_SAMPLE_FMT_FLTP;
 import static org.bytedeco.ffmpeg.global.avutil.AV_SAMPLE_FMT_S16;
 import static org.bytedeco.ffmpeg.global.avutil.av_frame_alloc;
 import static org.bytedeco.ffmpeg.global.avutil.av_frame_free;
@@ -57,50 +54,37 @@ import static org.bytedeco.ffmpeg.global.swresample.swr_init;
 import static org.bytedeco.ffmpeg.presets.avutil.AVERROR_EAGAIN;
 
 public class FfmpegClip implements InterruptibleTask {
-    static final AudioFormat TARGET_FORMAT = new AudioFormat(
-            Encoding.PCM_SIGNED,
-            44100,
-            16,
-            2,
-            4,
-            44100,
-            false);
-
-    private static final int BYTES_PER_SAMPLE = TARGET_FORMAT.getChannels() * TARGET_FORMAT.getSampleSizeInBits() / 8;
+    private final AudioStream audioStream;
+    private final AudioFormat targetFormat;
+    private final int bytesPerSample;
 
     private final String file;
     private final Play play;
     private long skipBytes;
     private long playBytes;
 
-    private final Pause pause = new Pause(true);
     private final CountDownLatch starting = new CountDownLatch(1);
-    private volatile boolean quit = false;
 
-    private SourceDataLine line;
+    public FfmpegClip(Play play, String file, long skipBytes, long playBytes, AudioStream audioStream, AudioFormat targetFormat) {
+        this.targetFormat = targetFormat;
+        this.bytesPerSample = bytesPerSample(targetFormat);
 
-    public FfmpegClip(Play play, String file, long skipBytes, long playBytes) {
         this.file = file;
         this.skipBytes = skipBytes;
         this.playBytes = playBytes;
         this.play = play;
+        this.audioStream = audioStream;
     }
 
     @Override
     public void run(boolean resume) throws RuntimeException {
         try {
-            synchronized (this) {
-                line = (SourceDataLine) AudioSystem.getLine(new Info(SourceDataLine.class, TARGET_FORMAT));
-                line.open(TARGET_FORMAT);
-                line.start();
-
-                if (resume) {
-                    pause.resume();
-                } else {
-                    pause.pause();
-                }
-                starting.countDown();
+            if (resume) {
+                audioStream.resume();
+            } else {
+                audioStream.pause();
             }
+            starting.countDown();
 
             AVFormatContext formatContext = new AVFormatContext(null);
             int res;
@@ -135,16 +119,16 @@ public class FfmpegClip implements InterruptibleTask {
 
                             AVPacket packet = av_packet_alloc();
                             try {
-                                modifyAmplification(play, line);
+                                audioStream.applyAmplification(play);
 
                                 PointerPointer<BytePointer> convertedData = new PointerPointer<>(new long[]{0, 0});
 
-                                byte[] bufferBytes = new byte[0];
                                 int convertedDataSize = -1;
-                                int outSamples, outBytes, written;
+                                int outSamples;
+                                int outBytes;
                                 int read = 0;
 
-                                while (read >= 0 && !quit && line.isOpen()) {
+                                while (read >= 0 && audioStream.isOpen()) {
                                     read = av_read_frame(formatContext, packet);
                                     if (packet.stream_index() != streamId) {
                                         av_packet_unref(packet);
@@ -158,19 +142,19 @@ public class FfmpegClip implements InterruptibleTask {
                                     }
                                     av_packet_unref(packet);
 
-                                    while (!quit && receiveFrame(fileCodecContext, audioFrameDecoded)) {
+                                    while (audioStream.isOpen() && receiveFrame(fileCodecContext, audioFrameDecoded)) {
                                         outSamples = (int) av_rescale_rnd(
-                                                swr_get_delay(swrContext, (int) TARGET_FORMAT.getSampleRate()) +
+                                                swr_get_delay(swrContext, (int) targetFormat.getSampleRate()) +
                                                         audioFrameDecoded.nb_samples(),
                                                 audioFrameDecoded.sample_rate(),
-                                                (int) TARGET_FORMAT.getSampleRate(), AV_ROUND_UP);
+                                                (int) targetFormat.getSampleRate(), AV_ROUND_UP);
 
-                                        convertedDataSize = reallocConvertedData(convertedData, convertedDataSize, outSamples);
+                                        convertedDataSize = reallocateConvertedData(convertedData, convertedDataSize, outSamples);
 
                                         outSamples = swr_convert(swrContext, convertedData, outSamples,
                                                 audioFrameDecoded.data(), audioFrameDecoded.nb_samples());
 
-                                        outBytes = outSamples * BYTES_PER_SAMPLE;
+                                        outBytes = outSamples * bytesPerSample;
 
                                         if (skipBytes < outBytes) {
                                             if (playBytes > 0) {
@@ -179,25 +163,16 @@ public class FfmpegClip implements InterruptibleTask {
                                                     playBytes = 0;
                                                 } else {
                                                     playBytes -= outBytes + skipBytes;
+                                                    outBytes -= skipBytes;
                                                 }
                                             }
 
-                                            if (bufferBytes.length < outBytes) {
-                                                bufferBytes = new byte[outBytes];
-                                            }
+                                            var bb = convertedData.get(BytePointer.class, 0)
+                                                    .position(skipBytes)
+                                                    .limit(skipBytes + outBytes)
+                                                    .asByteBuffer();
 
-                                            convertedData.get(BytePointer.class, 0)
-                                                    .limit(outBytes)
-                                                    .asByteBuffer()
-                                                    .get(bufferBytes, 0, outBytes);
-
-                                            written = (int) skipBytes + line.write(bufferBytes, (int) skipBytes, outBytes - (int) skipBytes);
-                                            while ((written < outBytes && !quit && line.isOpen()) || pause.isPaused()) {
-                                                pause.awaitToPass(); // prevent 100% cpu usage
-                                                if (written < outBytes) {
-                                                    written += line.write(bufferBytes, written, outBytes - written);
-                                                }
-                                            }
+                                            audioStream.write(bb);
 
                                             skipBytes = 0;
                                             if (playBytes == 0) {
@@ -211,9 +186,7 @@ public class FfmpegClip implements InterruptibleTask {
                                 }
 
                                 av_freep(convertedData);
-                                line.drain();
                             } finally {
-                                line.close();
                                 av_packet_free(packet);
                             }
                         } finally {
@@ -230,20 +203,23 @@ public class FfmpegClip implements InterruptibleTask {
             } finally {
                 avformat_close_input(formatContext);
             }
-        } catch (LineUnavailableException e) {
+        } catch (Exception e) {
             starting.countDown();
             throw new RuntimeException(e);
         } finally {
-            line.close();
+            try {
+                audioStream.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 
-    private int reallocConvertedData(PointerPointer<BytePointer> convertedData, int convertedDataSize, int outSamples) {
+    private int reallocateConvertedData(PointerPointer<BytePointer> convertedData, int convertedDataSize, int outSamples) {
         if (convertedDataSize < outSamples) {
             if (convertedDataSize >= 0) {
                 av_freep(convertedData);
             }
-            av_samples_alloc(convertedData, null, TARGET_FORMAT.getChannels(),
+            av_samples_alloc(convertedData, null, targetFormat.getChannels(),
                     outSamples, AV_SAMPLE_FMT_S16, 0);
             convertedDataSize = outSamples;
         }
@@ -253,8 +229,8 @@ public class FfmpegClip implements InterruptibleTask {
     private SwrContext createResamplingContext(AVCodecContext fileCodecContext) {
         SwrContext swrContext = swr_alloc_set_opts(null,
                 AV_CH_LAYOUT_STEREO,
-                AV_SAMPLE_FMT_S16,
-                (int) TARGET_FORMAT.getSampleRate(),
+                encodingToFormat(targetFormat.getEncoding()),
+                (int) targetFormat.getSampleRate(),
                 fileCodecContext.channel_layout() != 0 ? fileCodecContext.channel_layout() : AV_CH_LAYOUT_STEREO,
                 fileCodecContext.sample_fmt(),
                 fileCodecContext.sample_rate(),
@@ -266,6 +242,16 @@ public class FfmpegClip implements InterruptibleTask {
             throw new FfmpegApiException(res, "swr_init");
         }
         return swrContext;
+    }
+
+    private int encodingToFormat(Encoding encoding) {
+        if (encoding == Encoding.PCM_SIGNED) {
+            return AV_SAMPLE_FMT_S16;
+        } else if (encoding == Encoding.PCM_FLOAT) {
+            return AV_SAMPLE_FMT_FLTP;
+        } else {
+            throw new IllegalArgumentException("Unsupported encoding " + encoding);
+        }
     }
 
     private AVCodecContext openCodec(AVFormatContext formatContext, AVCodec codec, int streamId) {
@@ -316,32 +302,21 @@ public class FfmpegClip implements InterruptibleTask {
     }
 
     @Override
-    public synchronized void pause() {
+    public void pause() {
         finishStarting();
-        pause.pause();
-        if (line != null) {
-            line.stop();
-        }
+        audioStream.pause();
     }
 
     @Override
-    public synchronized void startOrResume() {
+    public void startOrResume() {
         finishStarting();
-        if (line != null) {
-            line.start();
-        }
-        pause.resume();
+        audioStream.resume();
     }
 
     @Override
-    public synchronized void abort() {
+    public void abort() {
         finishStarting();
-        if (line != null) {
-            line.stop();
-            line.close();
-        }
-        quit = true;
-        pause.resume();
+        audioStream.close(false);
     }
 
     private void finishStarting() {

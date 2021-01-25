@@ -4,7 +4,7 @@ import de.jowisoftware.rpgsoundscape.exceptions.ErrorPosition;
 import de.jowisoftware.rpgsoundscape.model.Modification.NoConversionLoadModification;
 import de.jowisoftware.rpgsoundscape.model.Play;
 import de.jowisoftware.rpgsoundscape.model.Sample;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioConverter;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.AudioConverter;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import de.jowisoftware.rpgsoundscape.player.exception.ResolvingException;
 import de.jowisoftware.rpgsoundscape.player.sample.resolvers.SampleResolver;
@@ -248,8 +248,7 @@ public class SampleRepository implements DisposableBean {
             } else if (shouldCache(file)) {
                 planTask(() -> {
                     try {
-                        Path result = sampleCache.resolveConverted(file, uri,
-                                (i, o) -> audioConverter.convert(i, o, applicationSettings.getCache().getCacheMaxSampleRate()));
+                        Path result = sampleCache.resolveConverted(file, uri, audioConverter::convert);
                         updateStatus(uri, v -> v.asResolved(result, attribution));
                     } catch (Exception e) {
                         reject(e);

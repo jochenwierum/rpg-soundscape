@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.audio;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,7 +7,7 @@ import java.nio.file.Path;
 public interface AudioConverter {
     boolean requiresConversion(Path path) throws Exception;
 
-    void convert(InputStream is, OutputStream os, float maxSampleRate) throws Exception;
+    void convert(InputStream is, OutputStream os) throws Exception;
 
     AudioConverter NULL_CONVERTER = new AudioConverter() {
         @Override
@@ -16,7 +16,7 @@ public interface AudioConverter {
         }
 
         @Override
-        public void convert(InputStream is, OutputStream os, float maxSampleRate) {
+        public void convert(InputStream is, OutputStream os) {
             throw new UnsupportedOperationException();
         }
     };

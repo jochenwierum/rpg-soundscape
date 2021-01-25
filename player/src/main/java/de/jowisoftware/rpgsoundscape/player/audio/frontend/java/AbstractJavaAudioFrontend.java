@@ -1,19 +1,20 @@
-package de.jowisoftware.rpgsoundscape.player.audio.javabackend;
+package de.jowisoftware.rpgsoundscape.player.audio.frontend.java;
 
 import de.jowisoftware.rpgsoundscape.model.Play;
-import de.jowisoftware.rpgsoundscape.player.audio.AudioPlayer;
-import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
+import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioBackend;
+import de.jowisoftware.rpgsoundscape.player.audio.frontend.AudioFrontend;
 import de.jowisoftware.rpgsoundscape.player.sample.LookupResult;
 import de.jowisoftware.rpgsoundscape.player.sample.SampleRepository;
 import de.jowisoftware.rpgsoundscape.player.threading.BlockExecutionContext;
 
 import javax.sound.sampled.AudioInputStream;
 
-public abstract class AbstractJavaAudioPlayer extends AudioPlayer {
-    private final JavaAudioConverter audioConverter = new JavaAudioConverter();
+public abstract class AbstractJavaAudioFrontend extends AudioFrontend {
+    private final JavaAudioConverter audioConverter;
 
-    public AbstractJavaAudioPlayer(SampleRepository sampleRepository, ApplicationSettings applicationSettings) {
-        super(sampleRepository, applicationSettings);
+    public AbstractJavaAudioFrontend(SampleRepository sampleRepository, AudioBackend audioBackend) {
+        super(sampleRepository, audioBackend);
+        audioConverter = new JavaAudioConverter(audioBackend);
     }
 
     @Override
