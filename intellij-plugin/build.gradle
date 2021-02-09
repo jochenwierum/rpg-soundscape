@@ -7,7 +7,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.intellij' version '0.4.26'
+  id 'org.jetbrains.intellij' version '0.6.5'
 }
 
 sourceCompatibility = 11
@@ -23,10 +23,10 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2020.2.1'
+    version '2020.3.1'
     sandboxDirectory "${project.rootDir}/intellij-plugin/idea-sandbox/intellij"
     plugins = [
-            'PsiViewer:202-SNAPSHOT.3',
+            'PsiViewer:203-SNAPSHOT',
             //'com.jetbrains.hackathon.indices.viewer:1.8',
     ]
 }

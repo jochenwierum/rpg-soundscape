@@ -1,16 +1,18 @@
 plugins {
-    id "com.github.node-gradle.node" version "2.2.4"
+    id "com.github.node-gradle.node" version "3.0.0"
 }
 
 apply plugin: 'base'
 
 node {
-    version = '14.13.1'
-    npmVersion = '6.14.8'
+    version = '14.15.4'
     download = true
 }
 
-npm_run_build {
+task buildApp(type: NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'build']
+
     inputs.files fileTree("public")
     inputs.files fileTree("src")
 
@@ -25,7 +27,7 @@ npm_run_build {
 }
 
 jar {
-    dependsOn npm_run_build
+    dependsOn buildApp
 
     from ("${buildDir}/webpack") {
         into("static")
@@ -37,7 +39,6 @@ String testsExecutedMarkerName = "${buildDir}/.tests.executed"
 
 task npmTest(type: NpmTask) {
     dependsOn assemble
-    environment CI: 'true'
 
     args = ['run', 'test']
 
