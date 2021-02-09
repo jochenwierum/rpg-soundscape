@@ -1,6 +1,7 @@
 package de.jowisoftware.rpgsoundscape.player.rest;
 
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
+import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings.Audio.Backend;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings.ExitType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,8 @@ public class SystemController {
         return Map.of(
                 "fullscreen", applicationSettings.getUi().isAllowFullscreen(),
                 "exit", applicationSettings.getUi().getExitType() != ExitType.DISABLED,
-                "logs", applicationSettings.getUi().getLogs().isEnabled()
+                "logs", applicationSettings.getUi().getLogs().isEnabled(),
+                "discord", applicationSettings.getAudio().getBackend() == Backend.DISCORD
         );
     }
 

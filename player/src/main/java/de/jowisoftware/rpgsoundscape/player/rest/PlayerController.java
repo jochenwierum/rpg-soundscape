@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/player")
 public class PlayerController {
-    private final SoundscapeLibrary soundscapeRepository;
+    private final SoundscapeLibrary soundscapeLibrary;
     private final MusicLibrary musicRepository;
     private final EffectLibrary effectLibrary;
 
@@ -28,14 +28,14 @@ public class PlayerController {
     private final EffectPlayer effectPlayer;
 
     public PlayerController(
-            SoundscapeLibrary soundscapeRepository,
-            MusicLibrary musicRepository,
+            SoundscapeLibrary soundscapeLibrary,
+            MusicLibrary musicLibrary,
             EffectLibrary effectLibrary,
             SoundscapePlayer soundscapePlayer,
             MusicPlayer musicPlayer,
             EffectPlayer effectPlayer) {
-        this.soundscapeRepository = soundscapeRepository;
-        this.musicRepository = musicRepository;
+        this.soundscapeLibrary = soundscapeLibrary;
+        this.musicRepository = musicLibrary;
         this.effectLibrary = effectLibrary;
         this.soundscapePlayer = soundscapePlayer;
         this.musicPlayer = musicPlayer;
@@ -44,7 +44,7 @@ public class PlayerController {
 
     @PostMapping("/soundscape")
     public ResponseEntity<?> play(@RequestBody NameDto nameDto) {
-        Soundscape soundscape = soundscapeRepository.get(nameDto.name())
+        Soundscape soundscape = soundscapeLibrary.get(nameDto.name())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         soundscapePlayer.switchSoundscape(soundscape);

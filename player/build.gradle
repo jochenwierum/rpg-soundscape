@@ -1,6 +1,6 @@
 plugins {
     id 'application'
-    id 'org.springframework.boot' version '2.4.0'
+    id 'org.springframework.boot' version '2.4.2'
 }
 
 ext {
@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: '2.4.2')
-    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.12.0')
+    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.12.1')
 
     implementation project(':standalone-parser')
     runtimeOnly project(':web')
@@ -31,7 +31,9 @@ dependencies {
     }
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2'
 
-    implementation group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '1.9.5.4'
+    implementation (group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '1.9.5.4') {
+        exclude group: 'junit', module: 'junit'
+    }
     implementation group: 'com.googlecode.soundlibs', name: 'vorbisspi', version: '1.0.3.3'
 
     implementation(group: 'org.bytedeco', name: 'ffmpeg-platform', version: "$version_ffmpeg") {
@@ -53,7 +55,7 @@ dependencies {
     }
 
     // needed by async log4j logger
-    runtime group: 'com.lmax', name: 'disruptor', version: '3.3.6'
+    runtime group: 'com.lmax', name: 'disruptor', version: '3.4.2'
 }
 
 test {

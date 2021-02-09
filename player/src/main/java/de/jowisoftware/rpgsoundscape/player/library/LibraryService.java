@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 public class LibraryService {
     private static final Logger LOG = LoggerFactory.getLogger(LibraryService.class);
 
-    private final SoundscapeLibrary soundscapeRepository;
+    private final SoundscapeLibrary soundscapeLibrary;
     private final EffectLibrary effectLibrary;
-    private final MusicLibrary musicRepository;
+    private final MusicLibrary musicLibrary;
 
     private final SampleRepository sampleRepository;
 
@@ -40,16 +40,16 @@ public class LibraryService {
     private final StatusReporter statusReporter;
 
     public LibraryService(
-            SoundscapeLibrary soundscapeRepository,
+            SoundscapeLibrary soundscapeLibrary,
             EffectLibrary effectLibrary,
-            MusicLibrary musicRepository,
+            MusicLibrary musicLibrary,
             SampleRepository sampleRepository,
             ApplicationContext applicationContext,
             ApplicationSettings applicationSettings,
             StatusReporter statusReporter) {
-        this.soundscapeRepository = soundscapeRepository;
+        this.soundscapeLibrary = soundscapeLibrary;
         this.effectLibrary = effectLibrary;
-        this.musicRepository = musicRepository;
+        this.musicLibrary = musicLibrary;
         this.sampleRepository = sampleRepository;
         this.applicationContext = applicationContext;
         this.applicationSettings = applicationSettings;
@@ -71,8 +71,8 @@ public class LibraryService {
     }
 
     private Set<Sample> importLibrary() throws IOException {
-        soundscapeRepository.reset();
-        musicRepository.reset();
+        soundscapeLibrary.reset();
+        musicLibrary.reset();
         effectLibrary.reset();
 
         return Files.list(applicationSettings.getLibraryPath().toAbsolutePath())
@@ -110,8 +110,8 @@ public class LibraryService {
 
     private Stream<Sample> importContent(SoundscapeFileContent loaded) {
         return Stream.of(
-                importContent(loaded.soundscapes(), soundscapeRepository::add),
-                importContent(loaded.music(), musicRepository::add),
+                importContent(loaded.soundscapes(), soundscapeLibrary::add),
+                importContent(loaded.music(), musicLibrary::add),
                 importContent(loaded.effects(), effectLibrary::add))
                 .reduce(Stream.empty(), Stream::concat);
     }

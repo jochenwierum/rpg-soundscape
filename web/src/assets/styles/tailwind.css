@@ -3,22 +3,27 @@
 @tailwind utilities;
 
 @layer base {
-    a.applink, a.applink:link, a.applink:active, a.applink:visited,
-    a.appbutton, a.appbutton:link, a.appbutton:active, a.appbutton:visited {
+    .applink, .applink:link, .applink:active, .applink:visited,
+    .appbutton, .appbutton:link, .appbutton:active, .appbutton:visited {
         @apply text-blue-800 font-bold no-underline border-blue-800 border-solid;
     }
 
-    a.applink:hover,
-    a.appbutton:hover {
+    .applink:hover,
+    .appbutton:hover {
         @apply text-blue-600;
     }
 
-    a.appbutton {
+    .appbutton {
         @apply border-2 rounded inline-block p-2;
     }
 
-    a.appbutton.appbutton-sm {
+    .appbutton.appbutton-sm {
         @apply p-1;
+    }
+
+    .appbutton.disabled:hover,
+    .appbutton.disabled {
+        @apply text-gray-500 cursor-not-allowed select-none;
     }
 
     .maintitle {

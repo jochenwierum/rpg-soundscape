@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.audio.backend.discord.bot;
+package de.jowisoftware.rpgsoundscape.player.discord;
 
 import de.jowisoftware.rpgsoundscape.player.audio.backend.discord.BlockingBuffer;
 import de.jowisoftware.rpgsoundscape.player.audio.backend.discord.DiscordMixer;

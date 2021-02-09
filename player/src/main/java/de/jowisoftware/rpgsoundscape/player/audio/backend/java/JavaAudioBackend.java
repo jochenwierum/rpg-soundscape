@@ -21,7 +21,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.Arrays;
 
 @Component
-@ConditionalOnProperty(value = "application.audio.backend", havingValue = "JAVA_AUDIO")
+@ConditionalOnProperty(value = "application.audio.backend", havingValue = "JAVA_AUDIO", matchIfMissing = true)
 public class JavaAudioBackend implements AudioBackend, DisposableBean {
     private static final Logger LOG = LoggerFactory.getLogger(JavaAudioBackend.class);
 

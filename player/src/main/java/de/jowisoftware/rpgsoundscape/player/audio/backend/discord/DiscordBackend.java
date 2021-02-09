@@ -4,11 +4,10 @@ import de.jowisoftware.rpgsoundscape.player.audio.JavaAudioUtils;
 import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioBackend;
 import de.jowisoftware.rpgsoundscape.player.audio.backend.AudioStream;
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings.Audio.Backend;
+import de.jowisoftware.rpgsoundscape.player.config.DiscordComponent;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import javax.sound.sampled.AudioFormat;
 import java.util.Set;
@@ -16,8 +15,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import static net.dv8tion.jda.api.audio.AudioSendHandler.INPUT_FORMAT;
 
-@Component
-@ConditionalOnProperty(value = "application.audio.backend", havingValue = "DISCORD")
+@DiscordComponent
 public class DiscordBackend implements AudioBackend {
     private static final Logger LOG = LoggerFactory.getLogger(DiscordBackend.class);
 

@@ -4,6 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @ConfigurationProperties(prefix = "application")
@@ -213,6 +215,7 @@ public class ApplicationSettings {
 
     public static class Discord {
         private String token;
+        private Set<String> allowedUsers = new HashSet<>();
 
         public String getToken() {
             return token;
@@ -220,6 +223,14 @@ public class ApplicationSettings {
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public Set<String> getAllowedUsers() {
+            return allowedUsers;
+        }
+
+        public void setAllowedUsers(Set<String> allowedUsers) {
+            this.allowedUsers = allowedUsers;
         }
     }
 

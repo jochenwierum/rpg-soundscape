@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -23,11 +24,11 @@ public class RepositoryController {
     private final Map<String, AbstractAssetLibrary<?>> repositories;
     static final int ITEMS_PER_PAGE = 50;
 
-    public RepositoryController(SoundscapeLibrary soundscapeRepository, MusicLibrary musicRepository,
+    public RepositoryController(SoundscapeLibrary soundscapeLibrary, MusicLibrary musicLibrary,
             EffectLibrary effectLibrary) {
         this.repositories = Map.of(
-                "soundscapes", soundscapeRepository,
-                "music", musicRepository,
+                "soundscapes", soundscapeLibrary,
+                "music", musicLibrary,
                 "effects", effectLibrary
         );
     }
@@ -61,7 +62,7 @@ public class RepositoryController {
 
     private Page toPage(SortedSet<String> content, Optional<String> filter, Optional<Integer> page) {
         int skipItems = page.filter(p -> p >= 0).orElse(0) * ITEMS_PER_PAGE;
-        Optional<String> lcFilter = filter.map(String::toLowerCase);
+        Optional<String> lcFilter = filter.map(s -> s.toLowerCase(Locale.ROOT));
 
         Predicate<String> filterFunction = item ->
                 lcFilter.map(filterValue -> item.toLowerCase().contains(filterValue))

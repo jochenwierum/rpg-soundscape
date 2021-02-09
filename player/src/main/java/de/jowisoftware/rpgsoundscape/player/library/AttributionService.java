@@ -100,6 +100,7 @@ public class AttributionService {
     public static record Description(
             String name,
             String description,
+            /* sorted, but read only! **/
             Map<String, Set<String>> categories,
             Integer sampleCount,
             Integer trackCount,

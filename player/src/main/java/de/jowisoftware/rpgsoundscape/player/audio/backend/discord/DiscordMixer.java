@@ -1,10 +1,9 @@
 package de.jowisoftware.rpgsoundscape.player.audio.backend.discord;
 
+import de.jowisoftware.rpgsoundscape.player.config.DiscordComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -12,8 +11,7 @@ import java.util.Arrays;
 import static de.jowisoftware.rpgsoundscape.player.audio.backend.discord.DiscordBackend.BUFFER_LENGTH;
 import static de.jowisoftware.rpgsoundscape.player.audio.backend.discord.DiscordBackend.CHUNK_SIZE;
 
-@Component
-@ConditionalOnProperty(value = "application.audio.backend", havingValue = "DISCORD")
+@DiscordComponent
 public class DiscordMixer implements DisposableBean {
     private static final Logger LOG = LoggerFactory.getLogger(DiscordMixer.class);
 

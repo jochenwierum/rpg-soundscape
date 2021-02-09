@@ -19,28 +19,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 public class RepositoryDetailsController {
     private final AttributionService attributionService;
-    private final SoundscapeLibrary soundscapeRepository;
-    private final MusicLibrary musicRepository;
+    private final SoundscapeLibrary soundscapeLibrary;
+    private final MusicLibrary musicLibrary;
     private final EffectLibrary effectLibrary;
 
-    public RepositoryDetailsController(SoundscapeLibrary soundscapeRepository, MusicLibrary musicRepository,
+    public RepositoryDetailsController(SoundscapeLibrary soundscapeLibrary, MusicLibrary musicLibrary,
             EffectLibrary effectLibrary, AttributionService attributionService) {
-        this.soundscapeRepository = soundscapeRepository;
-        this.musicRepository = musicRepository;
+        this.soundscapeLibrary = soundscapeLibrary;
+        this.musicLibrary = musicLibrary;
         this.effectLibrary = effectLibrary;
         this.attributionService = attributionService;
     }
 
     @GetMapping("/soundscape/{name}/info")
     public Description soundscapeInfo(@PathVariable("name") String name) {
-        return soundscapeRepository.get(name)
+        return soundscapeLibrary.get(name)
                 .map(attributionService::describeSoundscape)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/music/{name}/info")
     public Description musicInfo(@PathVariable("name") String name) {
-        return musicRepository.get(name)
+        return musicLibrary.get(name)
                 .map(attributionService::describeMusic)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -54,7 +54,7 @@ public class RepositoryDetailsController {
 
     @GetMapping("/soundscape/{name}")
     public SoundscapeDto soundscape(@PathVariable("name") String name) {
-        var tracks = soundscapeRepository.get(name)
+        var tracks = soundscapeLibrary.get(name)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND))
                 .tracks().values().stream()
                 .sorted()

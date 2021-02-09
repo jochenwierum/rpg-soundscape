@@ -1,4 +1,4 @@
-package de.jowisoftware.rpgsoundscape.player.audio.backend.discord.bot;
+package de.jowisoftware.rpgsoundscape.player.discord;
 
 import de.jowisoftware.rpgsoundscape.player.config.ApplicationSettings;
 import net.dv8tion.jda.api.JDA;
@@ -9,18 +9,16 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.EnumSet;
 
-@Component
+@Configuration
 @ConditionalOnProperty(value = "application.audio.backend", havingValue = "DISCORD")
-public class DiscordBot implements DisposableBean {
-    private static final Logger LOG = LoggerFactory.getLogger(DiscordBot.class);
-
-    private final JDA jda;
+public class DiscordBotConfiguration {
+    private static final Logger LOG = LoggerFactory.getLogger(DiscordBotConfiguration.class);
 
     public static final EnumSet<GatewayIntent> INTENTS = EnumSet.of(
             GatewayIntent.GUILD_MESSAGES,
@@ -28,12 +26,12 @@ public class DiscordBot implements DisposableBean {
             GatewayIntent.GUILD_VOICE_STATES
     );
 
-    public DiscordBot(DiscordEventListener discordEventListener, ApplicationSettings settings) throws Exception {
+    @Bean(destroyMethod = "shutdownNow")
+    public JDA jda(ApplicationSettings settings) throws Exception {
         String token = settings.getDiscord().getToken();
 
         LOG.info("Connecting to Discord bot...");
-        jda = JDABuilder.createLight(token, INTENTS)
-                .addEventListeners(discordEventListener)
+        JDA jda = JDABuilder.createLight(token, INTENTS)
                 .setStatus(OnlineStatus.ONLINE)
                 .setMemberCachePolicy(MemberCachePolicy.VOICE)
                 .enableCache(CacheFlag.VOICE_STATE)
@@ -43,12 +41,7 @@ public class DiscordBot implements DisposableBean {
         jda.awaitReady();
 
         LOG.info("Bot is ready!");
-    }
 
-    @Override
-    public void destroy() throws Exception {
-        LOG.info("Shutting down discord connection");
-        jda.shutdownNow();
-        LOG.info("Connection closed");
+        return jda;
     }
 }

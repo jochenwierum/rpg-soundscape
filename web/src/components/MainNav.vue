@@ -17,6 +17,10 @@
         <image-effect class="h-4 w-4"/>
         Effects
       </nav-button>
+      <nav-button v-if="discord" :active="active === 'discord'" @click="$emit('select', 'discord')">
+        <image-discord class="h-4 w-4"/>
+        Discord
+      </nav-button>
       <nav-button v-show="problemsCount > 0" :active="active === 'problems'" @click="$emit('select', 'problems')">
         <image-errors class="h-4 w-4"/>
         Problems
@@ -51,10 +55,12 @@ import ImageErrors from "@/components/icons/ImageErrors";
 import ImageFullscreen from "@/components/icons/ImageFullscreen";
 import ImageShutdown from "@/components/icons/ImageShutdown";
 import ImageLogs from "@/components/icons/ImageLogs";
+import ImageDiscord from "@/components/icons/ImageDiscord";
 
 export default {
   name: 'MainNav',
   components: {
+    ImageDiscord,
     ImageLogs,
     ImageShutdown,
     ImageFullscreen,
@@ -70,7 +76,8 @@ export default {
     return {
       exit: false,
       fullscreen: false,
-      logs: false
+      logs: false,
+      discord: false
     }
   },
 
@@ -87,6 +94,7 @@ export default {
           this.exit = data.exit;
           this.fullscreen = data.fullscreen;
           this.logs = data.logs;
+          this.discord = data.discord;
         })
         .catch(e => console.log("Could not fetch config:", e));
   },

@@ -142,22 +142,24 @@ public class SoundscapePlayer implements DisposableBean {
         // synchronizeState();
     }
 
-    public synchronized void resumeTrack(String track) {
+    public synchronized boolean resumeTrack(String track) {
         Optional<BlockExecutionContext> context = getTrackContext(track);
         if (context.isEmpty()) {
-            return;
+            return false;
         }
 
         context.get().resume();
+        return true;
     }
 
-    public synchronized void pauseTrack(String track) {
+    public synchronized boolean pauseTrack(String track) {
         Optional<BlockExecutionContext> context = getTrackContext(track);
         if (context.isEmpty()) {
-            return;
+            return false;
         }
 
         context.get().pause();
+        return true;
     }
 
     public synchronized void pauseAll() {

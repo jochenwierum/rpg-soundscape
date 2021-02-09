@@ -37,6 +37,8 @@
                     @unpin="unpin($event)"
                     @describe=" describeClip=$event"/>
 
+      <discord-view v-if="selected === 'discord'"/>
+
       <problem-view v-if="selected === 'problems'" :problems-count="problemsCount"/>
       <logs-view v-if="selected === 'logs'"/>
     </main>
@@ -57,10 +59,12 @@ import EffectsView from "@/components/EffectsView";
 import ClipInfo from "@/components/ClipInfo";
 import ResolvedStatus from "@/components/ResolvedStatus";
 import LogsView from "@/components/LogsView";
+import DiscordView from "@/components/DiscordView";
 
 export default {
   name: 'App',
   components: {
+    DiscordView,
     LogsView,
     ResolvedStatus,
     ClipInfo,
@@ -130,7 +134,7 @@ export default {
         this.samplesErrorCount = data.failed;
       });
 
-      this.eventSource.addEventListener("ping", () => console.log("ping"));
+      // this.eventSource.addEventListener("ping", () => console.debug("ping"));
 
       this.eventSource.onerror = (err) => {
         this.eventSource.close();
