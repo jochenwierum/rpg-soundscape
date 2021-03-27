@@ -26,7 +26,7 @@ public final class JavaAudioUtils {
                 .findFirst();
     }
 
-    public static long bytesPerMilliseconds(AudioFormat format, long millis) {
+    public static long millisecondsToBytes(AudioFormat format, long millis) {
         return (long) (millis * format.getFrameSize() * format.getFrameRate() / 1000);
     }
 
@@ -38,7 +38,7 @@ public final class JavaAudioUtils {
         return play.collectModifications(StartOmissionModification.class, StartOmissionModification::merge)
                 .map(omission -> omission.duration().toMillis())
                 .map(milliseconds -> {
-                    long bytes = bytesPerMilliseconds(format, milliseconds);
+                    long bytes = millisecondsToBytes(format, milliseconds);
                     LOG.trace("Skip first {} milliseconds (= {} bytes)", milliseconds, bytes);
                     return bytes;
                 });
@@ -48,7 +48,7 @@ public final class JavaAudioUtils {
         return play.collectModifications(LimitModification.class, LimitModification::merge)
                 .map(omission -> omission.duration().toMillis())
                 .map(milliseconds -> {
-                    long bytes = bytesPerMilliseconds(format, milliseconds);
+                    long bytes = millisecondsToBytes(format, milliseconds);
                     LOG.trace("play only {} milliseconds (= {} bytes)", milliseconds, bytes);
                     return bytes;
                 });

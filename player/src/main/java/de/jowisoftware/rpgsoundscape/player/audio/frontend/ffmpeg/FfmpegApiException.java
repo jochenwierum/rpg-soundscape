@@ -1,168 +1,171 @@
 package de.jowisoftware.rpgsoundscape.player.audio.frontend.ffmpeg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_BSF_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_BUFFER_TOO_SMALL;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_BUG;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_BUG2;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_DECODER_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_DEMUXER_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EACCES;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EAGAIN;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EBADF;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EDOM;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EEXIST;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EFAULT;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EFBIG;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EILSEQ;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EINTR;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EINVAL;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EIO;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENAMETOOLONG;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENCODER_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENODEV;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENOENT;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENOMEM;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENOSPC;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENOSYS;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ENXIO;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EOF;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EPERM;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EPIPE;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ERANGE;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_ESPIPE;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EXDEV;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EXIT;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EXPERIMENTAL;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_EXTERNAL;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_FILTER_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_BAD_REQUEST;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_FORBIDDEN;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_OTHER_4XX;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_SERVER_ERROR;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_HTTP_UNAUTHORIZED;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_INVALIDDATA;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_MUXER_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_OPTION_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_OUTPUT_CHANGED;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_PATCHWELCOME;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_PROTOCOL_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_STREAM_NOT_FOUND;
-import static org.bytedeco.ffmpeg.global.avutil.AVERROR_UNKNOWN;
-
 public class FfmpegApiException extends RuntimeException {
-    private static final Logger LOG = LoggerFactory.getLogger(FfmpegApiException.class);
-
     public FfmpegApiException(int res, String message) {
-        super(message + ", status: " + res + getStatusText(res).map(s -> " (" + s + ")").orElse(""));
+        super("%s, status: %s (%d)".formatted(message, decode(res), res));
     }
 
-    private static Optional<String> getStatusText(int res) {
-        if (res == AVERROR_EACCES()) {
-            return Optional.of("AVERROR_EACCES");
-        } else if (res == AVERROR_EAGAIN()) {
-            return Optional.of("AVERROR_EAGAIN");
-        } else if (res == AVERROR_EBADF()) {
-            return Optional.of("AVERROR_EBADF");
-        } else if (res == AVERROR_EDOM()) {
-            return Optional.of("AVERROR_EDOM");
-        } else if (res == AVERROR_EEXIST()) {
-            return Optional.of("AVERROR_EEXIST");
-        } else if (res == AVERROR_EFAULT()) {
-            return Optional.of("AVERROR_EFAULT");
-        } else if (res == AVERROR_EFBIG()) {
-            return Optional.of("AVERROR_EFBIG");
-        } else if (res == AVERROR_EILSEQ()) {
-            return Optional.of("AVERROR_EILSEQ");
-        } else if (res == AVERROR_EINTR()) {
-            return Optional.of("AVERROR_EINTR");
-        } else if (res == AVERROR_EINVAL()) {
-            return Optional.of("AVERROR_EINVAL");
-        } else if (res == AVERROR_EIO()) {
-            return Optional.of("AVERROR_EIO");
-        } else if (res == AVERROR_ENAMETOOLONG()) {
-            return Optional.of("AVERROR_ENAMETOOLONG");
-        } else if (res == AVERROR_ENODEV()) {
-            return Optional.of("AVERROR_ENODEV");
-        } else if (res == AVERROR_ENOENT()) {
-            return Optional.of("AVERROR_ENOENT");
-        } else if (res == AVERROR_ENOMEM()) {
-            return Optional.of("AVERROR_ENOMEM");
-        } else if (res == AVERROR_ENOSPC()) {
-            return Optional.of("AVERROR_ENOSPC");
-        } else if (res == AVERROR_ENOSYS()) {
-            return Optional.of("AVERROR_ENOSYS");
-        } else if (res == AVERROR_ENXIO()) {
-            return Optional.of("AVERROR_ENXIO");
-        } else if (res == AVERROR_EPERM()) {
-            return Optional.of("AVERROR_EPERM");
-        } else if (res == AVERROR_EPIPE()) {
-            return Optional.of("AVERROR_EPIPE");
-        } else if (res == AVERROR_ERANGE()) {
-            return Optional.of("AVERROR_ERANGE");
-        } else if (res == AVERROR_ESPIPE()) {
-            return Optional.of("AVERROR_ESPIPE");
-        } else if (res == AVERROR_EXDEV()) {
-            return Optional.of("AVERROR_EXDEV");
-        } else if (res == AVERROR_BSF_NOT_FOUND) {
-            return Optional.of("AVERROR_BSF_NOT_FOUND");
-        } else if (res == AVERROR_BUG) {
-            return Optional.of("AVERROR_BUG");
-        } else if (res == AVERROR_BUFFER_TOO_SMALL) {
-            return Optional.of("AVERROR_BUFFER_TOO_SMALL");
-        } else if (res == AVERROR_DECODER_NOT_FOUND) {
-            return Optional.of("AVERROR_DECODER_NOT_FOUND");
-        } else if (res == AVERROR_DEMUXER_NOT_FOUND) {
-            return Optional.of("AVERROR_DEMUXER_NOT_FOUND");
-        } else if (res == AVERROR_ENCODER_NOT_FOUND) {
-            return Optional.of("AVERROR_ENCODER_NOT_FOUND");
-        } else if (res == AVERROR_EOF) {
-            return Optional.of("AVERROR_EOF");
-        } else if (res == AVERROR_EXIT) {
-            return Optional.of("AVERROR_EXIT");
-        } else if (res == AVERROR_EXTERNAL) {
-            return Optional.of("AVERROR_EXTERNAL");
-        } else if (res == AVERROR_FILTER_NOT_FOUND) {
-            return Optional.of("AVERROR_FILTER_NOT_FOUND");
-        } else if (res == AVERROR_INVALIDDATA) {
-            return Optional.of("AVERROR_INVALIDDATA");
-        } else if (res == AVERROR_MUXER_NOT_FOUND) {
-            return Optional.of("AVERROR_MUXER_NOT_FOUND");
-        } else if (res == AVERROR_OPTION_NOT_FOUND) {
-            return Optional.of("AVERROR_OPTION_NOT_FOUND");
-        } else if (res == AVERROR_PATCHWELCOME) {
-            return Optional.of("AVERROR_PATCHWELCOME");
-        } else if (res == AVERROR_PROTOCOL_NOT_FOUND) {
-            return Optional.of("AVERROR_PROTOCOL_NOT_FOUND");
-        } else if (res == AVERROR_STREAM_NOT_FOUND) {
-            return Optional.of("AVERROR_STREAM_NOT_FOUND");
-        } else if (res == AVERROR_BUG2) {
-            return Optional.of("AVERROR_BUG2");
-        } else if (res == AVERROR_UNKNOWN) {
-            return Optional.of("AVERROR_UNKNOWN");
-        } else if (res == AVERROR_EXPERIMENTAL) {
-            return Optional.of("AVERROR_EXPERIMENTAL");
-        } else if (res == AVERROR_OUTPUT_CHANGED) {
-            return Optional.of("AVERROR_OUTPUT_CHANGED");
-        } else if (res == AVERROR_HTTP_BAD_REQUEST) {
-            return Optional.of("AVERROR_HTTP_BAD_REQUEST");
-        } else if (res == AVERROR_HTTP_UNAUTHORIZED) {
-            return Optional.of("AVERROR_HTTP_UNAUTHORIZED");
-        } else if (res == AVERROR_HTTP_FORBIDDEN) {
-            return Optional.of("AVERROR_HTTP_FORBIDDEN");
-        } else if (res == AVERROR_HTTP_NOT_FOUND) {
-            return Optional.of("AVERROR_HTTP_NOT_FOUND");
-        } else if (res == AVERROR_HTTP_OTHER_4XX) {
-            return Optional.of("AVERROR_HTTP_OTHER_4XX");
-        } else if (res == AVERROR_HTTP_SERVER_ERROR) {
-            return Optional.of("AVERROR_HTTP_SERVER_ERROR");
-        } else {
-            return Optional.empty();
-        }
+    private static String decode(int code) {
+        return switch (code) {
+            case (int) -1L -> "EPERM";
+            case (int) -2L -> "ENOENT";
+            case (int) -3L -> "ESRCH";
+            case (int) -4L -> "EINTR";
+            case (int) -5L -> "EIO";
+            case (int) -6L -> "ENXIO";
+            case (int) -7L -> "E2BIG";
+            case (int) -8L -> "ENOEXEC";
+            case (int) -9L -> "EBADF";
+            case (int) -10L -> "ECHILD";
+            case (int) -11L -> "EAGAIN";
+            case (int) -12L -> "ENOMEM";
+            case (int) -13L -> "EACCES";
+            case (int) -14L -> "EFAULT";
+            case (int) -15L -> "ENOTBLK";
+            case (int) -16L -> "EBUSY";
+            case (int) -17L -> "EEXIST";
+            case (int) -18L -> "EXDEV";
+            case (int) -19L -> "ENODEV";
+            case (int) -20L -> "ENOTDIR";
+            case (int) -21L -> "EISDIR";
+            case (int) -22L -> "EINVAL";
+            case (int) -23L -> "ENFILE";
+            case (int) -24L -> "EMFILE";
+            case (int) -25L -> "ENOTTY";
+            case (int) -26L -> "ETXTBSY";
+            case (int) -27L -> "EFBIG";
+            case (int) -28L -> "ENOSPC";
+            case (int) -29L -> "ESPIPE";
+            case (int) -30L -> "EROFS";
+            case (int) -31L -> "EMLINK";
+            case (int) -32L -> "EPIPE";
+            case (int) -33L -> "EDOM";
+            case (int) -34L -> "ERANGE";
+            case (int) -35L -> "EDEADLK";
+            case (int) -36L -> "ENAMETOOLONG";
+            case (int) -37L -> "ENOLCK";
+            case (int) -38L -> "ENOSYS";
+            case (int) -39L -> "ENOTEMPTY";
+            case (int) -40L -> "ELOOP";
+            case (int) -42L -> "ENOMSG";
+            case (int) -43L -> "EIDRM";
+            case (int) -44L -> "ECHRNG";
+            case (int) -45L -> "EL2NSYNC";
+            case (int) -46L -> "EL3HLT";
+            case (int) -47L -> "EL3RST";
+            case (int) -48L -> "ELNRNG";
+            case (int) -49L -> "EUNATCH";
+            case (int) -50L -> "ENOCSI";
+            case (int) -51L -> "EL2HLT";
+            case (int) -52L -> "EBADE";
+            case (int) -53L -> "EBADR";
+            case (int) -54L -> "EXFULL";
+            case (int) -55L -> "ENOANO";
+            case (int) -56L -> "EBADRQC";
+            case (int) -57L -> "EBADSLT";
+            case (int) -59L -> "EBFONT";
+            case (int) -60L -> "ENOSTR";
+            case (int) -61L -> "ENODATA";
+            case (int) -62L -> "ETIME";
+            case (int) -63L -> "ENOSR";
+            case (int) -64L -> "ENONET";
+            case (int) -65L -> "ENOPKG";
+            case (int) -66L -> "EREMOTE";
+            case (int) -67L -> "ENOLINK";
+            case (int) -68L -> "EADV";
+            case (int) -69L -> "ESRMNT";
+            case (int) -70L -> "ECOMM";
+            case (int) -71L -> "EPROTO";
+            case (int) -72L -> "EMULTIHOP";
+            case (int) -73L -> "EDOTDOT";
+            case (int) -74L -> "EBADMSG";
+            case (int) -75L -> "EOVERFLOW";
+            case (int) -76L -> "ENOTUNIQ";
+            case (int) -77L -> "EBADFD";
+            case (int) -78L -> "EREMCHG";
+            case (int) -79L -> "ELIBACC";
+            case (int) -80L -> "ELIBBAD";
+            case (int) -81L -> "ELIBSCN";
+            case (int) -82L -> "ELIBMAX";
+            case (int) -83L -> "ELIBEXEC";
+            case (int) -84L -> "EILSEQ";
+            case (int) -85L -> "ERESTART";
+            case (int) -86L -> "ESTRPIPE";
+            case (int) -87L -> "EUSERS";
+            case (int) -88L -> "ENOTSOCK";
+            case (int) -89L -> "EDESTADDRREQ";
+            case (int) -90L -> "EMSGSIZE";
+            case (int) -91L -> "EPROTOTYPE";
+            case (int) -92L -> "ENOPROTOOPT";
+            case (int) -93L -> "EPROTONOSUPPORT";
+            case (int) -94L -> "ESOCKTNOSUPPORT";
+            case (int) -95L -> "EOPNOTSUPP";
+            case (int) -96L -> "EPFNOSUPPORT";
+            case (int) -97L -> "EAFNOSUPPORT";
+            case (int) -98L -> "EADDRINUSE";
+            case (int) -99L -> "EADDRNOTAVAIL";
+            case (int) -100L -> "ENETDOWN";
+            case (int) -101L -> "ENETUNREACH";
+            case (int) -102L -> "ENETRESET";
+            case (int) -103L -> "ECONNABORTED";
+            case (int) -104L -> "ECONNRESET";
+            case (int) -105L -> "ENOBUFS";
+            case (int) -106L -> "EISCONN";
+            case (int) -107L -> "ENOTCONN";
+            case (int) -108L -> "ESHUTDOWN";
+            case (int) -109L -> "ETOOMANYREFS";
+            case (int) -110L -> "ETIMEDOUT";
+            case (int) -111L -> "ECONNREFUSED";
+            case (int) -112L -> "EHOSTDOWN";
+            case (int) -113L -> "EHOSTUNREACH";
+            case (int) -114L -> "EALREADY";
+            case (int) -115L -> "EINPROGRESS";
+            case (int) -116L -> "ESTALE";
+            case (int) -117L -> "EUCLEAN";
+            case (int) -118L -> "ENOTNAM";
+            case (int) -119L -> "ENAVAIL";
+            case (int) -120L -> "EISNAM";
+            case (int) -121L -> "EREMOTEIO";
+            case (int) -122L -> "EDQUOT";
+            case (int) -123L -> "ENOMEDIUM";
+            case (int) -124L -> "EMEDIUMTYPE";
+            case (int) -125L -> "ECANCELED";
+            case (int) -126L -> "ENOKEY";
+            case (int) -127L -> "EKEYEXPIRED";
+            case (int) -128L -> "EKEYREVOKED";
+            case (int) -129L -> "EKEYREJECTED";
+            case (int) -130L -> "EOWNERDEAD";
+            case (int) -131L -> "ENOTRECOVERABLE";
+            case (int) -132L -> "ERFKILL";
+            case (int) -133L -> "EHWPOISON";
+            case (int) -1179861752L -> "AVERROR_BSF_NOT_FOUND";
+            case (int) -558323010L -> "AVERROR_BUG";
+            case (int) -1397118274L -> "AVERROR_BUFFER_TOO_SMALL";
+            case (int) -1128613112L -> "AVERROR_DECODER_NOT_FOUND";
+            case (int) -1296385272L -> "AVERROR_DEMUXER_NOT_FOUND";
+            case (int) -1129203192L -> "AVERROR_ENCODER_NOT_FOUND";
+            case (int) -541478725L -> "AVERROR_EOF";
+            case (int) -1414092869L -> "AVERROR_EXIT";
+            case (int) -542398533L -> "AVERROR_EXTERNAL";
+            case (int) -1279870712L -> "AVERROR_FILTER_NOT_FOUND";
+            case (int) -1094995529L -> "AVERROR_INVALIDDATA";
+            case (int) -1481985528L -> "AVERROR_MUXER_NOT_FOUND";
+            case (int) -1414549496L -> "AVERROR_OPTION_NOT_FOUND";
+            case (int) -1163346256L -> "AVERROR_PATCHWELCOME";
+            case (int) -1330794744L -> "AVERROR_PROTOCOL_NOT_FOUND";
+            case (int) -1381258232L -> "AVERROR_STREAM_NOT_FOUND";
+            case (int) -541545794L -> "AVERROR_BUG2";
+            case (int) -1313558101L -> "AVERROR_UNKNOWN";
+            case (int) -733130664L -> "AVERROR_EXPERIMENTAL";
+            case (int) -1668179713L -> "AVERROR_INPUT_CHANGED";
+            case (int) -1668179714L -> "AVERROR_OUTPUT_CHANGED";
+            case (int) -808465656L -> "AVERROR_HTTP_BAD_REQUEST";
+            case (int) -825242872L -> "AVERROR_HTTP_UNAUTHORIZED";
+            case (int) -858797304L -> "AVERROR_HTTP_FORBIDDEN";
+            case (int) -875574520L -> "AVERROR_HTTP_NOT_FOUND";
+            case (int) -1482175736L -> "AVERROR_HTTP_OTHER_4XX";
+            case (int) -1482175992L -> "AVERROR_HTTP_SERVER_ERROR";
+            default -> "Unkown";
+        };
     }
 }

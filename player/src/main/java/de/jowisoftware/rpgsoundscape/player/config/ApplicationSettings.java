@@ -10,23 +10,31 @@ import java.util.Set;
 @Component
 @ConfigurationProperties(prefix = "application")
 public class ApplicationSettings {
+    private final Path basePath;
     private Audio audio = new Audio();
-    private Cache cache = new Cache();
+    private Cache cache;
     private Ui ui = new Ui();
     private Discord discord = new Discord();
 
-    private Path libraryPath = null;
+    private String libraryPath;
     private boolean debugParser = false;
 
-    public Path getLibraryPath() {
-        if (libraryPath == null) {
-            return Path.of("./library").normalize();
-        }
-        return libraryPath.toAbsolutePath().normalize();
+    public ApplicationSettings() {
+        basePath = Path.of(".").normalize();
+        cache = new Cache(basePath);
+        libraryPath = "library";
     }
 
-    public void setLibraryPath(Path libraryPath) {
+    public String getLibraryPath() {
+        return libraryPath;
+    }
+
+    public void setLibraryPath(String libraryPath) {
         this.libraryPath = libraryPath;
+    }
+
+    public Path calculateLibraryPath() {
+        return basePath.resolve(libraryPath).normalize().toAbsolutePath();
     }
 
     public boolean isDebugParser() {
@@ -111,20 +119,26 @@ public class ApplicationSettings {
     }
 
     public static class Cache {
-        private Path path;
+        private final Path basePath;
+        private String path;
         private boolean preCacheConversion = true;
         private float cacheMaxSampleRate = 0;
         private long maxFileSize = 0;
 
-        public Path getPath() {
-            if (path == null) {
-                return Path.of("./.cache").normalize();
-            }
+        public Cache(Path basePath) {
+            this.basePath = basePath.resolve(".cache");
+        }
+
+        public String getPath() {
             return path;
         }
 
-        public void setPath(Path path) {
+        public void setPath(String path) {
             this.path = path;
+        }
+
+        public Path calculatePath() {
+            return basePath.resolve(path).normalize().toAbsolutePath();
         }
 
         public boolean isPreCacheConversion() {

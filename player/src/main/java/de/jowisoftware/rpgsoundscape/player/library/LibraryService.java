@@ -75,7 +75,7 @@ public class LibraryService {
         musicLibrary.reset();
         effectLibrary.reset();
 
-        return Files.list(applicationSettings.getLibraryPath().toAbsolutePath())
+        return Files.list(applicationSettings.calculateLibraryPath())
                 .filter(Files::isRegularFile)
                 .filter(this::shouldLoad)
                 .sorted()

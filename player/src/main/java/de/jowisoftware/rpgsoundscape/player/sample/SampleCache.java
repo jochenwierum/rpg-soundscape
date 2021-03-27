@@ -40,7 +40,7 @@ public class SampleCache {
 
     public SampleCache(StatusReporter statusReporter, ApplicationSettings applicationSettings) throws Exception {
         this.statusReporter = statusReporter;
-        this.cachePath = applicationSettings.getCache().getPath().toAbsolutePath().normalize();
+        this.cachePath = applicationSettings.getCache().calculatePath();
 
         if (!Files.exists(cachePath)) {
             Files.createDirectories(cachePath);

@@ -15,7 +15,7 @@ public class FileSampleResolver implements SampleResolver {
     private final Path basePath;
 
     public FileSampleResolver(ApplicationSettings applicationSettings) {
-        this.basePath = applicationSettings.getLibraryPath().toAbsolutePath().normalize();
+        this.basePath = applicationSettings.calculateLibraryPath();
     }
 
     @Override

@@ -19,7 +19,7 @@ public class PersistableState implements DisposableBean, InitializingBean {
     private final Map<String, String> data = new ConcurrentHashMap<>();
 
     public PersistableState(ApplicationSettings applicationSettings, ObjectMapper objectMapper) {
-        statefile = applicationSettings.getCache().getPath().resolve("state.json").toAbsolutePath();
+        statefile = applicationSettings.getCache().calculatePath().resolve("state.json").toAbsolutePath();
         this.objectMapper = objectMapper;
     }
 

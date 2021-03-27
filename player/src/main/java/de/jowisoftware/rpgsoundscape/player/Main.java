@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 @SpringBootApplication
-@PropertySource(value = "file:config.properties", ignoreResourceNotFound = true, encoding = "UTF-8")
+@PropertySource(value = "file:./config.properties", ignoreResourceNotFound = false, encoding = "UTF-8")
 public class Main {
     public static void main(String[] args) {
         var argList = new ArrayList<>(Arrays.asList(args));

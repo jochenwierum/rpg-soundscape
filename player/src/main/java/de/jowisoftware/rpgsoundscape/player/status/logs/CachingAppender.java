@@ -15,7 +15,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,10 +99,6 @@ public class CachingAppender extends AbstractAppender {
         while (events.size() > limit) {
             events.remove(0);
         }
-    }
-
-    public List<LogEntry> lines() {
-        return new ArrayList<>(events);
     }
 
     public void registerListener(Consumer<LogEntry> listener) {

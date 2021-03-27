@@ -19,7 +19,7 @@ import static net.dv8tion.jda.api.audio.AudioSendHandler.INPUT_FORMAT;
 public class DiscordBackend implements AudioBackend {
     private static final Logger LOG = LoggerFactory.getLogger(DiscordBackend.class);
 
-    public static final int CHUNK_SIZE = (int) JavaAudioUtils.bytesPerMilliseconds(INPUT_FORMAT, 20);
+    public static final int CHUNK_SIZE = (int) JavaAudioUtils.millisecondsToBytes(INPUT_FORMAT, 20);
     public static final int BUFFER_LENGTH = CHUNK_SIZE / 2;
 
     private final Set<BlockingBuffer<float[]>> streams = new CopyOnWriteArraySet<>();

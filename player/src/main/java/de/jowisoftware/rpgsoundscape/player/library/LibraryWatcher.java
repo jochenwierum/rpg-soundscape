@@ -50,7 +50,7 @@ public class LibraryWatcher implements DisposableBean {
     }
 
     private void collectDirs(Path dir, List<Path> result) {
-        result.add(dir.toAbsolutePath().normalize());
+        result.add(dir);
 
         try {
             Files.list(dir)
@@ -87,7 +87,7 @@ public class LibraryWatcher implements DisposableBean {
 
     private void updateWatchedDirs() {
         var dirs = new ArrayList<Path>();
-        collectDirs(applicationSettings.getLibraryPath(), dirs);
+        collectDirs(applicationSettings.calculateLibraryPath(), dirs);
 
         Set<Path> toDelete = new HashSet<>(watchedDirs.keySet());
 
