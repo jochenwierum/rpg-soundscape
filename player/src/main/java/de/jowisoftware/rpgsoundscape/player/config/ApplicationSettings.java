@@ -16,13 +16,12 @@ public class ApplicationSettings {
     private Ui ui = new Ui();
     private Discord discord = new Discord();
 
-    private String libraryPath;
+    private String libraryPath = "library";
     private boolean debugParser = false;
 
     public ApplicationSettings() {
         basePath = Path.of(".").normalize();
         cache = new Cache(basePath);
-        libraryPath = "library";
     }
 
     public String getLibraryPath() {
@@ -120,7 +119,7 @@ public class ApplicationSettings {
 
     public static class Cache {
         private final Path basePath;
-        private String path;
+        private String path = ".cache";
         private boolean preCacheConversion = true;
         private float cacheMaxSampleRate = 0;
         private long maxFileSize = 0;

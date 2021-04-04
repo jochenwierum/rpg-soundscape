@@ -43,6 +43,7 @@ tasks.generateHtml {
 
 val applicationZipTask by tasks.register<Zip>("applicationZip") {
     dependsOn(":player:distZip")
+    dependsOn(tasks.generateHtml)
     dependsOn(":intellij-plugin:buildPlugin")
 
     archiveBaseName.set("soundscape")
@@ -58,7 +59,7 @@ val applicationZipTask by tasks.register<Zip>("applicationZip") {
     }
 
     from(tasks.getByPath(":intellij-plugin:buildPlugin").outputs.files.asPath)
-    from(":generateHtml") {
+    from(tasks.generateHtml) {
         into("docs")
     }
     from(file("${project.projectDir}/src/main/templates"))
