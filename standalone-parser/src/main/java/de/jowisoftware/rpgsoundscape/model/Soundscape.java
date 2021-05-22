@@ -29,8 +29,6 @@ public record Soundscape(
         Map<String, Track> tracks = processTracks(soundscape, context);
         Metadata metadata = Metadata.from(soundscape, soundscape.getMetadataStatementList());
 
-        //GO ON HERE: PROCESS INCLUDES
-
         SString name = soundscape.getString();
 
         Soundscape result = new Soundscape(name != null ? name.parsed() : "",

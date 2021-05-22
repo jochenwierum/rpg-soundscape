@@ -21,8 +21,8 @@ tasks.buildSearchableOptions {
 }
 
 intellij {
-    val versionIntellij: String by project
-    version = versionIntellij
+    val versionIntellijIDE: String by project
+    version = versionIntellijIDE
 }
 
 grammarKit {

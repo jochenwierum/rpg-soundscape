@@ -7,12 +7,12 @@ dependencies {
     implementation(project(":syntax"))
 }
 
-val versionIntellij: String by project
+val versionIntellijIDE: String by project
 val versionIntellijPluginPsiViewer: String by project
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = versionIntellij
+    version = versionIntellijIDE
     sandboxDirectory = "${project.rootDir}/intellij-plugin/idea-sandbox/intellij"
 
     setPlugins(
